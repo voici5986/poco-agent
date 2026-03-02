@@ -74,7 +74,10 @@ async def get_active_memory_create_job(
     )
 
 
-@router.get("/jobs/{job_id}", response_model=ResponseSchema[MemoryCreateJobResponse])
+@router.get(
+    "/jobs/{job_id:uuid}",
+    response_model=ResponseSchema[MemoryCreateJobResponse],
+)
 async def get_memory_create_job(
     job_id: uuid.UUID,
     user_id: str = Depends(get_current_user_id),

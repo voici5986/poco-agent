@@ -52,7 +52,7 @@ async def create_memories_internal(
 
 
 @router.get(
-    "/memories/jobs/{job_id}",
+    "/memories/jobs/{job_id:uuid}",
     response_model=ResponseSchema[MemoryCreateJobResponse],
 )
 async def get_memory_create_job_internal(
