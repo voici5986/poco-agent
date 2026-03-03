@@ -20,10 +20,11 @@ A safer, more beautiful, and easier-to-use OpenClaw alternative
 ## Core Features
 
 - **Secure Sandbox**: Tasks run in isolated containers - install dependencies or modify files freely without affecting your host environment.
-- **Beautiful UI & Mobile Support**: Provides an attractive web interface with output previews, allowing you to command your Agent from anywhere on your phone.
+- **Beautiful UI & Mobile Support**: Provides an attractive web interface with output previews, allowing you to command your Agent from anywhere on your phone. Also supports Telegram and DingTalk for seamless IM integration.
 - **Zero Configuration Ready-to-Use**: No complex local environment setup needed - one-click Docker launch with a complete runtime environment.
 - **Complete Capabilities & MCP/Skills Extensions**: Fully replicates Claude Code native features (Slash Commands, Plan Mode, AskQuestion), and supports MCP protocol or custom Skills for unlimited extensibility.
 - **Async & Scheduled Tasks**: Supports background execution and scheduled triggers - your Agent keeps working in the cloud even with the browser closed.
+- **Smart Memory**: Powered by mem0 - Agent remembers your preferences, project context, and past interactions for increasingly personalized assistance.
 - **More Features**: Built-in **browser** for autonomous web research, **GitHub repository connection** support, and many more powerful features waiting to be discovered!
 
 ## Quick Start
