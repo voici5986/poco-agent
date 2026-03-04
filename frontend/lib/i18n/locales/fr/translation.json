@@ -18,6 +18,8 @@
     "deleteTask": "Supprimer la tâche",
     "rename": "Renommer",
     "moveToProject": "Déplacer vers un projet",
+    "pin": "Épingler",
+    "unpin": "Désépingler",
     "delete": "Supprimer",
     "askTag": "ask",
     "shareTitle": "Partagez Poco avec vos amis",

@@ -49,12 +49,14 @@ import {
 interface CollapsibleProjectItemProps {
   project: ProjectItem;
   tasks: TaskHistoryItem[];
+  pinnedTaskIds: string[];
   isExpanded: boolean;
   onToggle: () => void;
   onProjectClick: () => void;
   onDeleteTask: (taskId: string) => Promise<void> | void;
   onRenameTask?: (taskId: string, newName: string) => Promise<void> | void;
   onMoveTaskToProject?: (taskId: string, projectId: string | null) => void;
+  onToggleTaskPin: (taskId: string) => void;
   allProjects: ProjectItem[];
   onRenameProject?: (projectId: string, newName: string) => void;
   onDeleteProject?: (projectId: string) => Promise<void> | void;
@@ -73,12 +75,14 @@ interface CollapsibleProjectItemProps {
 export function CollapsibleProjectItem({
   project,
   tasks,
+  pinnedTaskIds,
   isExpanded,
   onToggle,
   onProjectClick,
   onDeleteTask,
   onRenameTask,
   onMoveTaskToProject,
+  onToggleTaskPin,
   allProjects,
   onRenameProject,
   onDeleteProject,
@@ -260,9 +264,11 @@ export function CollapsibleProjectItem({
           <div className="mt-0.5 min-w-0 max-w-[calc(var(--sidebar-width)-16px)] overflow-hidden">
             <TaskHistoryList
               tasks={tasks}
+              pinnedTaskIds={pinnedTaskIds}
               onDeleteTask={onDeleteTask}
               onRenameTask={onRenameTask}
               onMoveTaskToProject={onMoveTaskToProject}
+              onToggleTaskPin={onToggleTaskPin}
               projects={allProjects}
               isSelectionMode={isTaskSelectionMode}
               selectedTaskIds={selectedTaskIds}

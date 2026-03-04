@@ -19,6 +19,8 @@
     "deleteTask": "Aufgabe löschen",
     "rename": "Umbenennen",
     "moveToProject": "In Projekt verschieben",
+    "pin": "Anheften",
+    "unpin": "Lösen",
     "delete": "Löschen",
     "askTag": "ask",
     "shareTitle": "Poco mit Freunden teilen",

@@ -20,6 +20,8 @@
     "deleteTask": "Delete task",
     "rename": "Rename",
     "moveToProject": "Move to project",
+    "pin": "Pin",
+    "unpin": "Unpin",
     "delete": "Delete",
     "askTag": "ask",
     "shareTitle": "Share Poco with friends",

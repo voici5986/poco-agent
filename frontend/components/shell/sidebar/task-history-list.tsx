@@ -8,6 +8,8 @@ import {
   Pencil,
   Trash2,
   GripVertical,
+  Pin,
+  PinOff,
 } from "lucide-react";
 import { useDraggable } from "@dnd-kit/core";
 
@@ -49,10 +51,12 @@ interface Project {
 
 interface DraggableTaskProps {
   task: TaskHistoryItem;
+  isPinned: boolean;
   lng?: string;
   onDeleteTask: (taskId: string) => Promise<void> | void;
   onRenameClick?: (task: TaskHistoryItem) => void;
   onMoveTaskToProject?: (taskId: string, projectId: string | null) => void;
+  onTogglePin?: (taskId: string) => void;
   projects: Project[];
   isSelectionMode?: boolean;
   isSelected?: boolean;
@@ -74,10 +78,12 @@ interface DraggableTaskProps {
 
 function DraggableTask({
   task,
+  isPinned,
   lng,
   onDeleteTask,
   onRenameClick,
   onMoveTaskToProject,
+  onTogglePin,
   projects,
   isSelectionMode,
   isSelected,
@@ -87,6 +93,7 @@ function DraggableTask({
 }: DraggableTaskProps) {
   const { t } = useT("translation");
   const router = useRouter();
+  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const { listeners, setNodeRef, isDragging } = useDraggable({
     id: task.id,
     data: {
@@ -198,8 +205,22 @@ function DraggableTask({
             </div>
           </SidebarMenuButton>
 
+          {isPinned && (
+            <div
+              className={cn(
+                "pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 shrink-0 size-5 flex items-center justify-center rounded-lg text-muted-foreground transition-opacity group-data-[collapsible=icon]:hidden",
+                isDropdownOpen
+                  ? "opacity-0"
+                  : "opacity-100 group-hover/task-card:opacity-0",
+              )}
+              aria-hidden="true"
+            >
+              <Pin className="size-3.5" />
+            </div>
+          )}
+
           {/* More actions - only in non-selection mode */}
-          <DropdownMenu>
+          <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
             <DropdownMenuTrigger asChild>
               <div
                 role="button"
@@ -220,6 +241,21 @@ function DraggableTask({
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" side="right">
+              {onTogglePin && (
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onTogglePin(task.id);
+                  }}
+                >
+                  {isPinned ? (
+                    <PinOff className="size-4" />
+                  ) : (
+                    <Pin className="size-4" />
+                  )}
+                  <span>{t(isPinned ? "sidebar.unpin" : "sidebar.pin")}</span>
+                </DropdownMenuItem>
+              )}
               {onRenameClick && (
                 <DropdownMenuItem
                   onClick={(e) => {
@@ -278,9 +314,11 @@ function DraggableTask({
 
 export function TaskHistoryList({
   tasks,
+  pinnedTaskIds = [],
   onDeleteTask,
   onRenameTask,
   onMoveTaskToProject,
+  onToggleTaskPin,
   projects,
   showDropIndicator = false,
   dropIndicatorLabel,
@@ -291,9 +329,11 @@ export function TaskHistoryList({
   onNavigate,
 }: {
   tasks: TaskHistoryItem[];
+  pinnedTaskIds?: string[];
   onDeleteTask: (taskId: string) => Promise<void> | void;
   onRenameTask?: (taskId: string, newName: string) => Promise<void> | void;
   onMoveTaskToProject?: (taskId: string, projectId: string | null) => void;
+  onToggleTaskPin?: (taskId: string) => void;
   projects?: Project[];
   showDropIndicator?: boolean;
   dropIndicatorLabel?: string;
@@ -304,6 +344,32 @@ export function TaskHistoryList({
   onNavigate?: () => void;
 }) {
   const lng = useLanguage();
+  const pinnedOrder = React.useMemo(() => {
+    const orderMap = new Map<string, number>();
+    pinnedTaskIds.forEach((id, index) => {
+      orderMap.set(id, index);
+    });
+    return orderMap;
+  }, [pinnedTaskIds]);
+  const orderedTasks = React.useMemo(() => {
+    if (!tasks.length || pinnedOrder.size === 0) return tasks;
+
+    const pinned: TaskHistoryItem[] = [];
+    const unpinned: TaskHistoryItem[] = [];
+
+    for (const task of tasks) {
+      if (pinnedOrder.has(task.id)) {
+        pinned.push(task);
+      } else {
+        unpinned.push(task);
+      }
+    }
+
+    pinned.sort(
+      (a, b) => (pinnedOrder.get(a.id) ?? 0) - (pinnedOrder.get(b.id) ?? 0),
+    );
+    return [...pinned, ...unpinned];
+  }, [pinnedOrder, tasks]);
 
   // Dialog states
   const [renameDialogOpen, setRenameDialogOpen] = React.useState(false);
@@ -344,14 +410,16 @@ export function TaskHistoryList({
             </div>
           </SidebarMenuItem>
         )}
-        {tasks.map((task) => (
+        {orderedTasks.map((task) => (
           <DraggableTask
             key={task.id}
             task={task}
+            isPinned={pinnedOrder.has(task.id)}
             lng={lng}
             onDeleteTask={onDeleteTask}
             onRenameClick={onRenameTask ? handleRenameClick : undefined}
             onMoveTaskToProject={onMoveTaskToProject}
+            onTogglePin={onToggleTaskPin}
             projects={projects || []}
             isSelectionMode={isSelectionMode}
             isSelected={selectedTaskIds.has(task.id)}

@@ -18,6 +18,35 @@ import {
 } from "@/lib/startup-preload";
 import { toast } from "sonner";
 
+const PINNED_TASK_IDS_STORAGE_KEY = "poco_pinned_task_ids";
+
+function readPinnedTaskIds(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(PINNED_TASK_IDS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (item): item is string => typeof item === "string" && item.length > 0,
+    );
+  } catch {
+    return [];
+  }
+}
+
+function writePinnedTaskIds(taskIds: string[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(
+      PINNED_TASK_IDS_STORAGE_KEY,
+      JSON.stringify(taskIds),
+    );
+  } catch (error) {
+    console.error("Failed to persist pinned task ids", error);
+  }
+}
+
 interface UseTaskHistoryOptions {
   initialTasks?: TaskHistoryItem[];
 }
@@ -31,6 +60,9 @@ export function useTaskHistory(options: UseTaskHistoryOptions = {}) {
   const hasConsumedStartupPreloadRef = useRef(hasPreloadedTasks);
   const [taskHistory, setTaskHistory] =
     useState<TaskHistoryItem[]>(seededTasks);
+  const [pinnedTaskIds, setPinnedTaskIds] = useState<string[]>(() =>
+    readPinnedTaskIds(),
+  );
   const [isLoading, setIsLoading] = useState(
     !hasPreloadedTasks && !initialTasks.length,
   );
@@ -70,6 +102,19 @@ export function useTaskHistory(options: UseTaskHistoryOptions = {}) {
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
+
+  useEffect(() => {
+    writePinnedTaskIds(pinnedTaskIds);
+  }, [pinnedTaskIds]);
+
+  useEffect(() => {
+    if (!taskHistory.length) return;
+    const validTaskIds = new Set(taskHistory.map((task) => task.id));
+    setPinnedTaskIds((prev) => {
+      const next = prev.filter((taskId) => validTaskIds.has(taskId));
+      return next.length === prev.length ? prev : next;
+    });
+  }, [taskHistory]);
 
   const addTask = useCallback((title: string, options?: AddTaskOptions) => {
     const newTask: TaskHistoryItem = {
@@ -130,7 +175,9 @@ export function useTaskHistory(options: UseTaskHistoryOptions = {}) {
     async (taskId: string) => {
       // Optimistic update
       const previousTasks = taskHistory;
+      const previousPinnedTaskIds = pinnedTaskIds;
       setTaskHistory((prev) => prev.filter((task) => task.id !== taskId));
+      setPinnedTaskIds((prev) => prev.filter((id) => id !== taskId));
 
       try {
         const { deleteSessionAction } =
@@ -140,9 +187,10 @@ export function useTaskHistory(options: UseTaskHistoryOptions = {}) {
         console.error("Failed to delete task", error);
         // Rollback on error
         setTaskHistory(previousTasks);
+        setPinnedTaskIds(previousPinnedTaskIds);
       }
     },
-    [taskHistory],
+    [pinnedTaskIds, taskHistory],
   );
 
   const moveTask = useCallback(
@@ -192,14 +240,23 @@ export function useTaskHistory(options: UseTaskHistoryOptions = {}) {
     [t],
   );
 
+  const toggleTaskPin = useCallback((taskId: string) => {
+    setPinnedTaskIds((prev) => {
+      const next = prev.filter((id) => id !== taskId);
+      return prev.includes(taskId) ? next : [taskId, ...next];
+    });
+  }, []);
+
   return {
     taskHistory,
+    pinnedTaskIds,
     isLoading,
     addTask,
     touchTask,
     removeTask,
     moveTask,
     renameTask,
+    toggleTaskPin,
     refreshTasks: fetchTasks,
   };
 }

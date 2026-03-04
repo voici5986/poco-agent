@@ -30,11 +30,13 @@ import { useSidebarSelection } from "./hooks/use-sidebar-selection";
 interface MainSidebarProps {
   projects: ProjectItem[];
   taskHistory: TaskHistoryItem[];
+  pinnedTaskIds: string[];
   onNewTask: () => void;
   onOpenSearch: () => void;
   onDeleteTask: (taskId: string) => Promise<void> | void;
   onRenameTask?: (taskId: string, newName: string) => Promise<void> | void;
   onMoveTaskToProject?: (taskId: string, projectId: string | null) => void;
+  onToggleTaskPin: (taskId: string) => void;
   onRenameProject?: (projectId: string, newName: string) => void;
   onDeleteProject?: (projectId: string) => Promise<void> | void;
   onOpenSettings?: (tab?: SettingsTabId) => void;
@@ -61,11 +63,13 @@ interface MainSidebarProps {
 export function MainSidebar({
   projects,
   taskHistory,
+  pinnedTaskIds,
   onNewTask,
   onOpenSearch,
   onDeleteTask,
   onRenameTask,
   onMoveTaskToProject,
+  onToggleTaskPin,
   onRenameProject,
   onDeleteProject,
   onOpenSettings,
@@ -139,9 +143,11 @@ export function MainSidebar({
         <SidebarContentSection
           projects={projects}
           taskHistory={taskHistory}
+          pinnedTaskIds={pinnedTaskIds}
           onDeleteTask={onDeleteTask}
           onRenameTask={onRenameTask}
           onMoveTaskToProject={onMoveTaskToProject}
+          onToggleTaskPin={onToggleTaskPin}
           onRenameProject={onRenameProject}
           onDeleteProject={onDeleteProject}
           onOpenCreateProjectDialog={onOpenCreateProjectDialog}

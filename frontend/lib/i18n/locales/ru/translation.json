@@ -18,6 +18,8 @@
     "deleteTask": "Удалить задачу",
     "rename": "Переименовать",
     "moveToProject": "Переместить в проект",
+    "pin": "Закрепить",
+    "unpin": "Открепить",
     "delete": "Удалить",
     "askTag": "ask",
     "shareTitle": "Поделитесь Poco с друзьями",

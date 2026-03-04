@@ -15,10 +15,12 @@ import type { SettingsTabId } from "@/features/settings";
 interface AppSidebarProps {
   projects: ProjectItem[];
   taskHistory: TaskHistoryItem[];
+  pinnedTaskIds?: string[];
   onNewTask?: () => void;
   onDeleteTask?: (taskId: string) => Promise<void> | void;
   onRenameTask?: (taskId: string, newName: string) => Promise<void> | void;
   onMoveTaskToProject?: (taskId: string, projectId: string | null) => void;
+  onToggleTaskPin?: (taskId: string) => void;
   onCreateProject?: (name: string) => void;
   onRenameProject?: (projectId: string, newName: string) => void;
   onDeleteProject?: (projectId: string) => Promise<void> | void;
@@ -28,6 +30,7 @@ interface AppSidebarProps {
 
 // Default no-op handler
 const noop = () => {};
+const noopTaskAction: (taskId: string) => void = () => {};
 
 /**
  * Unified sidebar wrapper.
@@ -38,10 +41,12 @@ const noop = () => {};
 export function AppSidebar({
   projects,
   taskHistory,
+  pinnedTaskIds = [],
   onNewTask,
   onDeleteTask,
   onRenameTask,
   onMoveTaskToProject,
+  onToggleTaskPin,
   onCreateProject,
   onRenameProject,
   onDeleteProject,
@@ -82,11 +87,13 @@ export function AppSidebar({
       <MainSidebar
         projects={projects}
         taskHistory={taskHistory}
+        pinnedTaskIds={pinnedTaskIds}
         onNewTask={handleNewTask}
         onOpenSearch={openSearch}
         onDeleteTask={onDeleteTask ?? noop}
         onRenameTask={onRenameTask}
         onMoveTaskToProject={onMoveTaskToProject}
+        onToggleTaskPin={onToggleTaskPin ?? noopTaskAction}
         onRenameProject={onRenameProject}
         onDeleteProject={onDeleteProject}
         onOpenSettings={onOpenSettings}

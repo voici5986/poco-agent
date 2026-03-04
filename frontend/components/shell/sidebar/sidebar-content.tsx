@@ -123,9 +123,11 @@ function LongPressActionButton({
 interface DroppableAllTasksGroupProps {
   title: string;
   tasks: TaskHistoryItem[];
+  pinnedTaskIds: string[];
   onDeleteTask: (taskId: string) => Promise<void> | void;
   onRenameTask?: (taskId: string, newName: string) => Promise<void> | void;
   onMoveTaskToProject?: (taskId: string, projectId: string | null) => void;
+  onToggleTaskPin: (taskId: string) => void;
   projects: ProjectItem[];
   isSelectionMode?: boolean;
   isOtherSelectionMode?: boolean;
@@ -138,9 +140,11 @@ interface DroppableAllTasksGroupProps {
 function DroppableAllTasksGroup({
   title,
   tasks,
+  pinnedTaskIds,
   onDeleteTask,
   onRenameTask,
   onMoveTaskToProject,
+  onToggleTaskPin,
   projects,
   isSelectionMode,
   isOtherSelectionMode,
@@ -188,9 +192,11 @@ function DroppableAllTasksGroup({
           <SidebarGroupContent className="p-2 pt-0 mt-0 group-data-[collapsible=icon]:mt-0">
             <TaskHistoryList
               tasks={tasks}
+              pinnedTaskIds={pinnedTaskIds}
               onDeleteTask={onDeleteTask}
               onRenameTask={onRenameTask}
               onMoveTaskToProject={onMoveTaskToProject}
+              onToggleTaskPin={onToggleTaskPin}
               projects={projects}
               showDropIndicator={isOver}
               dropIndicatorLabel={t("sidebar.moveToHere")}
@@ -213,9 +219,11 @@ function DroppableAllTasksGroup({
 interface SidebarContentSectionProps {
   projects: ProjectItem[];
   taskHistory: TaskHistoryItem[];
+  pinnedTaskIds: string[];
   onDeleteTask: (taskId: string) => Promise<void> | void;
   onRenameTask?: (taskId: string, newName: string) => Promise<void> | void;
   onMoveTaskToProject?: (taskId: string, projectId: string | null) => void;
+  onToggleTaskPin: (taskId: string) => void;
   onRenameProject?: (projectId: string, newName: string) => void;
   onDeleteProject?: (projectId: string) => Promise<void> | void;
   onOpenCreateProjectDialog?: () => void;
@@ -234,9 +242,11 @@ interface SidebarContentSectionProps {
 export function SidebarContentSection({
   projects,
   taskHistory,
+  pinnedTaskIds,
   onDeleteTask,
   onRenameTask,
   onMoveTaskToProject,
+  onToggleTaskPin,
   onRenameProject,
   onDeleteProject,
   onOpenCreateProjectDialog,
@@ -359,12 +369,14 @@ export function SidebarContentSection({
                           key={project.id}
                           project={project}
                           tasks={tasksByProject.get(project.id) || []}
+                          pinnedTaskIds={pinnedTaskIds}
                           isExpanded={expandedProjects.has(project.id)}
                           onToggle={() => toggleProjectExpanded(project.id)}
                           onProjectClick={() => handleProjectClick(project.id)}
                           onDeleteTask={onDeleteTask}
                           onRenameTask={onRenameTask}
                           onMoveTaskToProject={onMoveTaskToProject}
+                          onToggleTaskPin={onToggleTaskPin}
                           allProjects={projects}
                           onRenameProject={handleRenameProject}
                           onDeleteProject={onDeleteProject}
@@ -389,9 +401,11 @@ export function SidebarContentSection({
             <DroppableAllTasksGroup
               title={t("sidebar.allTasks")}
               tasks={unassignedTasks}
+              pinnedTaskIds={pinnedTaskIds}
               onDeleteTask={onDeleteTask}
               onRenameTask={onRenameTask}
               onMoveTaskToProject={onMoveTaskToProject}
+              onToggleTaskPin={onToggleTaskPin}
               projects={projects}
               isSelectionMode={isTaskSelectionMode}
               isOtherSelectionMode={isProjectSelectionMode}

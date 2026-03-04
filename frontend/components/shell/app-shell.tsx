@@ -37,11 +37,13 @@ export function AppShell({
   );
   const {
     taskHistory,
+    pinnedTaskIds,
     addTask,
     touchTask,
     removeTask,
     moveTask,
     renameTask,
+    toggleTaskPin,
     refreshTasks,
   } = useTaskHistory({});
 
@@ -100,9 +102,11 @@ export function AppShell({
             <AppSidebar
               projects={projects}
               taskHistory={taskHistory}
+              pinnedTaskIds={pinnedTaskIds}
               onDeleteTask={removeTask}
               onRenameTask={renameTask}
               onMoveTaskToProject={moveTask}
+              onToggleTaskPin={toggleTaskPin}
               onCreateProject={addProject}
               onRenameProject={handleRenameProject}
               onDeleteProject={handleDeleteProject}
