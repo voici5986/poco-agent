@@ -1,8 +1,5 @@
 "use client";
 
-import type { ComponentType } from "react";
-import { Activity, CalendarDays, Clock3 } from "lucide-react";
-
 import {
   Card,
   CardContent,
@@ -10,8 +7,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useT } from "@/lib/i18n/client";
 import {
+  formatCompactNumber,
   formatCurrency,
   formatNumber,
 } from "@/features/settings/lib/usage-analytics";
@@ -33,7 +36,34 @@ interface UsageMetricCardProps {
   total: number;
   metric: UsageAnalyticsMetricSummary;
   locale: string;
-  icon: ComponentType<{ className?: string }>;
+}
+
+function UsageMetricValue({
+  value,
+  locale,
+  className,
+}: {
+  value: number;
+  locale: string;
+  className?: string;
+}) {
+  const compactValue = formatCompactNumber(value, locale);
+  const exactValue = formatNumber(value, locale);
+
+  if (Math.abs(value) < 1_000) {
+    return <span className={className}>{exactValue}</span>;
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className={className}>{compactValue}</span>
+      </TooltipTrigger>
+      <TooltipContent side="top" sideOffset={8}>
+        {exactValue}
+      </TooltipContent>
+    </Tooltip>
+  );
 }
 
 function UsageMetricCard({
@@ -42,53 +72,64 @@ function UsageMetricCard({
   total,
   metric,
   locale,
-  icon: Icon,
 }: UsageMetricCardProps) {
   const { t } = useT("translation");
+  const metricItems = [
+    {
+      label: t("settings.usageTab.inputTokens"),
+      value: metric.input_tokens,
+    },
+    {
+      label: t("settings.usageTab.outputTokens"),
+      value: metric.output_tokens,
+    },
+    {
+      label: t("settings.usageTab.cacheWriteTokens"),
+      value: metric.cache_creation_input_tokens,
+    },
+    {
+      label: t("settings.usageTab.cacheReadTokens"),
+      value: metric.cache_read_input_tokens,
+    },
+  ];
 
   return (
-    <Card className="border-border/60 bg-card/80">
-      <CardHeader className="space-y-1">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <span className="flex size-8 items-center justify-center rounded-full bg-muted text-muted-foreground">
-            <Icon className="size-4" />
-          </span>
-          {title}
-        </CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4 pb-6">
-        <div className="text-3xl font-semibold tracking-tight">
-          {formatNumber(total, locale)}
+    <Card className="h-72 border-border/60 bg-card/80 shadow-sm">
+      <CardHeader className="px-5 pt-5 pb-0">
+        <div className="flex min-w-0 items-baseline gap-2">
+          <CardTitle className="shrink-0 text-base font-semibold">
+            {title}
+          </CardTitle>
+          <CardDescription className="min-w-0 truncate text-xs leading-none">
+            {description}
+          </CardDescription>
         </div>
-        <div className="grid gap-2 text-sm text-muted-foreground">
-          <div className="flex items-center justify-between">
-            <span>{t("settings.usageTab.inputTokens")}</span>
-            <span className="font-medium text-foreground">
-              {formatNumber(metric.input_tokens, locale)}
-            </span>
+      </CardHeader>
+      <CardContent className="flex flex-1 flex-col px-5 pb-5 pt-2">
+        <UsageMetricValue
+          value={total}
+          locale={locale}
+          className="inline-block text-4xl font-semibold leading-none tracking-tight tabular-nums"
+        />
+        <div className="mt-4 flex flex-1 flex-col text-sm text-muted-foreground">
+          <div className="space-y-2">
+            {metricItems.map((item) => (
+              <div
+                key={item.label}
+                className="flex items-center justify-between gap-4"
+              >
+                <span>{item.label}</span>
+                <UsageMetricValue
+                  value={item.value}
+                  locale={locale}
+                  className="inline-block text-base font-medium text-foreground tabular-nums"
+                />
+              </div>
+            ))}
           </div>
-          <div className="flex items-center justify-between">
-            <span>{t("settings.usageTab.outputTokens")}</span>
-            <span className="font-medium text-foreground">
-              {formatNumber(metric.output_tokens, locale)}
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span>{t("settings.usageTab.cacheWriteTokens")}</span>
-            <span className="font-medium text-foreground">
-              {formatNumber(metric.cache_creation_input_tokens, locale)}
-            </span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span>{t("settings.usageTab.cacheReadTokens")}</span>
-            <span className="font-medium text-foreground">
-              {formatNumber(metric.cache_read_input_tokens, locale)}
-            </span>
-          </div>
-          <div className="flex items-center justify-between border-t border-dashed border-border/70 pt-2">
+          <div className="mt-auto flex items-center justify-between gap-4 border-t border-dashed border-border/70 pt-3">
             <span>{t("settings.usageTab.cost")}</span>
-            <span className="font-medium text-foreground">
+            <span className="text-base font-medium text-foreground tabular-nums">
               {formatCurrency(metric.total_cost_usd, locale)}
             </span>
           </div>
@@ -107,14 +148,13 @@ export function UsageSummaryCards({
   const { t } = useT("translation");
 
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
+    <div className="grid gap-2.5 lg:grid-cols-3">
       <UsageMetricCard
         title={t("settings.usageTab.monthSummary")}
         description={monthLabel}
         total={summary.month.total_tokens}
         metric={summary.month}
         locale={locale}
-        icon={CalendarDays}
       />
       <UsageMetricCard
         title={t("settings.usageTab.daySummary")}
@@ -122,7 +162,6 @@ export function UsageSummaryCards({
         total={summary.day.total_tokens}
         metric={summary.day}
         locale={locale}
-        icon={Clock3}
       />
       <UsageMetricCard
         title={t("settings.usageTab.allTimeSummary")}
@@ -130,7 +169,6 @@ export function UsageSummaryCards({
         total={summary.all_time.total_tokens}
         metric={summary.all_time}
         locale={locale}
-        icon={Activity}
       />
     </div>
   );

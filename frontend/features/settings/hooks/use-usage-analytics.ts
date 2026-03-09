@@ -10,6 +10,10 @@ import {
 } from "@/features/settings/lib/usage-analytics";
 import type { UsageAnalyticsResponse } from "@/features/settings/types";
 
+interface UseUsageAnalyticsOptions {
+  enabled?: boolean;
+}
+
 function toErrorMessage(error: unknown): string | null {
   if (error instanceof Error && error.message) {
     return error.message;
@@ -17,19 +21,16 @@ function toErrorMessage(error: unknown): string | null {
   return null;
 }
 
-export function useUsageAnalytics() {
-  const [timezone, setTimezone] = React.useState("UTC");
+export function useUsageAnalytics(options: UseUsageAnalyticsOptions = {}) {
+  const enabled = options.enabled ?? true;
+  const [timezone] = React.useState(getBrowserTimeZone);
   const [requestedMonth, setRequestedMonth] =
     React.useState(getCurrentYearMonth);
   const [requestedDay, setRequestedDay] = React.useState<string | null>(null);
   const [data, setData] = React.useState<UsageAnalyticsResponse | null>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [isLoading, setIsLoading] = React.useState(enabled);
   const [error, setError] = React.useState<string | null>(null);
   const requestTokenRef = React.useRef(0);
-
-  React.useEffect(() => {
-    setTimezone(getBrowserTimeZone());
-  }, []);
 
   const load = React.useCallback(async () => {
     const requestToken = requestTokenRef.current + 1;
@@ -56,8 +57,12 @@ export function useUsageAnalytics() {
   }, [requestedDay, requestedMonth, timezone]);
 
   React.useEffect(() => {
+    if (!enabled) {
+      setIsLoading(false);
+      return;
+    }
     void load();
-  }, [load]);
+  }, [enabled, load]);
 
   const goToPreviousMonth = React.useCallback(() => {
     setRequestedMonth((current) => shiftYearMonth(current, -1));
@@ -74,8 +79,9 @@ export function useUsageAnalytics() {
   }, []);
 
   const refresh = React.useCallback(() => {
+    if (!enabled) return;
     void load();
-  }, [load]);
+  }, [enabled, load]);
 
   return {
     data,
@@ -90,3 +96,5 @@ export function useUsageAnalytics() {
     selectDay,
   };
 }
+
+export type UsageAnalyticsState = ReturnType<typeof useUsageAnalytics>;

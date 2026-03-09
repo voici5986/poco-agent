@@ -47,12 +47,17 @@ import { SettingsSidebar } from "@/features/settings/components/settings-sidebar
 import { AccountSettingsTab } from "@/features/settings/components/tabs/account-settings-tab";
 import { ModelsSettingsTab } from "@/features/settings/components/tabs/models-settings-tab";
 import { ShortcutsSettingsTab } from "@/features/settings/components/tabs/shortcuts-settings-tab";
-import { UsageSettingsTab } from "@/features/settings/components/tabs/usage-settings-tab";
+import {
+  UsageSettingsTab,
+  UsageToolbar,
+} from "@/features/settings/components/tabs/usage-settings-tab";
 import {
   useBackendPreference,
   type BackendOption,
 } from "@/features/settings/hooks/use-backend-preference";
 import { useSettingsLanguage } from "@/features/settings/hooks/use-settings-language";
+import { useUsageAnalytics } from "@/features/settings/hooks/use-usage-analytics";
+import { formatMonthLabel } from "@/features/settings/lib/usage-analytics";
 import type {
   ApiProviderConfig,
   SettingsSidebarItem,
@@ -98,7 +103,7 @@ export function SettingsDialog({
   tabRequest,
   onStartOnboarding,
 }: SettingsDialogProps) {
-  const { t } = useT("translation");
+  const { t, i18n } = useT("translation");
   const isMobile = useIsMobile();
   const router = useRouter();
   const { mode, setMode } = useThemeMode();
@@ -115,6 +120,10 @@ export function SettingsDialog({
   const [anthropicConfig, setAnthropicConfig] = React.useState(
     DEFAULT_ANTHROPIC_CONFIG,
   );
+
+  const isUsageViewActive =
+    open && (activeTab === "usage" || mobileView === "usage");
+  const usageAnalytics = useUsageAnalytics({ enabled: isUsageViewActive });
 
   const dragHandleRef = React.useRef<HTMLDivElement | null>(null);
   const dragStartYRef = React.useRef(0);
@@ -224,6 +233,10 @@ export function SettingsDialog({
   const activeTitle = React.useMemo(
     () => sidebarItems.find((item) => item.id === activeTab)?.label,
     [activeTab, sidebarItems],
+  );
+  const usageMonthLabel = React.useMemo(
+    () => formatMonthLabel(usageAnalytics.activeMonth, i18n.language),
+    [i18n.language, usageAnalytics.activeMonth],
   );
 
   const languageOptions = React.useMemo<SettingOption[]>(
@@ -370,7 +383,12 @@ export function SettingsDialog({
     }
 
     if (activeTab === "usage") {
-      return <UsageSettingsTab />;
+      return (
+        <UsageSettingsTab
+          usageAnalytics={usageAnalytics}
+          showInlineToolbar={isMobile}
+        />
+      );
     }
 
     return <ShortcutsSettingsTab />;
@@ -401,8 +419,26 @@ export function SettingsDialog({
             />
 
             <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-background">
-              <div className="flex shrink-0 items-center justify-between p-5 pb-2">
-                <h2 className="text-xl font-semibold">{activeTitle}</h2>
+              <div className="flex shrink-0 items-center justify-between gap-4 p-5 pb-2">
+                <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <h2 className="text-xl font-semibold">{activeTitle}</h2>
+                  {activeTab === "usage" ? (
+                    <span className="text-lg font-semibold tracking-tight text-foreground/90">
+                      {usageMonthLabel}
+                    </span>
+                  ) : null}
+                </div>
+                {activeTab === "usage" ? (
+                  <UsageToolbar
+                    monthLabel={usageMonthLabel}
+                    isLoading={usageAnalytics.isLoading}
+                    onPreviousMonth={usageAnalytics.goToPreviousMonth}
+                    onNextMonth={usageAnalytics.goToNextMonth}
+                    onRefresh={usageAnalytics.refresh}
+                    showMonthLabel={false}
+                    className="hidden shrink-0 md:flex md:justify-end"
+                  />
+                ) : null}
               </div>
               {renderContent()}
             </div>

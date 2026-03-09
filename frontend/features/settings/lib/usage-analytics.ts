@@ -34,11 +34,83 @@ export function formatDayLabel(day: string, locale: string): string {
   }).format(date);
 }
 
-export function formatCompactNumber(value: number, locale: string): string {
-  return new Intl.NumberFormat(locale, {
-    notation: "compact",
-    maximumFractionDigits: 1,
-  }).format(value);
+export function formatCompactNumber(
+  value: number,
+  locale: string,
+  fractionDigits = 2,
+): string {
+  const absoluteValue = Math.abs(value);
+
+  if (absoluteValue < 1_000) {
+    return formatNumber(value, locale);
+  }
+
+  const suffixes = ["", "K", "M", "B", "T"];
+  let compactValue = absoluteValue;
+  let suffixIndex = 0;
+
+  while (compactValue >= 1_000 && suffixIndex < suffixes.length - 1) {
+    compactValue /= 1_000;
+    suffixIndex += 1;
+  }
+
+  if (
+    Number(compactValue.toFixed(fractionDigits)) >= 1_000 &&
+    suffixIndex < suffixes.length - 1
+  ) {
+    compactValue /= 1_000;
+    suffixIndex += 1;
+  }
+
+  const sign = value < 0 ? "-" : "";
+  return `${sign}${compactValue.toFixed(fractionDigits)}${suffixes[suffixIndex]}`;
+}
+
+export interface CompactNumberScale {
+  divisor: number;
+  suffix: string;
+}
+
+export function getCompactNumberScale(value: number): CompactNumberScale {
+  const absoluteValue = Math.abs(value);
+
+  if (absoluteValue >= 1_000_000_000_000) {
+    return { divisor: 1_000_000_000_000, suffix: "T" };
+  }
+
+  if (absoluteValue >= 1_000_000_000) {
+    return { divisor: 1_000_000_000, suffix: "B" };
+  }
+
+  if (absoluteValue >= 1_000_000) {
+    return { divisor: 1_000_000, suffix: "M" };
+  }
+
+  if (absoluteValue >= 1_000) {
+    return { divisor: 1_000, suffix: "K" };
+  }
+
+  return { divisor: 1, suffix: "" };
+}
+
+export function formatNumberWithScale(
+  value: number,
+  locale: string,
+  scale: CompactNumberScale,
+  fractionDigits = 1,
+): string {
+  if (value === 0) {
+    return "0";
+  }
+
+  if (scale.divisor === 1) {
+    return formatNumber(value, locale);
+  }
+
+  return `${new Intl.NumberFormat(locale, {
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  }).format(value / scale.divisor)}${scale.suffix}`;
 }
 
 export function formatNumber(value: number, locale: string): string {
@@ -49,6 +121,7 @@ export function formatCurrency(value: number, locale: string): string {
   return new Intl.NumberFormat(locale, {
     style: "currency",
     currency: "USD",
-    maximumFractionDigits: 4,
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
   }).format(value);
 }

@@ -20,8 +20,9 @@ import {
 } from "@/components/ui/chart";
 import { useT } from "@/lib/i18n/client";
 import {
-  formatCompactNumber,
   formatDayLabel,
+  formatNumberWithScale,
+  getCompactNumberScale,
 } from "@/features/settings/lib/usage-analytics";
 import type { UsageAnalyticsBucket } from "@/features/settings/types";
 
@@ -55,17 +56,33 @@ export function UsageDayChart({ day, buckets, locale }: UsageDayChartProps) {
       }) satisfies ChartConfig,
     [t],
   );
+  const yAxisScale = React.useMemo(
+    () =>
+      getCompactNumberScale(
+        buckets.reduce(
+          (maxValue, bucket) => Math.max(maxValue, bucket.total_tokens),
+          0,
+        ),
+      ),
+    [buckets],
+  );
 
   return (
-    <Card className="border-border/60 bg-card/80">
-      <CardHeader>
-        <CardTitle>{t("settings.usageTab.hourlyDistribution")}</CardTitle>
-        <CardDescription>{formatDayLabel(day, locale)}</CardDescription>
+    <Card className="h-72 border-border/60 bg-card/80">
+      <CardHeader className="pt-5 pb-1.5">
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+          <CardTitle>{t("settings.usageTab.hourlyDistribution")}</CardTitle>
+          <CardDescription className="text-xs leading-none">
+            {t("settings.usageTab.selectedDayLabel", {
+              day: formatDayLabel(day, locale),
+            })}
+          </CardDescription>
+        </div>
       </CardHeader>
-      <CardContent className="pb-6">
+      <CardContent className="flex min-h-0 flex-1 flex-col px-4 pb-4">
         <ChartContainer
           config={chartConfig}
-          className="h-[320px] w-full min-w-0 !aspect-auto"
+          className="min-h-0 flex-1 w-full min-w-0 !aspect-auto"
         >
           <BarChart
             data={buckets}
@@ -81,9 +98,9 @@ export function UsageDayChart({ day, buckets, locale }: UsageDayChartProps) {
             <YAxis
               tickLine={false}
               axisLine={false}
-              width={48}
+              width={60}
               tickFormatter={(value: number) =>
-                formatCompactNumber(value, locale)
+                formatNumberWithScale(value, locale, yAxisScale, 1)
               }
             />
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
