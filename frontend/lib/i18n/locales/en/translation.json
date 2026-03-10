@@ -1489,13 +1489,14 @@
       }
     },
     "providerDiscoverError": "Failed to discover provider models",
-    "providerModelsPlaceholder": "Search or enter model names",
-    "providerModelsSearchPlaceholder": "Search models or type a custom name",
+    "providerModelsPlaceholder": "No custom models added yet",
+    "providerModelsSearchPlaceholder": "Enter a model name, then press Enter",
+    "providerModelsAdd": "Add model",
     "providerModelsDiscovering": "Loading models...",
     "providerModelsManualHint": "Discovery is unavailable for this provider. Enter the model names manually.",
     "providerModelsEmpty": "No models found",
     "providerModelsUseCustom": "Use custom model: {{model}}",
-    "providerFieldAnnotation": "Leave API Key blank to keep the current key. Leave Base URL blank to use the default endpoint. Models can be selected from the list or entered manually."
+    "providerFieldAnnotation": "Leave API Key blank to keep the current key. Leave Base URL blank to use the default endpoint. Enter model names manually and press Enter or click add."
   },
   "validation": {
     "projectNameRequired": "Please enter a project name",

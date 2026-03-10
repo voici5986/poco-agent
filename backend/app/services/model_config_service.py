@@ -1,9 +1,5 @@
-import json
 import os
 from dataclasses import dataclass
-from urllib import error as urllib_error
-from urllib import parse as urllib_parse
-from urllib import request as urllib_request
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -21,8 +17,6 @@ from app.schemas.model_config import (
     ModelConfigResponse,
     ModelDefinitionResponse,
     ModelProviderResponse,
-    ProviderModelDiscoveryRequest,
-    ProviderModelDiscoveryResponse,
     ProviderModelSettingsUpsertRequest,
 )
 from app.services.env_var_service import SYSTEM_USER_ID
@@ -36,7 +30,6 @@ class ProviderSpec:
     api_key_env_key: str
     base_url_env_key: str
     default_base_url: str
-    discovery_mode: str | None = None
     known_models: tuple[tuple[str, str], ...] = ()
 
 
@@ -47,7 +40,6 @@ PROVIDER_SPECS: tuple[ProviderSpec, ...] = (
         api_key_env_key="ANTHROPIC_API_KEY",
         base_url_env_key="ANTHROPIC_BASE_URL",
         default_base_url="https://api.anthropic.com",
-        discovery_mode="anthropic",
         known_models=(
             ("claude-sonnet-4-20250514", "Claude Sonnet 4"),
             ("claude-opus-4-20250514", "Claude Opus 4"),
@@ -59,7 +51,6 @@ PROVIDER_SPECS: tuple[ProviderSpec, ...] = (
         api_key_env_key="OPENAI_API_KEY",
         base_url_env_key="OPENAI_BASE_URL",
         default_base_url="https://api.openai.com/v1",
-        discovery_mode="openai-compatible",
         known_models=(
             ("gpt-4.1", "GPT-4.1"),
             ("gpt-4.1-mini", "GPT-4.1 Mini"),
@@ -93,7 +84,6 @@ PROVIDER_SPECS: tuple[ProviderSpec, ...] = (
         api_key_env_key="DEEPSEEK_API_KEY",
         base_url_env_key="DEEPSEEK_BASE_URL",
         default_base_url="https://api.deepseek.com",
-        discovery_mode="openai-compatible",
         known_models=(
             ("deepseek-chat", "DeepSeek Chat"),
             ("deepseek-reasoner", "DeepSeek Reasoner"),
@@ -193,8 +183,6 @@ def _build_model_definition(
 
 
 class ModelConfigService:
-    discovery_timeout_seconds: int = 10
-
     def __init__(self) -> None:
         self.settings = get_settings()
 
@@ -298,48 +286,6 @@ class ModelConfigService:
             selected_model_ids=model_ids,
         )
 
-    def discover_provider_models(
-        self,
-        db: Session,
-        user_id: str,
-        provider_id: str,
-        request: ProviderModelDiscoveryRequest,
-    ) -> ProviderModelDiscoveryResponse:
-        spec = self._get_provider_spec(provider_id)
-        if not spec.discovery_mode:
-            return ProviderModelDiscoveryResponse(provider_id=provider_id, models=[])
-
-        user_env_values, system_env_values = self._load_provider_env_values(db, user_id)
-        api_key, base_url = self._resolve_discovery_credentials(
-            spec=spec,
-            user_env_values=user_env_values,
-            system_env_values=system_env_values,
-            request=request,
-        )
-
-        if not api_key:
-            return ProviderModelDiscoveryResponse(provider_id=provider_id, models=[])
-
-        try:
-            if spec.discovery_mode == "anthropic":
-                models = self._discover_anthropic_models(
-                    provider_id=provider_id,
-                    api_key=api_key,
-                    base_url=base_url,
-                )
-            else:
-                models = self._discover_openai_compatible_models(
-                    provider_id=provider_id,
-                    api_key=api_key,
-                    base_url=base_url,
-                )
-        except AppException:
-            raise
-        except Exception:
-            models = []
-
-        return ProviderModelDiscoveryResponse(provider_id=provider_id, models=models)
-
     def _build_provider_response(
         self,
         spec: ProviderSpec,
@@ -385,9 +331,7 @@ class ModelConfigService:
             default_base_url=spec.default_base_url,
             effective_base_url=effective_base_url,
             base_url_source=base_url_source,
-            supports_model_discovery=bool(spec.discovery_mode),
             models=selected_models,
-            discovered_models=[],
         )
 
     def _get_provider_spec(self, provider_id: str) -> ProviderSpec:
@@ -448,130 +392,3 @@ class ModelConfigService:
             except Exception:
                 continue
         return values
-
-    def _resolve_discovery_credentials(
-        self,
-        spec: ProviderSpec,
-        user_env_values: dict[str, str],
-        system_env_values: dict[str, str],
-        request: ProviderModelDiscoveryRequest,
-    ) -> tuple[str, str]:
-        override_key = (request.api_key or "").strip()
-        api_key = override_key or user_env_values.get(spec.api_key_env_key, "")
-        if not api_key:
-            api_key = system_env_values.get(spec.api_key_env_key, "") or (
-                os.getenv(spec.api_key_env_key) or ""
-            ).strip()
-
-        if request.base_url is None:
-            base_url = (
-                user_env_values.get(spec.base_url_env_key, "")
-                or system_env_values.get(spec.base_url_env_key, "")
-                or (os.getenv(spec.base_url_env_key) or "").strip()
-                or spec.default_base_url
-            )
-        else:
-            base_url = (request.base_url or "").strip() or spec.default_base_url
-
-        return api_key.strip(), base_url.strip()
-
-    def _discover_openai_compatible_models(
-        self,
-        provider_id: str,
-        api_key: str,
-        base_url: str,
-    ) -> list[ModelDefinitionResponse]:
-        endpoint = self._join_url(base_url, "models")
-        payload = self._request_json(
-            endpoint,
-            headers={
-                "Authorization": f"Bearer {api_key}",
-            },
-        )
-        data = payload.get("data")
-        if not isinstance(data, list):
-            return []
-
-        model_ids = [
-            str(item.get("id") or "").strip()
-            for item in data
-            if isinstance(item, dict)
-        ]
-        return [
-            _build_model_definition(model_id, provider_id)
-            for model_id in _normalize_model_ids(model_ids)
-        ]
-
-    def _discover_anthropic_models(
-        self,
-        provider_id: str,
-        api_key: str,
-        base_url: str,
-    ) -> list[ModelDefinitionResponse]:
-        endpoint = self._join_url(base_url, "v1/models")
-        payload = self._request_json(
-            endpoint,
-            headers={
-                "x-api-key": api_key,
-                "anthropic-version": "2023-06-01",
-            },
-        )
-        data = payload.get("data")
-        if not isinstance(data, list):
-            return []
-
-        model_ids = [
-            str(item.get("id") or "").strip()
-            for item in data
-            if isinstance(item, dict)
-        ]
-        return [
-            _build_model_definition(model_id, provider_id)
-            for model_id in _normalize_model_ids(model_ids)
-        ]
-
-    def _join_url(self, base_url: str, path: str) -> str:
-        clean_base = (base_url or "").strip().rstrip("/")
-        clean_path = path.lstrip("/")
-        if not clean_base:
-            raise AppException(
-                error_code=ErrorCode.BAD_REQUEST,
-                message="Base URL is required for model discovery",
-            )
-        if clean_base.endswith(f"/{clean_path}"):
-            return clean_base
-        if clean_base.endswith("/v1") and clean_path.startswith("v1/"):
-            return f"{clean_base}/{clean_path.removeprefix('v1/')}"
-        return urllib_parse.urljoin(f"{clean_base}/", clean_path)
-
-    def _request_json(self, url: str, headers: dict[str, str]) -> dict:
-        request = urllib_request.Request(
-            url,
-            headers={
-                "Accept": "application/json",
-                **headers,
-            },
-            method="GET",
-        )
-        try:
-            with urllib_request.urlopen(
-                request,
-                timeout=self.discovery_timeout_seconds,
-            ) as response:
-                payload = response.read().decode("utf-8")
-        except urllib_error.HTTPError as exc:
-            if exc.code in (401, 403, 404):
-                return {}
-            raise AppException(
-                error_code=ErrorCode.EXTERNAL_SERVICE_ERROR,
-                message=f"Provider model discovery failed: {exc.code}",
-            ) from exc
-        except urllib_error.URLError:
-            return {}
-
-        try:
-            parsed = json.loads(payload)
-        except json.JSONDecodeError:
-            return {}
-
-        return parsed if isinstance(parsed, dict) else {}

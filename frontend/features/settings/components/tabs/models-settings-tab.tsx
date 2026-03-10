@@ -2,9 +2,8 @@
 
 import * as React from "react";
 import {
-  Check,
-  ChevronsUpDown,
   Loader2,
+  Plus,
   RotateCcw,
   Save,
   X,
@@ -12,20 +11,7 @@ import {
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n/client";
 import type { ApiProviderConfig } from "@/features/settings/types";
 
@@ -45,54 +31,10 @@ function getStatusLabel(
 interface ProviderModelFieldProps {
   config: ApiProviderConfig;
   onChange: (patch: Partial<ApiProviderConfig>) => void;
-  onDiscover: () => void;
 }
 
-function ProviderModelField({
-  config,
-  onChange,
-  onDiscover,
-}: ProviderModelFieldProps) {
+function ProviderModelField({ config, onChange }: ProviderModelFieldProps) {
   const { t } = useT("translation");
-  const [open, setOpen] = React.useState(false);
-  const discoveryAttemptedRef = React.useRef(false);
-  const query = config.modelDraft.trim().toLowerCase();
-  const discoveredModels = React.useMemo(
-    () =>
-      Array.isArray(config.discoveredModels) ? config.discoveredModels : [],
-    [config.discoveredModels],
-  );
-  const discoveredOptions = React.useMemo(
-    () =>
-      discoveredModels.filter((item) =>
-        item.model_id.toLowerCase().includes(query),
-      ),
-    [discoveredModels, query],
-  );
-
-  React.useEffect(() => {
-    if (!open) {
-      discoveryAttemptedRef.current = false;
-      return;
-    }
-    if (
-      discoveryAttemptedRef.current ||
-      !config.supportsModelDiscovery ||
-      config.isDiscovering ||
-      discoveredModels.length > 0
-    ) {
-      return;
-    }
-    discoveryAttemptedRef.current = true;
-    void onDiscover();
-  }, [
-    config.isDiscovering,
-    config.supportsModelDiscovery,
-    discoveredModels.length,
-    onDiscover,
-    open,
-  ]);
-
   const addModel = React.useCallback(
     (modelId: string) => {
       const clean = modelId.trim();
@@ -111,6 +53,21 @@ function ProviderModelField({
     [config.selectedModelIds, onChange],
   );
 
+  const commitDraft = React.useCallback(() => {
+    addModel(config.modelDraft);
+  }, [addModel, config.modelDraft]);
+
+  const handleDraftKeyDown = React.useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key !== "Enter" && event.key !== ",") {
+        return;
+      }
+      event.preventDefault();
+      commitDraft();
+    },
+    [commitDraft],
+  );
+
   const removeModel = React.useCallback(
     (modelId: string) => {
       onChange({
@@ -124,114 +81,58 @@ function ProviderModelField({
 
   return (
     <div className="space-y-2">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            disabled={config.isSaving}
-            className="h-auto min-h-11 w-full justify-between px-3 py-2 text-left"
-          >
-            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
-              {config.selectedModelIds.length > 0 ? (
-                config.selectedModelIds.map((modelId) => (
-                  <span
-                    key={modelId}
-                    className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-muted px-2 py-0.5 text-xs text-foreground"
-                  >
-                    <span className="truncate max-w-[180px]">{modelId}</span>
-                    <span
-                      role="button"
-                      tabIndex={0}
-                      className="text-muted-foreground transition hover:text-foreground"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        removeModel(modelId);
-                      }}
-                      onKeyDown={(event) => {
-                        if (event.key !== "Enter" && event.key !== " ") {
-                          return;
-                        }
-                        event.preventDefault();
-                        event.stopPropagation();
-                        removeModel(modelId);
-                      }}
-                    >
-                      <X className="size-3" />
-                    </span>
-                  </span>
-                ))
-              ) : (
-                <span className="text-sm text-muted-foreground">
-                  {t("settings.providerModelsPlaceholder")}
-                </span>
-              )}
-            </div>
-            <ChevronsUpDown className="ml-2 size-4 shrink-0 text-muted-foreground" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          align="start"
-          className="w-[--radix-popover-trigger-width] p-0"
+      <div className="flex items-center gap-2">
+        <Input
+          value={config.modelDraft}
+          onChange={(event) => onChange({ modelDraft: event.target.value })}
+          onKeyDown={handleDraftKeyDown}
+          placeholder={t("settings.providerModelsSearchPlaceholder")}
+          disabled={config.isSaving}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="size-10 shrink-0"
+          onClick={commitDraft}
+          disabled={config.isSaving || config.modelDraft.trim().length === 0}
+          title={t("settings.providerModelsAdd")}
+          aria-label={t("settings.providerModelsAdd")}
         >
-          <Command>
-            <CommandInput
-              value={config.modelDraft}
-              onValueChange={(value) => onChange({ modelDraft: value })}
-              placeholder={t("settings.providerModelsSearchPlaceholder")}
-            />
-            <CommandList>
-              {config.isDiscovering ? (
-                <div className="flex items-center gap-2 px-3 py-3 text-sm text-muted-foreground">
-                  <Loader2 className="size-4 animate-spin" />
-                  <span>{t("settings.providerModelsDiscovering")}</span>
-                </div>
-              ) : null}
-              {config.supportsModelDiscovery ? null : (
-                <div className="px-3 py-2 text-xs text-muted-foreground">
-                  {t("settings.providerModelsManualHint")}
-                </div>
-              )}
-              <CommandEmpty>{t("settings.providerModelsEmpty")}</CommandEmpty>
-              {query ? (
-                <CommandItem
-                  value={`__custom__:${config.modelDraft}`}
-                  onSelect={() => addModel(config.modelDraft)}
-                >
-                  <Check className="size-4 opacity-0" />
-                  <span>
-                    {t("settings.providerModelsUseCustom", {
-                      model: config.modelDraft.trim(),
-                    })}
-                  </span>
-                </CommandItem>
-              ) : null}
-              {discoveredOptions.map((item) => {
-                const isSelected = config.selectedModelIds.includes(
-                  item.model_id,
-                );
-                return (
-                  <CommandItem
-                    key={item.model_id}
-                    value={item.model_id}
-                    onSelect={() => addModel(item.model_id)}
-                  >
-                    <Check
-                      className={cn(
-                        "size-4",
-                        isSelected ? "opacity-100" : "opacity-0",
-                      )}
-                    />
-                    <span className="truncate">{item.model_id}</span>
-                  </CommandItem>
-                );
-              })}
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+          <Plus className="size-4" />
+        </Button>
+      </div>
+      {config.selectedModelIds.length > 0 ? (
+        <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+          {config.selectedModelIds.map((modelId) => (
+            <span
+              key={modelId}
+              className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-muted px-2 py-0.5 text-xs text-foreground"
+            >
+              <span className="truncate max-w-[180px]">{modelId}</span>
+              <span
+                role="button"
+                tabIndex={0}
+                className="text-muted-foreground transition hover:text-foreground"
+                onClick={() => removeModel(modelId)}
+                onKeyDown={(event) => {
+                  if (event.key !== "Enter" && event.key !== " ") {
+                    return;
+                  }
+                  event.preventDefault();
+                  removeModel(modelId);
+                }}
+              >
+                <X className="size-3" />
+              </span>
+            </span>
+          ))}
+        </div>
+      ) : (
+        <p className="text-xs text-muted-foreground">
+          {t("settings.providerModelsPlaceholder")}
+        </p>
+      )}
     </div>
   );
 }
@@ -241,7 +142,6 @@ interface ApiProviderSectionProps {
   onChange: (patch: Partial<ApiProviderConfig>) => void;
   onSave: () => Promise<void> | void;
   onClear: () => Promise<void> | void;
-  onDiscover: () => Promise<void> | void;
 }
 
 function ApiProviderSection({
@@ -249,7 +149,6 @@ function ApiProviderSection({
   onChange,
   onSave,
   onClear,
-  onDiscover,
 }: ApiProviderSectionProps) {
   const { t } = useT("translation");
   const statusLabel = getStatusLabel(t, config.credentialState);
@@ -315,12 +214,7 @@ function ApiProviderSection({
       <Input
         type="password"
         value={config.keyInput}
-        onChange={(event) =>
-          onChange({
-            keyInput: event.target.value,
-            discoveredModels: [],
-          })
-        }
+        onChange={(event) => onChange({ keyInput: event.target.value })}
         placeholder={t("settings.providerApiKeyPlaceholder", {
           provider: config.displayName,
         })}
@@ -329,21 +223,12 @@ function ApiProviderSection({
 
       <Input
         value={config.baseUrlInput}
-        onChange={(event) =>
-          onChange({
-            baseUrlInput: event.target.value,
-            discoveredModels: [],
-          })
-        }
+        onChange={(event) => onChange({ baseUrlInput: event.target.value })}
         placeholder={config.defaultBaseUrl}
         disabled={config.isSaving}
       />
 
-      <ProviderModelField
-        config={config}
-        onChange={onChange}
-        onDiscover={onDiscover}
-      />
+      <ProviderModelField config={config} onChange={onChange} />
 
       <p className="text-xs text-muted-foreground">
         {t("settings.providerFieldAnnotation")}
@@ -361,7 +246,6 @@ interface ModelsSettingsTabProps {
   ) => void;
   onSaveProvider: (providerId: string) => Promise<void> | void;
   onClearProvider: (providerId: string) => Promise<void> | void;
-  onDiscoverProviderModels: (providerId: string) => Promise<void> | void;
 }
 
 export function ModelsSettingsTab({
@@ -370,7 +254,6 @@ export function ModelsSettingsTab({
   onChangeProvider,
   onSaveProvider,
   onClearProvider,
-  onDiscoverProviderModels,
 }: ModelsSettingsTabProps) {
   const { t } = useT("translation");
 
@@ -398,7 +281,6 @@ export function ModelsSettingsTab({
               onChange={(patch) => onChangeProvider(provider.providerId, patch)}
               onSave={() => onSaveProvider(provider.providerId)}
               onClear={() => onClearProvider(provider.providerId)}
-              onDiscover={() => onDiscoverProviderModels(provider.providerId)}
             />
           ))
         ) : (

@@ -1385,13 +1385,14 @@
       }
     },
     "providerDiscoverError": "Impossible de récupérer les modèles du fournisseur",
-    "providerModelsPlaceholder": "Rechercher ou saisir un nom de modèle",
-    "providerModelsSearchPlaceholder": "Rechercher des modèles ou saisir un nom personnalisé",
+    "providerModelsPlaceholder": "Aucun modèle personnalisé ajouté pour l'instant",
+    "providerModelsSearchPlaceholder": "Saisissez un nom de modèle puis appuyez sur Entrée",
+    "providerModelsAdd": "Ajouter un modèle",
     "providerModelsDiscovering": "Chargement des modèles...",
     "providerModelsManualHint": "Ce fournisseur ne prend pas en charge la découverte automatique. Saisissez les noms des modèles manuellement.",
     "providerModelsEmpty": "Aucun modèle trouvé",
     "providerModelsUseCustom": "Utiliser un modèle personnalisé : {{model}}",
-    "providerFieldAnnotation": "Laissez le champ API Key vide pour conserver la clé actuelle. Laissez Base URL vide pour utiliser l'endpoint par défaut. Les modèles peuvent être sélectionnés dans la liste ou saisis manuellement."
+    "providerFieldAnnotation": "Laissez le champ API Key vide pour conserver la clé actuelle. Laissez Base URL vide pour utiliser l'endpoint par défaut. Saisissez les noms de modèle manuellement puis appuyez sur Entrée ou cliquez sur ajouter."
   },
   "validation": {
     "projectNameRequired": "Veuillez entrer un nom de projet",

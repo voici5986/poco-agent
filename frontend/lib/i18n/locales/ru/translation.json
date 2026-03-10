@@ -1385,13 +1385,14 @@
       }
     },
     "providerDiscoverError": "Не удалось получить модели провайдера",
-    "providerModelsPlaceholder": "Найдите или введите имя модели",
-    "providerModelsSearchPlaceholder": "Найдите модели или введите собственное имя",
+    "providerModelsPlaceholder": "Пользовательские модели пока не добавлены",
+    "providerModelsSearchPlaceholder": "Введите имя модели и нажмите Enter",
+    "providerModelsAdd": "Добавить модель",
     "providerModelsDiscovering": "Загрузка моделей...",
     "providerModelsManualHint": "Для этого провайдера автоматическое обнаружение недоступно. Введите имена моделей вручную.",
     "providerModelsEmpty": "Модели не найдены",
     "providerModelsUseCustom": "Использовать пользовательскую модель: {{model}}",
-    "providerFieldAnnotation": "Оставьте API Key пустым, чтобы сохранить текущий ключ. Оставьте Base URL пустым, чтобы использовать endpoint по умолчанию. Модели можно выбрать из списка или ввести вручную."
+    "providerFieldAnnotation": "Оставьте API Key пустым, чтобы сохранить текущий ключ. Оставьте Base URL пустым, чтобы использовать endpoint по умолчанию. Имена моделей вводятся вручную, затем нажмите Enter или кнопку добавления."
   },
   "validation": {
     "projectNameRequired": "Пожалуйста, введите имя проекта",

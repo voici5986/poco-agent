@@ -1489,13 +1489,14 @@
       }
     },
     "providerDiscoverError": "拉取提供方模型失败",
-    "providerModelsPlaceholder": "搜索或输入模型名称",
-    "providerModelsSearchPlaceholder": "搜索模型，或直接输入自定义名称",
+    "providerModelsPlaceholder": "暂未添加自定义模型",
+    "providerModelsSearchPlaceholder": "输入模型名称后按回车",
+    "providerModelsAdd": "添加模型",
     "providerModelsDiscovering": "正在加载模型...",
     "providerModelsManualHint": "该提供方暂不支持自动发现，请手动输入模型名称。",
     "providerModelsEmpty": "没有找到模型",
     "providerModelsUseCustom": "使用自定义模型：{{model}}",
-    "providerFieldAnnotation": "API Key 留空表示保留当前值，Base URL 留空表示使用默认地址，模型可从列表选择或手动输入。"
+    "providerFieldAnnotation": "API Key 留空表示保留当前值，Base URL 留空表示使用默认地址。模型名称请手动输入，按回车或点击添加。"
   },
   "validation": {
     "projectNameRequired": "请输入项目名称",

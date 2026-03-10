@@ -2,7 +2,6 @@ import type { LucideIcon } from "lucide-react";
 import type {
   BaseUrlSource,
   CredentialState,
-  ModelDefinition,
   ModelProvider,
 } from "@/features/chat/types/api/models";
 
@@ -29,8 +28,6 @@ export type ApiProviderConfig = {
   effectiveBaseUrl: string;
   baseUrlSource: BaseUrlSource;
   models: ModelProvider["models"];
-  discoveredModels: ModelDefinition[];
-  supportsModelDiscovery: boolean;
   selectedModelIds: string[];
   modelDraft: string;
   keyInput: string;
@@ -38,7 +35,6 @@ export type ApiProviderConfig = {
   hasStoredUserKey: boolean;
   hasStoredUserBaseUrl: boolean;
   isSaving: boolean;
-  isDiscovering: boolean;
 };
 
 export interface UsageAnalyticsMetricSummary {

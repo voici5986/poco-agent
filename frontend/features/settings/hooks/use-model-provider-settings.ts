@@ -32,13 +32,9 @@ function buildProviderConfig(
   envVars: EnvVar[],
   status?: {
     savingProviderId?: string | null;
-    discoveringProviderId?: string | null;
   },
 ): ApiProviderConfig {
   const providerModels = Array.isArray(provider.models) ? provider.models : [];
-  const discoveredModels = Array.isArray(provider.discovered_models)
-    ? provider.discovered_models
-    : [];
   const hasStoredUserKey = envVars.some(
     (item) => item.scope === "user" && item.key === provider.api_key_env_key,
   );
@@ -56,8 +52,6 @@ function buildProviderConfig(
     effectiveBaseUrl: provider.effective_base_url,
     baseUrlSource: provider.base_url_source,
     models: providerModels,
-    discoveredModels,
-    supportsModelDiscovery: provider.supports_model_discovery,
     selectedModelIds: providerModels.map((item) => item.model_id),
     modelDraft: "",
     keyInput: "",
@@ -66,7 +60,6 @@ function buildProviderConfig(
     hasStoredUserKey,
     hasStoredUserBaseUrl,
     isSaving: status?.savingProviderId === provider.provider_id,
-    isDiscovering: status?.discoveringProviderId === provider.provider_id,
   };
 }
 
@@ -90,7 +83,6 @@ export function useModelProviderSettings(options?: { enabled?: boolean }) {
       nextEnvVars: EnvVar[],
       status?: {
         savingProviderId?: string | null;
-        discoveringProviderId?: string | null;
       },
     ) => {
       setProviderConfigs((prev) => {
@@ -293,37 +285,6 @@ export function useModelProviderSettings(options?: { enabled?: boolean }) {
     ],
   );
 
-  const discoverProviderModels = React.useCallback(
-    async (providerId: string) => {
-      const provider = providerConfigs.find(
-        (item) => item.providerId === providerId,
-      );
-      if (!provider || !provider.supportsModelDiscovery) {
-        return;
-      }
-
-      setProviderPatch(providerId, { isDiscovering: true });
-      try {
-        const discovered = await modelConfigService.discoverProviderModels(
-          providerId,
-          {
-            api_key: provider.keyInput.trim() || null,
-            base_url: provider.baseUrlInput,
-          },
-        );
-        setProviderPatch(providerId, {
-          discoveredModels: discovered.models,
-        });
-      } catch (error) {
-        console.error("[Settings] Failed to discover provider models:", error);
-        toast.error(t("settings.providerDiscoverError"));
-      } finally {
-        setProviderPatch(providerId, { isDiscovering: false });
-      }
-    },
-    [providerConfigs, setProviderPatch, t],
-  );
-
   return {
     modelConfig,
     providerConfigs,
@@ -332,7 +293,6 @@ export function useModelProviderSettings(options?: { enabled?: boolean }) {
     setProviderPatch,
     saveProvider,
     clearCustomProvider,
-    discoverProviderModels,
     refresh,
   };
 }

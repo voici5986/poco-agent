@@ -6,8 +6,6 @@ from app.core.deps import get_current_user_id, get_db
 from app.schemas.model_config import (
     ModelConfigResponse,
     ModelProviderResponse,
-    ProviderModelDiscoveryRequest,
-    ProviderModelDiscoveryResponse,
     ProviderModelSettingsUpsertRequest,
 )
 from app.schemas.response import Response, ResponseSchema
@@ -46,22 +44,3 @@ async def upsert_provider_models(
     )
     return Response.success(data=payload, message="Provider models updated")
 
-
-@router.post(
-    "/providers/{provider_id}/discover",
-    response_model=ResponseSchema[ProviderModelDiscoveryResponse],
-)
-async def discover_provider_models(
-    provider_id: str,
-    request: ProviderModelDiscoveryRequest,
-    user_id: str = Depends(get_current_user_id),
-    db: Session = Depends(get_db),
-) -> JSONResponse:
-    """Best-effort discovery of provider models using the current credentials."""
-    payload = model_config_service.discover_provider_models(
-        db,
-        user_id=user_id,
-        provider_id=provider_id,
-        request=request,
-    )
-    return Response.success(data=payload, message="Provider models discovered")

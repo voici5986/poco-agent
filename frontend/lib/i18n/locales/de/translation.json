@@ -1389,13 +1389,14 @@
       }
     },
     "providerDiscoverError": "Modelle des Anbieters konnten nicht geladen werden",
-    "providerModelsPlaceholder": "Modellnamen suchen oder eingeben",
-    "providerModelsSearchPlaceholder": "Modelle suchen oder einen eigenen Namen eingeben",
+    "providerModelsPlaceholder": "Noch keine benutzerdefinierten Modelle hinzugefuegt",
+    "providerModelsSearchPlaceholder": "Modellnamen eingeben und Enter druecken",
+    "providerModelsAdd": "Modell hinzufuegen",
     "providerModelsDiscovering": "Modelle werden geladen...",
     "providerModelsManualHint": "Dieser Anbieter unterstützt keine automatische Erkennung. Gib die Modellnamen manuell ein.",
     "providerModelsEmpty": "Keine Modelle gefunden",
     "providerModelsUseCustom": "Benutzerdefiniertes Modell verwenden: {{model}}",
-    "providerFieldAnnotation": "API Key leer lassen, um den aktuellen Schlüssel beizubehalten. Base URL leer lassen, um den Standard-Endpunkt zu verwenden. Modelle können aus der Liste gewählt oder manuell eingegeben werden."
+    "providerFieldAnnotation": "API Key leer lassen, um den aktuellen Schluessel beizubehalten. Base URL leer lassen, um den Standard-Endpunkt zu verwenden. Modellnamen manuell eingeben und mit Enter oder dem Plus hinzufuegen."
   },
   "validation": {
     "projectNameRequired": "Bitte gib einen Projektnamen ein",
