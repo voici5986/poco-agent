@@ -86,6 +86,14 @@
       "plan": "Plan Mode",
       "scheduled": "Scheduled Mode"
     },
+    "skillCreatorCard": {
+      "title": "Create a skill",
+      "description": "Use custom skills to automate repetitive workflows.",
+      "prefillPrompt": "Help me use /skill-creator to create a skill. First, ask me what the skill should do."
+    },
+    "bottomCards": {
+      "selectCard": "Select card {{index}}"
+    },
     "repo": {
       "toggle": "Repository settings",
       "dialogTitle": "Repository settings",

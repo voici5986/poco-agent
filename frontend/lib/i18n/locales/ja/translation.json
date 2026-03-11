@@ -84,6 +84,14 @@
       "plan": "計画モード",
       "scheduled": "定時モード"
     },
+    "skillCreatorCard": {
+      "title": "スキルを作成",
+      "description": "カスタムスキルを使って繰り返し作業を自動化します。",
+      "prefillPrompt": "/skill-creator を使ってスキルを作るのを手伝って。まず、そのスキルで何をしたいか聞いてください。"
+    },
+    "bottomCards": {
+      "selectCard": "カード {{index}} を選択"
+    },
     "repo": {
       "toggle": "リポジトリ設定",
       "dialogTitle": "リポジトリ設定",

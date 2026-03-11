@@ -84,6 +84,14 @@
       "plan": "Mode plan",
       "scheduled": "Mode planifié"
     },
+    "skillCreatorCard": {
+      "title": "Créer une compétence",
+      "description": "Utilisez des compétences personnalisées pour automatiser les flux de travail répétitifs.",
+      "prefillPrompt": "Aide-moi à utiliser /skill-creator pour créer une compétence. Commence par me demander ce que la compétence doit faire."
+    },
+    "bottomCards": {
+      "selectCard": "Sélectionner la carte {{index}}"
+    },
     "repo": {
       "toggle": "Paramètres du dépôt",
       "dialogTitle": "Paramètres du dépôt",

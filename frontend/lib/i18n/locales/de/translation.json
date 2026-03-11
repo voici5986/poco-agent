@@ -85,6 +85,14 @@
       "plan": "Planmodus",
       "scheduled": "Zeitplanmodus"
     },
+    "skillCreatorCard": {
+      "title": "Skill erstellen",
+      "description": "Nutze benutzerdefinierte Skills, um wiederkehrende Arbeitsabläufe zu automatisieren.",
+      "prefillPrompt": "Hilf mir dabei, mit /skill-creator einen Skill zu erstellen. Frage mich zuerst, was der Skill tun soll."
+    },
+    "bottomCards": {
+      "selectCard": "Karte {{index}} auswählen"
+    },
     "repo": {
       "toggle": "Repository-Einstellungen",
       "dialogTitle": "Repository-Einstellungen",

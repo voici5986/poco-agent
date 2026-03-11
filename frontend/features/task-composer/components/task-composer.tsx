@@ -45,6 +45,7 @@ interface TaskComposerProps {
     git_branch: string | null;
     git_token_env_key: string | null;
   }) => void | Promise<void>;
+  bottomAddon?: React.ReactNode;
   onFocus?: () => void;
   onBlur?: () => void;
 }
@@ -73,6 +74,7 @@ export function TaskComposer({
   isSubmitting,
   allowProjectize = true,
   onRepoDefaultsSave,
+  bottomAddon,
   onFocus,
   onBlur,
 }: TaskComposerProps) {
@@ -472,6 +474,10 @@ export function TaskComposer({
             />
           </div>
         </div>
+
+        {bottomAddon ? (
+          <div className="border-t border-border/60">{bottomAddon}</div>
+        ) : null}
       </div>
 
       {fileDrop.isDragActive ? (
