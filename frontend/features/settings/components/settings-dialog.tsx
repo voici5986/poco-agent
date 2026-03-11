@@ -370,7 +370,7 @@ export function SettingsDialog({
   };
 
   const renderMobileSecondary = () => (
-    <div className="min-h-0 flex-1 overflow-hidden rounded-3xl border border-border/50 bg-card/70">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-border/50 bg-card/70">
       {renderContent()}
     </div>
   );
