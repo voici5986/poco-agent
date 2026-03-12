@@ -78,15 +78,18 @@ class BackendClient:
             retry_connect_errors=2,
         )
 
-    async def forward_callback(self, callback_data: dict) -> None:
-        """Forward Executor callback to Backend."""
-        await self._request(
+    async def forward_callback(self, callback_data: dict) -> dict[str, Any]:
+        """Forward Executor callback to Backend and return the callback response."""
+        response = await self._request(
             "POST",
             "/api/v1/callback",
             json=callback_data,
             headers=self._trace_headers(),
             retry_connect_errors=3,
         )
+        data = response.json()
+        result = data.get("data", {})
+        return result if isinstance(result, dict) else {}
 
     async def claim_run(
         self,
