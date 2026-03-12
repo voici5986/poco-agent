@@ -5,6 +5,7 @@ from sqlalchemy import exists, select, update
 from sqlalchemy.orm import Session, aliased
 
 from app.models.agent_run import AgentRun
+from app.models.agent_session import AgentSession
 
 
 class RunRepository:
@@ -21,10 +22,6 @@ class RunRepository:
         scheduled_at: datetime | None = None,
         config_snapshot: dict | None = None,
     ) -> AgentRun:
-        """Creates a new run.
-
-        Note: Does not commit. Transaction handled by Service layer.
-        """
         run = AgentRun(
             session_id=session_id,
             user_message_id=user_message_id,
@@ -42,8 +39,42 @@ class RunRepository:
 
     @staticmethod
     def get_by_id(session_db: Session, run_id: uuid.UUID) -> AgentRun | None:
-        """Gets a run by ID."""
         return session_db.query(AgentRun).filter(AgentRun.id == run_id).first()
+
+    @staticmethod
+    def get_latest_by_session(
+        session_db: Session, session_id: uuid.UUID
+    ) -> AgentRun | None:
+        return (
+            session_db.query(AgentRun)
+            .filter(AgentRun.session_id == session_id)
+            .order_by(AgentRun.created_at.desc())
+            .first()
+        )
+
+    @staticmethod
+    def get_unfinished_by_session(
+        session_db: Session, session_id: uuid.UUID
+    ) -> AgentRun | None:
+        return (
+            session_db.query(AgentRun)
+            .filter(AgentRun.session_id == session_id)
+            .filter(AgentRun.status.in_(["queued", "claimed", "running"]))
+            .order_by(AgentRun.created_at.desc())
+            .first()
+        )
+
+    @staticmethod
+    def get_latest_active_by_session(
+        session_db: Session, session_id: uuid.UUID
+    ) -> AgentRun | None:
+        return (
+            session_db.query(AgentRun)
+            .filter(AgentRun.session_id == session_id)
+            .filter(AgentRun.status.in_(["queued", "claimed", "running"]))
+            .order_by(AgentRun.created_at.desc())
+            .first()
+        )
 
     @staticmethod
     def list_by_session(
@@ -52,7 +83,6 @@ class RunRepository:
         limit: int = 100,
         offset: int = 0,
     ) -> list[AgentRun]:
-        """Lists runs for a session."""
         return (
             session_db.query(AgentRun)
             .filter(AgentRun.session_id == session_id)
@@ -68,10 +98,8 @@ class RunRepository:
         session_id: uuid.UUID,
         user_message_ids: list[int],
     ) -> list[AgentRun]:
-        """Lists runs by session and a set of user_message ids."""
         if not user_message_ids:
             return []
-
         return (
             session_db.query(AgentRun)
             .filter(AgentRun.session_id == session_id)
@@ -99,11 +127,6 @@ class RunRepository:
 
     @staticmethod
     def release_expired_claims(session_db: Session) -> int:
-        """Release expired claimed runs back to queued.
-
-        Returns:
-            Number of released runs.
-        """
         now = datetime.now(timezone.utc)
         stmt = (
             update(AgentRun)
@@ -122,16 +145,10 @@ class RunRepository:
         lease_seconds: int = 30,
         schedule_modes: list[str] | None = None,
     ) -> AgentRun | None:
-        """Claims the next available run for execution.
-
-        Uses SELECT ... FOR UPDATE SKIP LOCKED to support multiple workers.
-        Ensures only one claimed/running run per session at a time.
-        """
         if lease_seconds <= 0:
             lease_seconds = 30
 
         _ = RunRepository.release_expired_claims(session_db)
-
         now = datetime.now(timezone.utc)
         lease_until = now + timedelta(seconds=lease_seconds)
 
@@ -142,11 +159,18 @@ class RunRepository:
             .where(running_or_claimed.session_id == AgentRun.session_id)
             .where(running_or_claimed.status.in_(["claimed", "running"]))
         )
+        has_live_session = exists(
+            select(1)
+            .select_from(AgentSession)
+            .where(AgentSession.id == AgentRun.session_id)
+            .where(AgentSession.is_deleted.is_(False))
+        )
 
         stmt = (
             select(AgentRun)
             .where(AgentRun.status == "queued")
             .where(AgentRun.scheduled_at <= now)
+            .where(has_live_session)
             .where(~has_active_run)
             .order_by(AgentRun.scheduled_at.asc(), AgentRun.created_at.asc())
             .with_for_update(skip_locked=True)

@@ -13,6 +13,7 @@ from app.models.agent_scheduled_task import AgentScheduledTask
 from app.repositories.message_repository import MessageRepository
 from app.repositories.project_repository import ProjectRepository
 from app.repositories.run_repository import RunRepository
+from app.repositories.session_queue_item_repository import SessionQueueItemRepository
 from app.repositories.scheduled_task_repository import ScheduledTaskRepository
 from app.repositories.session_repository import SessionRepository
 from app.schemas.scheduled_task import (
@@ -417,6 +418,8 @@ class ScheduledTaskService:
 
         # Skip if an unfinished run already exists (avoid unbounded queue growth).
         if not force:
+            if SessionQueueItemRepository.has_active_items(db, session_id):
+                return None
             existing_run = (
                 db.query(AgentRun)
                 .filter(AgentRun.session_id == session_id)
