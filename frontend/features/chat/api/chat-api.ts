@@ -229,7 +229,7 @@ export const chatService = {
       prompt: content,
       session_id: sessionId,
       schedule_mode: "immediate",
-      config: attachments?.length ? { input_files: attachments } : undefined,
+      config,
       client_request_id: clientRequestId,
     });
   },

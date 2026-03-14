@@ -667,7 +667,11 @@ export function ChatPanel({
         updateSession({ status: "pending" });
       }
 
-      const result = await sendMessage(content, attachments);
+      const result = await sendMessage(
+        content,
+        attachments,
+        selectedModelSelection,
+      );
 
       if (!result) {
         if (shouldMarkSessionPending) {
@@ -706,6 +710,7 @@ export function ChatPanel({
       refreshPendingMessages,
       refreshTasks,
       sendMessage,
+      selectedModelSelection,
       session?.next_queued_query_preview,
       session?.session_id,
       session?.status,
