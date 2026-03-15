@@ -66,7 +66,7 @@
       "planDefault": "先规划计划，再执行任务，适合复杂任务",
       "shortcutHint": "/ 使用 Slash Command，shift+enter 换行，enter 发送"
     },
-    "tools": "将你的工具连接到 Poco",
+    "tools": "为 Poco 赋予更多能力",
     "importFigma": "从 Figma 导入 (即将推出)",
     "connect": "连接",
     "configure": "配置",
@@ -1586,7 +1586,7 @@
     "apps": "应用",
     "comingSoon": "即将推出",
     "clickForDetails": "点击查看详情",
-    "connectTools": "将您的工具连接到 Poco",
+    "connectTools": "为 Poco 赋予更多能力",
     "turnOffAll": "一键关闭",
     "noMcpInstalled": "未安装 MCP",
     "noSkillsInstalled": "未安装技能"

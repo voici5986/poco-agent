@@ -66,7 +66,7 @@
       "planDefault": "Plan first, then execute. Best for complex tasks.",
       "shortcutHint": "/ for Slash Command, Shift+Enter for new line, Enter to send"
     },
-    "tools": "Connect your tools to Poco",
+    "tools": "Give Poco more capabilities",
     "importFigma": "Import from Figma (coming soon)",
     "connect": "Connect",
     "configure": "Configure",
@@ -1589,7 +1589,7 @@
     "apps": "Apps",
     "comingSoon": "Coming soon",
     "clickForDetails": "Click for details",
-    "connectTools": "Connect your tools to Poco"
+    "connectTools": "Give Poco more capabilities"
   },
   "fileChange": {
     "previewDisabled": "Executing, preview not available",

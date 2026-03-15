@@ -571,28 +571,6 @@ export function CardNav({
                 +{hiddenPreviewCount}
               </span>
             ) : null}
-
-            {!isLoading &&
-            previewItems.length === 0 &&
-            hiddenPreviewCount === 0 ? (
-              <span className="text-xs text-muted-foreground">
-                {t("cardNav.comingSoon")}
-              </span>
-            ) : null}
-
-            {showDismiss ? (
-              <button
-                type="button"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  handleDismiss();
-                }}
-                className="inline-flex size-7 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
-                aria-label={t("common.close")}
-              >
-                <X className="size-4" />
-              </button>
-            ) : null}
           </div>
         </div>
       </nav>
