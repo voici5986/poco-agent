@@ -507,6 +507,8 @@ export function CardNav({
     onDismiss?.();
   }, [onDismiss]);
 
+  const canDismiss = showDismiss && typeof onDismiss === "function";
+
   return (
     <div className={cn("w-full", className)}>
       <nav
@@ -570,6 +572,20 @@ export function CardNav({
               <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full border border-border/60 bg-muted/40 px-2 text-xs text-muted-foreground">
                 +{hiddenPreviewCount}
               </span>
+            ) : null}
+
+            {canDismiss ? (
+              <button
+                type="button"
+                aria-label={t("common.close")}
+                className="inline-flex size-7 items-center justify-center rounded-full border border-border/60 bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleDismiss();
+                }}
+              >
+                <X className="size-3.5" />
+              </button>
             ) : null}
           </div>
         </div>
