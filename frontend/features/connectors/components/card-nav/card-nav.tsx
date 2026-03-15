@@ -531,7 +531,7 @@ export function CardNav({
           }}
           className={cn(
             "group flex cursor-pointer items-center justify-between gap-3 rounded-xl transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20",
-            embedded ? "px-4 py-2.5" : "p-3.5",
+            embedded ? "min-h-12 px-4 py-2.5" : "min-h-14 p-3.5",
           )}
         >
           <div className="flex min-w-0 items-center gap-2.5">
