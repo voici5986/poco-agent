@@ -22,7 +22,7 @@ export interface CapabilityCardConfig {
   title: string;
   items: CapabilityItem[];
   emptyText: string;
-  onToggle: (installId: number, enabled: boolean) => void;
+  onToggle: (toggleId: number, enabled: boolean) => void;
   onNavigate: () => void;
   showWarning?: boolean;
   onWarningClick?: () => void;

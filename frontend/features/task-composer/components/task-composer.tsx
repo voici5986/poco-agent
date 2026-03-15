@@ -32,6 +32,28 @@ import type {
 } from "@/features/task-composer/types";
 import type { CapabilityRecommendation } from "@/features/task-composer/types/capability-recommendation";
 
+interface TrackedCapabilityItem {
+  item: CapabilityRecommendation;
+  restoreEnabled: boolean;
+}
+
+function toCapabilityToggleConfig(
+  toggles: Record<string, boolean> | Record<number, boolean> | null | undefined,
+): Record<string, boolean> {
+  const result: Record<string, boolean> = {};
+  if (!toggles) {
+    return result;
+  }
+
+  for (const [key, value] of Object.entries(toggles)) {
+    if (typeof value === "boolean") {
+      result[key] = value;
+    }
+  }
+
+  return result;
+}
+
 // ---------------------------------------------------------------------------
 // Props
 // ---------------------------------------------------------------------------
@@ -90,9 +112,7 @@ export function TaskComposer({
   const isComposing = React.useRef(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const latestValueRef = React.useRef(value);
-  const trackedCapabilityItemsRef = React.useRef<CapabilityRecommendation[]>(
-    [],
-  );
+  const trackedCapabilityItemsRef = React.useRef<TrackedCapabilityItem[]>([]);
 
   React.useEffect(() => {
     latestValueRef.current = value;
@@ -133,13 +153,19 @@ export function TaskComposer({
   // ---- Browser toggle ----
   const [browserEnabled, setBrowserEnabled] = React.useState(true);
   const [memoryEnabled, setMemoryEnabled] = React.useState(false);
-  const [mcpConfig, setMcpConfig] = React.useState<Record<string, boolean>>({});
-  const [skillConfig, setSkillConfig] = React.useState<Record<string, boolean>>(
-    {},
-  );
   const [trackedCapabilityItems, setTrackedCapabilityItems] = React.useState<
-    CapabilityRecommendation[]
+    TrackedCapabilityItem[]
   >([]);
+
+  const effectiveMcpConfig = React.useMemo(
+    () => toCapabilityToggleConfig(capabilityToggle?.mcpEnabledMap),
+    [capabilityToggle],
+  );
+
+  const effectiveSkillConfig = React.useMemo(
+    () => toCapabilityToggleConfig(capabilityToggle?.skillEnabledMap),
+    [capabilityToggle],
+  );
 
   // ---- Repo state ----
   const [repoDialogOpen, setRepoDialogOpen] = React.useState(false);
@@ -225,16 +251,14 @@ export function TaskComposer({
   React.useEffect(() => {
     if (value.trim().length > 0) return;
     const prev = trackedCapabilityItemsRef.current;
-    for (const item of prev) {
-      if (item.type === "mcp") {
-        capabilityToggle?.toggleMcp(item.id, item.default_enabled);
+    for (const entry of prev) {
+      if (entry.item.type === "mcp") {
+        capabilityToggle?.toggleMcp(entry.item.id, entry.restoreEnabled);
       } else {
-        capabilityToggle?.toggleSkill(item.id, item.default_enabled);
+        capabilityToggle?.toggleSkill(entry.item.id, entry.restoreEnabled);
       }
     }
     setTrackedCapabilityItems([]);
-    setMcpConfig({});
-    setSkillConfig({});
   }, [value, capabilityToggle]);
 
   // Default scheduled name from input
@@ -305,8 +329,12 @@ export function TaskComposer({
           : null,
       browser_enabled: browserEnabled,
       memory_enabled: memoryFeatureEnabled ? memoryEnabled : false,
-      mcp_config: mcpConfig,
-      skill_config: skillConfig,
+      mcp_config:
+        Object.keys(effectiveMcpConfig).length > 0 ? effectiveMcpConfig : null,
+      skill_config:
+        Object.keys(effectiveSkillConfig).length > 0
+          ? effectiveSkillConfig
+          : null,
       run_schedule:
         mode === "scheduled"
           ? null
@@ -332,19 +360,17 @@ export function TaskComposer({
 
     onSend(payload);
     upload.clearAttachments();
-    setMcpConfig({});
-    setSkillConfig({});
-    setTrackedCapabilityItems([]);
     setRunScheduleMode("immediate");
     setRunScheduledAt(null);
   }, [
     allowProjectize,
     browserEnabled,
+    effectiveMcpConfig,
+    effectiveSkillConfig,
     canSubmit,
     gitBranch,
     gitTokenEnvKey,
     isSubmitting,
-    mcpConfig,
     memoryEnabled,
     memoryFeatureEnabled,
     mode,
@@ -360,7 +386,6 @@ export function TaskComposer({
     scheduledName,
     scheduledReuseSession,
     scheduledTimezone,
-    skillConfig,
     upload,
     value,
     voiceInput.isBusy,
@@ -369,30 +394,30 @@ export function TaskComposer({
   const isCapabilityEnabled = React.useCallback(
     (item: CapabilityRecommendation) => {
       const key = String(item.id);
-      const override = item.type === "mcp" ? mcpConfig[key] : skillConfig[key];
+      const override =
+        item.type === "mcp"
+          ? effectiveMcpConfig[key]
+          : effectiveSkillConfig[key];
       return typeof override === "boolean" ? override : item.default_enabled;
     },
-    [mcpConfig, skillConfig],
+    [effectiveMcpConfig, effectiveSkillConfig],
   );
 
   const handleToggleCapability = React.useCallback(
     (item: CapabilityRecommendation, enabled: boolean) => {
       const key = String(item.id);
-
-      const updateToggleMap = (prev: Record<string, boolean>) => {
-        if (enabled === item.default_enabled) {
-          const next = { ...prev };
-          delete next[key];
-          return next;
-        }
-        return { ...prev, [key]: enabled };
-      };
+      const currentEnabled =
+        item.type === "mcp"
+          ? effectiveMcpConfig[key]
+          : effectiveSkillConfig[key];
+      const restoreEnabled =
+        typeof currentEnabled === "boolean"
+          ? currentEnabled
+          : item.default_enabled;
 
       if (item.type === "mcp") {
-        setMcpConfig(updateToggleMap);
         capabilityToggle?.toggleMcp(item.id, enabled);
       } else {
-        setSkillConfig(updateToggleMap);
         capabilityToggle?.toggleSkill(item.id, enabled);
       }
 
@@ -402,26 +427,27 @@ export function TaskComposer({
 
       setTrackedCapabilityItems((prev) => {
         const existingIndex = prev.findIndex(
-          (entry) => entry.type === item.type && entry.id === item.id,
+          (entry) => entry.item.type === item.type && entry.item.id === item.id,
         );
 
-        if (enabled === item.default_enabled) {
-          if (existingIndex === -1) {
-            return prev;
-          }
-          return prev.filter((_, index) => index !== existingIndex);
-        }
-
         if (existingIndex !== -1) {
+          const existing = prev[existingIndex];
+          if (enabled === existing.restoreEnabled) {
+            return prev.filter((_, index) => index !== existingIndex);
+          }
           return prev.map((entry, index) =>
-            index === existingIndex ? item : entry,
+            index === existingIndex ? { ...entry, item } : entry,
           );
         }
 
-        return [...prev, item];
+        if (enabled === restoreEnabled) {
+          return prev;
+        }
+
+        return [...prev, { item, restoreEnabled }];
       });
     },
-    [capabilityToggle],
+    [capabilityToggle, effectiveMcpConfig, effectiveSkillConfig],
   );
 
   // ---- Render ----
@@ -600,7 +626,7 @@ export function TaskComposer({
         <div className="mt-3">
           <CapabilityRecommendations
             recommendations={capabilityRecommendations.items}
-            trackedItems={trackedCapabilityItems}
+            trackedItems={trackedCapabilityItems.map((entry) => entry.item)}
             isLoading={capabilityRecommendations.isLoading}
             showEmptyState={showRecommendationEmptyState}
             isEnabled={isCapabilityEnabled}

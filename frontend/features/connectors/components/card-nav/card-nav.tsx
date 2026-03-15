@@ -6,11 +6,8 @@ import { Plug, Server, Sparkles, X } from "lucide-react";
 import { mcpService } from "@/features/capabilities/mcp/api/mcp-api";
 import { skillsService } from "@/features/capabilities/skills/api/skills-api";
 import { pluginsService } from "@/features/capabilities/plugins/api/plugins-api";
-import type {
-  McpServer,
-  UserMcpInstall,
-} from "@/features/capabilities/mcp/types";
-import { Skill, UserSkillInstall } from "@/features/capabilities/skills/types";
+import type { McpServer } from "@/features/capabilities/mcp/types";
+import type { Skill } from "@/features/capabilities/skills/types";
 import type {
   Plugin,
   UserPluginInstall,
@@ -47,7 +44,7 @@ interface InstalledItem {
   id: number;
   name: string;
   enabled: boolean;
-  installId: number;
+  toggleId: number;
 }
 
 interface PreviewItem {
@@ -79,16 +76,12 @@ export function CardNav({
   const didInitialRefreshRef = useRef(false);
 
   const preloadMcpServers = getStartupPreloadValue("mcpServers");
-  const preloadMcpInstalls = getStartupPreloadValue("mcpInstalls");
   const preloadSkills = getStartupPreloadValue("skills");
-  const preloadSkillInstalls = getStartupPreloadValue("skillInstalls");
   const preloadPlugins = getStartupPreloadValue("plugins");
   const preloadPluginInstalls = getStartupPreloadValue("pluginInstalls");
   const hasPreloadedCardData =
     hasStartupPreloadValue("mcpServers") &&
-    hasStartupPreloadValue("mcpInstalls") &&
     hasStartupPreloadValue("skills") &&
-    hasStartupPreloadValue("skillInstalls") &&
     hasStartupPreloadValue("plugins") &&
     hasStartupPreloadValue("pluginInstalls");
 
@@ -96,14 +89,8 @@ export function CardNav({
   const [mcpServers, setMcpServers] = useState<McpServer[]>(
     hasPreloadedCardData ? (preloadMcpServers ?? []) : [],
   );
-  const [mcpInstalls, setMcpInstalls] = useState<UserMcpInstall[]>(
-    hasPreloadedCardData ? (preloadMcpInstalls ?? []) : [],
-  );
   const [skills, setSkills] = useState<Skill[]>(
     hasPreloadedCardData ? (preloadSkills ?? []) : [],
-  );
-  const [skillInstalls, setSkillInstalls] = useState<UserSkillInstall[]>(
-    hasPreloadedCardData ? (preloadSkillInstalls ?? []) : [],
   );
   const [plugins, setPlugins] = useState<Plugin[]>(
     hasPreloadedCardData ? (preloadPlugins ?? []) : [],
@@ -122,25 +109,15 @@ export function CardNav({
 
       setIsLoading(true);
       try {
-        const [
-          mcpServersData,
-          mcpInstallsData,
-          skillsData,
-          skillInstallsData,
-          pluginsData,
-          pluginInstallsData,
-        ] = await Promise.all([
-          mcpService.listServers(),
-          mcpService.listInstalls(),
-          skillsService.listSkills(),
-          skillsService.listInstalls(),
-          pluginsService.listPlugins(),
-          pluginsService.listInstalls(),
-        ]);
+        const [mcpServersData, skillsData, pluginsData, pluginInstallsData] =
+          await Promise.all([
+            mcpService.listServers(),
+            skillsService.listSkills(),
+            pluginsService.listPlugins(),
+            pluginsService.listInstalls(),
+          ]);
         setMcpServers(mcpServersData);
-        setMcpInstalls(mcpInstallsData);
         setSkills(skillsData);
-        setSkillInstalls(skillInstallsData);
         setPlugins(pluginsData);
         setPluginInstalls(pluginInstallsData);
         setHasFetched(true);
@@ -161,41 +138,75 @@ export function CardNav({
     void fetchData(true);
   }, [fetchData]);
 
-  // Get all installed MCPs (merge with context overrides)
+  // Get all installed MCPs from context state
   const installedMcps: InstalledItem[] = useMemo(() => {
-    return mcpInstalls.map((install) => {
-      const server = mcpServers.find((s) => s.id === install.server_id);
-      const contextEnabled = capabilityToggle?.getMcpEnabled(
-        install.server_id,
-        install.enabled,
-      );
-      return {
-        id: install.server_id,
-        name:
-          server?.name || t("cardNav.fallbackMcp", { id: install.server_id }),
-        enabled: contextEnabled ?? install.enabled,
-        installId: install.id,
-      };
-    });
-  }, [mcpInstalls, mcpServers, capabilityToggle, t]);
+    const enabledMap = capabilityToggle?.mcpEnabledMap ?? {};
+    const items: InstalledItem[] = [];
+    const seen = new Set<number>();
 
-  // Get all installed Skills (merge with context overrides)
+    for (const server of mcpServers) {
+      if (!Object.prototype.hasOwnProperty.call(enabledMap, server.id)) {
+        continue;
+      }
+      items.push({
+        id: server.id,
+        name: server.name || t("cardNav.fallbackMcp", { id: server.id }),
+        enabled: Boolean(enabledMap[server.id]),
+        toggleId: server.id,
+      });
+      seen.add(server.id);
+    }
+
+    for (const rawId of Object.keys(enabledMap)) {
+      const id = Number(rawId);
+      if (!Number.isInteger(id) || seen.has(id)) {
+        continue;
+      }
+      items.push({
+        id,
+        name: t("cardNav.fallbackMcp", { id }),
+        enabled: Boolean(enabledMap[id]),
+        toggleId: id,
+      });
+    }
+
+    return items;
+  }, [capabilityToggle?.mcpEnabledMap, mcpServers, t]);
+
+  // Get all installed Skills from context state
   const installedSkills: InstalledItem[] = useMemo(() => {
-    return skillInstalls.map((install) => {
-      const skill = skills.find((s) => s.id === install.skill_id);
-      const contextEnabled = capabilityToggle?.getSkillEnabled(
-        install.skill_id,
-        install.enabled,
-      );
-      return {
-        id: install.skill_id,
-        name:
-          skill?.name || t("cardNav.fallbackSkill", { id: install.skill_id }),
-        enabled: contextEnabled ?? install.enabled,
-        installId: install.id,
-      };
-    });
-  }, [skillInstalls, skills, capabilityToggle, t]);
+    const enabledMap = capabilityToggle?.skillEnabledMap ?? {};
+    const items: InstalledItem[] = [];
+    const seen = new Set<number>();
+
+    for (const skill of skills) {
+      if (!Object.prototype.hasOwnProperty.call(enabledMap, skill.id)) {
+        continue;
+      }
+      items.push({
+        id: skill.id,
+        name: skill.name || t("cardNav.fallbackSkill", { id: skill.id }),
+        enabled: Boolean(enabledMap[skill.id]),
+        toggleId: skill.id,
+      });
+      seen.add(skill.id);
+    }
+
+    for (const rawId of Object.keys(enabledMap)) {
+      const id = Number(rawId);
+      if (!Number.isInteger(id) || seen.has(id)) {
+        continue;
+      }
+      items.push({
+        id,
+        name: t("cardNav.fallbackSkill", { id }),
+        enabled: Boolean(enabledMap[id]),
+        toggleId: id,
+      });
+    }
+
+    return items;
+  }, [capabilityToggle?.skillEnabledMap, skills, t]);
 
   // Get all installed Plugins
   const installedPlugins: InstalledItem[] = pluginInstalls.map((install) => {
@@ -205,18 +216,14 @@ export function CardNav({
       name:
         plugin?.name || t("cardNav.fallbackPreset", { id: install.plugin_id }),
       enabled: install.enabled,
-      installId: install.id,
+      toggleId: install.id,
     };
   });
 
-  // Toggle MCP enabled state (local only, no API call)
+  // Toggle MCP enabled state (session-scoped only, no API call)
   const toggleMcpEnabled = useCallback(
-    (installId: number, currentEnabled: boolean) => {
-      const targetInstall = mcpInstalls.find(
-        (install) => install.id === installId,
-      );
-      if (!targetInstall) return;
-
+    (serverId: number, currentEnabled: boolean) => {
+      if (!capabilityToggle) return;
       const newEnabled = !currentEnabled;
 
       // Check if enabling would exceed the limit
@@ -226,16 +233,7 @@ export function CardNav({
         return;
       }
 
-      setMcpInstalls((prev) =>
-        prev.map((install) =>
-          install.id === installId
-            ? { ...install, enabled: newEnabled }
-            : install,
-        ),
-      );
-
-      // Sync with context
-      capabilityToggle?.toggleMcp(targetInstall.server_id, newEnabled);
+      capabilityToggle.toggleMcp(serverId, newEnabled);
 
       if (newEnabled) {
         playInstallSound();
@@ -251,17 +249,13 @@ export function CardNav({
         );
       }
     },
-    [mcpInstalls, installedMcps, capabilityToggle, t],
+    [capabilityToggle, installedMcps, t],
   );
 
-  // Toggle Skill enabled state (local only, no API call)
+  // Toggle Skill enabled state (session-scoped only, no API call)
   const toggleSkillEnabled = useCallback(
-    (installId: number, currentEnabled: boolean) => {
-      const targetInstall = skillInstalls.find(
-        (install) => install.id === installId,
-      );
-      if (!targetInstall) return;
-
+    (skillId: number, currentEnabled: boolean) => {
+      if (!capabilityToggle) return;
       const newEnabled = !currentEnabled;
 
       // Check if enabling would exceed the limit
@@ -273,16 +267,7 @@ export function CardNav({
         return;
       }
 
-      setSkillInstalls((prev) =>
-        prev.map((install) =>
-          install.id === installId
-            ? { ...install, enabled: newEnabled }
-            : install,
-        ),
-      );
-
-      // Sync with context
-      capabilityToggle?.toggleSkill(targetInstall.skill_id, newEnabled);
+      capabilityToggle.toggleSkill(skillId, newEnabled);
 
       if (newEnabled) {
         playInstallSound();
@@ -298,7 +283,7 @@ export function CardNav({
         );
       }
     },
-    [skillInstalls, installedSkills, capabilityToggle, t],
+    [capabilityToggle, installedSkills, t],
   );
 
   // Toggle Plugin enabled state (local only, no API call)
@@ -387,6 +372,11 @@ export function CardNav({
     },
     [navigateToCapabilityView],
   );
+
+  const capabilityStateHasFetched = capabilityToggle?.hasFetched ?? true;
+  const capabilityStateIsLoading = capabilityToggle?.isLoading ?? false;
+  const combinedIsLoading = isLoading || capabilityStateIsLoading;
+  const combinedHasFetched = hasFetched && capabilityStateHasFetched;
 
   const countEnabled = useCallback((items: InstalledItem[]) => {
     return items.reduce((count, item) => (item.enabled ? count + 1 : count), 0);
@@ -570,8 +560,8 @@ export function CardNav({
         onOpenChange={handleOpenDialog}
         title={displayText}
         cards={dialogCards}
-        isLoading={isLoading}
-        hasFetched={hasFetched}
+        isLoading={combinedIsLoading}
+        hasFetched={combinedHasFetched}
       />
     </div>
   );

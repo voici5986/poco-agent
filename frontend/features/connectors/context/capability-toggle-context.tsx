@@ -11,6 +11,30 @@ import {
 } from "react";
 import { mcpService } from "@/features/capabilities/mcp/api/mcp-api";
 import { skillsService } from "@/features/capabilities/skills/api/skills-api";
+import {
+  getStartupPreloadValue,
+  hasStartupPreloadValue,
+} from "@/lib/startup-preload";
+
+function toMcpEnabledMap(
+  installs: Array<{ server_id: number; enabled: boolean }> | null,
+): Record<number, boolean> {
+  const result: Record<number, boolean> = {};
+  for (const install of installs ?? []) {
+    result[install.server_id] = install.enabled;
+  }
+  return result;
+}
+
+function toSkillEnabledMap(
+  installs: Array<{ skill_id: number; enabled: boolean }> | null,
+): Record<number, boolean> {
+  const result: Record<number, boolean> = {};
+  for (const install of installs ?? []) {
+    result[install.skill_id] = install.enabled;
+  }
+  return result;
+}
 
 interface CapabilityToggleContextValue {
   mcpEnabledMap: Record<number, boolean>;
@@ -20,9 +44,6 @@ interface CapabilityToggleContextValue {
 
   toggleMcp: (serverId: number, enabled: boolean) => void;
   toggleSkill: (skillId: number, enabled: boolean) => void;
-  refreshFromApi: () => Promise<void>;
-  getMcpEnabled: (serverId: number, defaultEnabled: boolean) => boolean;
-  getSkillEnabled: (skillId: number, defaultEnabled: boolean) => boolean;
 }
 
 const CapabilityToggleContext =
@@ -43,14 +64,23 @@ interface CapabilityToggleProviderProps {
 export function CapabilityToggleProvider({
   children,
 }: CapabilityToggleProviderProps) {
+  const preloadedMcpInstalls = hasStartupPreloadValue("mcpInstalls")
+    ? getStartupPreloadValue("mcpInstalls")
+    : null;
+  const preloadedSkillInstalls = hasStartupPreloadValue("skillInstalls")
+    ? getStartupPreloadValue("skillInstalls")
+    : null;
+  const hasPreloadedState = Boolean(
+    preloadedMcpInstalls && preloadedSkillInstalls,
+  );
   const [mcpEnabledMap, setMcpEnabledMap] = useState<Record<number, boolean>>(
-    {},
+    () => toMcpEnabledMap(preloadedMcpInstalls),
   );
   const [skillEnabledMap, setSkillEnabledMap] = useState<
     Record<number, boolean>
-  >({});
+  >(() => toSkillEnabledMap(preloadedSkillInstalls));
   const [isLoading, setIsLoading] = useState(false);
-  const [hasFetched, setHasFetched] = useState(false);
+  const [hasFetched, setHasFetched] = useState(hasPreloadedState);
   const didInitialFetchRef = useRef(false);
 
   const refreshFromApi = useCallback(async () => {
@@ -62,18 +92,8 @@ export function CapabilityToggleProvider({
         skillsService.listInstalls(),
       ]);
 
-      const newMcpMap: Record<number, boolean> = {};
-      for (const install of mcpInstalls) {
-        newMcpMap[install.server_id] = install.enabled;
-      }
-
-      const newSkillMap: Record<number, boolean> = {};
-      for (const install of skillInstalls) {
-        newSkillMap[install.skill_id] = install.enabled;
-      }
-
-      setMcpEnabledMap(newMcpMap);
-      setSkillEnabledMap(newSkillMap);
+      setMcpEnabledMap(toMcpEnabledMap(mcpInstalls));
+      setSkillEnabledMap(toSkillEnabledMap(skillInstalls));
       setHasFetched(true);
     } catch (error) {
       console.error("[CapabilityToggleContext] Failed to fetch data:", error);
@@ -102,22 +122,6 @@ export function CapabilityToggleProvider({
     }));
   }, []);
 
-  const getMcpEnabled = useCallback(
-    (serverId: number, defaultEnabled: boolean) => {
-      const override = mcpEnabledMap[serverId];
-      return typeof override === "boolean" ? override : defaultEnabled;
-    },
-    [mcpEnabledMap],
-  );
-
-  const getSkillEnabled = useCallback(
-    (skillId: number, defaultEnabled: boolean) => {
-      const override = skillEnabledMap[skillId];
-      return typeof override === "boolean" ? override : defaultEnabled;
-    },
-    [skillEnabledMap],
-  );
-
   const value: CapabilityToggleContextValue = {
     mcpEnabledMap,
     skillEnabledMap,
@@ -125,9 +129,6 @@ export function CapabilityToggleProvider({
     hasFetched,
     toggleMcp,
     toggleSkill,
-    refreshFromApi,
-    getMcpEnabled,
-    getSkillEnabled,
   };
 
   return (

@@ -9,7 +9,7 @@ export interface CapabilityItem {
   id: number;
   name: string;
   enabled: boolean;
-  installId: number;
+  toggleId: number;
 }
 
 const scrollbarStyles =
@@ -20,7 +20,7 @@ interface CapabilityItemListProps {
   emptyText: string;
   isLoading: boolean;
   hasFetched: boolean;
-  onToggle: (installId: number, currentEnabled: boolean) => void;
+  onToggle: (toggleId: number, currentEnabled: boolean) => void;
 }
 
 export function CapabilityItemList({
@@ -87,16 +87,16 @@ export function CapabilityItemList({
 
 interface CapabilityItemRowProps {
   item: CapabilityItem;
-  onToggle: (installId: number, currentEnabled: boolean) => void;
+  onToggle: (toggleId: number, currentEnabled: boolean) => void;
 }
 
 function CapabilityItemRow({ item, onToggle }: CapabilityItemRowProps) {
   const handleClick = React.useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
-      onToggle(item.installId, item.enabled);
+      onToggle(item.toggleId, item.enabled);
     },
-    [item.installId, item.enabled, onToggle],
+    [item.toggleId, item.enabled, onToggle],
   );
 
   return (

@@ -23,7 +23,7 @@ interface CapabilityCardProps {
   emptyText: string;
   isLoading: boolean;
   hasFetched: boolean;
-  onToggle: (installId: number, currentEnabled: boolean) => void;
+  onToggle: (toggleId: number, currentEnabled: boolean) => void;
   onNavigate: () => void;
   showWarning?: boolean;
   onWarningClick?: () => void;
