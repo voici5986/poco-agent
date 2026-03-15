@@ -22,6 +22,7 @@ import { useMemoryFeatureEnabled } from "@/hooks/use-memory-feature-enabled";
 import { useFileDropUpload } from "@/features/task-composer/hooks/use-file-drop-upload";
 import { useFileUpload } from "@/features/task-composer/hooks/use-file-upload";
 import { appendTranscribedText, useVoiceInput } from "@/features/voice";
+import { playInstallSound } from "@/lib/utils/sound";
 import type { RunScheduleMode } from "@/features/task-composer/model/run-schedule";
 import type {
   ComposerMode,
@@ -131,7 +132,7 @@ export function TaskComposer({
   const [skillConfig, setSkillConfig] = React.useState<Record<string, boolean>>(
     {},
   );
-  const [selectedCapabilityItems, setSelectedCapabilityItems] = React.useState<
+  const [trackedCapabilityItems, setTrackedCapabilityItems] = React.useState<
     CapabilityRecommendation[]
   >([]);
 
@@ -298,7 +299,7 @@ export function TaskComposer({
     upload.clearAttachments();
     setMcpConfig({});
     setSkillConfig({});
-    setSelectedCapabilityItems([]);
+    setTrackedCapabilityItems([]);
     setRunScheduleMode("immediate");
     setRunScheduledAt(null);
   }, [
@@ -330,38 +331,58 @@ export function TaskComposer({
     voiceInput.isBusy,
   ]);
 
-  const handleApplyCapability = React.useCallback(
+  const isCapabilityEnabled = React.useCallback(
     (item: CapabilityRecommendation) => {
       const key = String(item.id);
-      if (item.type === "mcp") {
-        setMcpConfig((prev) => ({ ...prev, [key]: true }));
-      } else {
-        setSkillConfig((prev) => ({ ...prev, [key]: true }));
-      }
-      setSelectedCapabilityItems((prev) => {
-        const exists = prev.some(
-          (entry) => entry.type === item.type && entry.id === item.id,
-        );
-        if (exists) return prev;
-        return [...prev, item];
-      });
+      const override = item.type === "mcp" ? mcpConfig[key] : skillConfig[key];
+      return typeof override === "boolean" ? override : item.default_enabled;
     },
-    [],
+    [mcpConfig, skillConfig],
   );
 
-  const handleRemoveCapability = React.useCallback(
-    (item: CapabilityRecommendation) => {
+  const handleToggleCapability = React.useCallback(
+    (item: CapabilityRecommendation, enabled: boolean) => {
       const key = String(item.id);
+
+      const updateToggleMap = (prev: Record<string, boolean>) => {
+        if (enabled === item.default_enabled) {
+          const next = { ...prev };
+          delete next[key];
+          return next;
+        }
+        return { ...prev, [key]: enabled };
+      };
+
       if (item.type === "mcp") {
-        setMcpConfig((prev) => ({ ...prev, [key]: false }));
+        setMcpConfig(updateToggleMap);
       } else {
-        setSkillConfig((prev) => ({ ...prev, [key]: false }));
+        setSkillConfig(updateToggleMap);
       }
-      setSelectedCapabilityItems((prev) =>
-        prev.filter(
-          (entry) => !(entry.type === item.type && entry.id === item.id),
-        ),
-      );
+
+      if (enabled) {
+        playInstallSound();
+      }
+
+      setTrackedCapabilityItems((prev) => {
+        const existingIndex = prev.findIndex(
+          (entry) => entry.type === item.type && entry.id === item.id,
+        );
+
+        if (enabled === item.default_enabled) {
+          if (existingIndex === -1) {
+            return prev;
+          }
+          return prev.filter((_, index) => index !== existingIndex);
+        }
+
+        if (existingIndex !== -1) {
+          return prev.map((entry, index) =>
+            index === existingIndex ? item : entry,
+          );
+        }
+
+        return [...prev, item];
+      });
     },
     [],
   );
@@ -502,14 +523,14 @@ export function TaskComposer({
 
         <CapabilityRecommendations
           recommendations={capabilityRecommendations.items}
-          selectedItems={selectedCapabilityItems}
+          trackedItems={trackedCapabilityItems}
           isLoading={capabilityRecommendations.isLoading}
           showEmptyState={
             capabilityRecommendations.hasFetched &&
             value.trim().length >= capabilityRecommendations.minQueryLength
           }
-          onApply={handleApplyCapability}
-          onRemove={handleRemoveCapability}
+          isEnabled={isCapabilityEnabled}
+          onToggle={handleToggleCapability}
         />
 
         {/* Bottom toolbar */}
