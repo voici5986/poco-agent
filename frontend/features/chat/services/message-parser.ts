@@ -34,6 +34,7 @@ interface MessageContentShape {
   subtype?: string;
   content?: MessageContentBlock[];
   text?: string;
+  result?: string;
   parent_tool_use_id?: string | null;
 }
 
@@ -287,6 +288,11 @@ export function parseMessages(
     let textContent = "";
     if (isNonEmptyString(contentObj.text)) {
       textContent = cleanText(contentObj.text);
+    } else if (
+      typeIncludes(contentObj._type, "ResultMessage") &&
+      isNonEmptyString(contentObj.result)
+    ) {
+      textContent = cleanText(contentObj.result);
     } else if (Array.isArray(contentObj.content)) {
       const textBlocks = contentObj.content
         .filter((b) => typeIncludes(b?._type, "TextBlock"))
