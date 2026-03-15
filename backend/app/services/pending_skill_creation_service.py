@@ -342,7 +342,9 @@ class PendingSkillCreationService:
     ) -> list["_DetectedWorkspaceSkill"]:
         files = extract_manifest_files(manifest)
         candidates: list[_DetectedWorkspaceSkill] = []
-        seen_paths: set[str] = set()
+        # Deduplicate by skill name because workspace exports may include both
+        # .config/skills/<name>/ (symlink) and .config_data/skills/<name>/ (real path).
+        seen_names: set[str] = set()
 
         for item in files:
             normalized_path = normalize_manifest_path(item.get("path"))
@@ -350,14 +352,16 @@ class PendingSkillCreationService:
                 continue
             parent = PurePosixPath(normalized_path).parent
             parent_str = parent.as_posix()
-            if not parent_str.startswith("/.config/skills/"):
-                continue
-            if parent_str in seen_paths:
-                continue
+
             parts = [part for part in parent.parts if part]
-            if len(parts) != 3 or parts[:2] != [".config", "skills"]:
+            if len(parts) != 3 or parts[1] != "skills":
                 continue
-            detected_name = parts[-1]
+            if parts[0] not in {".config", ".config_data"}:
+                continue
+
+            detected_name = parts[2]
+            if detected_name in seen_names:
+                continue
             if not self._looks_like_valid_skill_name(detected_name):
                 continue
 
@@ -377,7 +381,7 @@ class PendingSkillCreationService:
                     skill_relative_path=parent_str,
                 )
             )
-            seen_paths.add(parent_str)
+            seen_names.add(detected_name)
 
         return candidates
 

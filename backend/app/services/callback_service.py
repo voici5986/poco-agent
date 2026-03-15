@@ -465,6 +465,20 @@ class CallbackService:
                 db,
                 session=db_session,
             )
+        elif (
+            should_apply_workspace_export
+            and not preserve_existing_ready_workspace
+            and callback.workspace_export_status is not None
+            and callback.workspace_export_status.strip().lower() == "ready"
+            and (db_session.status or "").strip().lower() in {"completed", "failed"}
+        ):
+            # Workspace export may arrive in a separate callback after the initial
+            # COMPLETED callback.  Trigger detection when the export becomes ready for
+            # a session that is already terminal.
+            pending_skill_creation_service.detect_and_create_pending(
+                db,
+                session=db_session,
+            )
 
         db.commit()
         return CallbackResponse(
