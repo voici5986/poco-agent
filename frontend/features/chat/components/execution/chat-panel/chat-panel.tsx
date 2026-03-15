@@ -53,6 +53,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useLanguage } from "@/hooks/use-language";
 import { ModelSelector } from "@/features/chat/components/chat/model-selector";
 import { useModelCatalog } from "@/features/chat/hooks/use-model-catalog";
@@ -1177,18 +1183,35 @@ export function ChatPanel({
         </div>
       ) : null}
 
-      {pendingSkillCreation ? (
-        <div className={cn("pb-3", contentPaddingClass)}>
-          <SkillCreationReviewCard
-            creation={pendingSkillCreation}
-            isSubmitting={isSubmittingPendingSkillCreation}
-            onConfirm={(payload) =>
-              confirmPendingSkillCreation(pendingSkillCreation.id, payload)
-            }
-            onCancel={() => cancelPendingSkillCreation(pendingSkillCreation.id)}
-          />
-        </div>
-      ) : null}
+      <Dialog
+        open={Boolean(pendingSkillCreation)}
+        onOpenChange={() => undefined}
+      >
+        <DialogContent
+          className="max-h-[90vh] w-[min(1200px,calc(100vw-2rem))] max-w-[min(1200px,calc(100vw-2rem))] overflow-hidden p-0"
+          showCloseButton={false}
+        >
+          <DialogTitle className="sr-only">
+            {t("chat.skillCreationReview.title")}
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            {t("chat.skillCreationReview.subtitle")}
+          </DialogDescription>
+          {pendingSkillCreation ? (
+            <SkillCreationReviewCard
+              creation={pendingSkillCreation}
+              isSubmitting={isSubmittingPendingSkillCreation}
+              className="border-0 bg-transparent p-6 shadow-none"
+              onConfirm={(payload) =>
+                confirmPendingSkillCreation(pendingSkillCreation.id, payload)
+              }
+              onCancel={() =>
+                cancelPendingSkillCreation(pendingSkillCreation.id)
+              }
+            />
+          ) : null}
+        </DialogContent>
+      </Dialog>
 
       {/* Status Bar - Skills and MCP */}
       {(hasConfigSnapshot || hasSkills || hasMcp || hasBrowser) && (

@@ -74,6 +74,7 @@ function flattenFiles(nodes: FileNode[]): FileNode[] {
 interface SkillCreationReviewCardProps {
   creation: PendingSkillCreation;
   isSubmitting?: boolean;
+  className?: string;
   onConfirm: (payload: {
     resolved_name?: string | null;
     overwrite?: boolean;
@@ -84,6 +85,7 @@ interface SkillCreationReviewCardProps {
 export function SkillCreationReviewCard({
   creation,
   isSubmitting = false,
+  className,
   onConfirm,
   onCancel,
 }: SkillCreationReviewCardProps) {
@@ -193,7 +195,12 @@ export function SkillCreationReviewCard({
   };
 
   return (
-    <div className="rounded-lg border border-border bg-card/70 p-4 shadow-sm">
+    <div
+      className={cn(
+        "rounded-lg border border-border bg-card/70 p-4 shadow-sm",
+        className,
+      )}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-1">
           <div className="flex items-center gap-2">
