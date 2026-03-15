@@ -66,7 +66,8 @@ class BackendEventService:
 
         if event.type == "run.terminal":
             run = event.run
-            status = (run.status if run is not None else event.session.status).strip()
+            raw_status = run.status if run is not None else event.session.status
+            status = (raw_status or "").strip()
             if status not in {"completed", "failed", "canceled"}:
                 return 0
             run_ref = (

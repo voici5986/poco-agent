@@ -1,5 +1,6 @@
 import asyncio
 import importlib
+import inspect
 import logging
 import threading
 from concurrent.futures import Future
@@ -18,6 +19,18 @@ try:
 except ImportError:
     lark = None
     lark_ws = None
+
+
+def _get_lark_sdk() -> Any:
+    if lark is None:
+        raise RuntimeError("lark_oapi is not installed")
+    return lark
+
+
+def _get_lark_ws_sdk() -> Any:
+    if lark_ws is None:
+        raise RuntimeError("lark_oapi.ws is not installed")
+    return lark_ws
 
 
 class FeishuStreamService:
@@ -59,6 +72,9 @@ class FeishuStreamService:
         if not self.enabled:
             return
 
+        lark_sdk = _get_lark_sdk()
+        lark_ws_sdk = _get_lark_ws_sdk()
+
         self._loop = asyncio.get_running_loop()
         finished = asyncio.Event()
         self._stopping.clear()
@@ -71,14 +87,14 @@ class FeishuStreamService:
                 self._thread_loop = thread_loop
 
                 client_module = importlib.import_module("lark_oapi.ws.client")
-                client_module.loop = thread_loop
+                setattr(client_module, "loop", thread_loop)
 
                 event_handler = (
-                    lark.EventDispatcherHandler.builder("", "")
+                    lark_sdk.EventDispatcherHandler.builder("", "")
                     .register_p2_im_message_receive_v1(self._handle_message_event)
                     .build()
                 )
-                self._client = lark_ws.Client(
+                self._client = lark_ws_sdk.Client(
                     self._app_id,
                     self._app_secret,
                     event_handler=event_handler,
@@ -153,7 +169,9 @@ class FeishuStreamService:
                 if client is not None:
                     disconnect = getattr(client, "_disconnect", None)
                     if callable(disconnect):
-                        await disconnect()
+                        result = disconnect()
+                        if inspect.isawaitable(result):
+                            await result
             except Exception:
                 logger.exception("feishu_stream_stop_failed")
             finally:
