@@ -90,6 +90,9 @@ export function TaskComposer({
   const isComposing = React.useRef(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const latestValueRef = React.useRef(value);
+  const trackedCapabilityItemsRef = React.useRef<CapabilityRecommendation[]>(
+    [],
+  );
 
   React.useEffect(() => {
     latestValueRef.current = value;
@@ -172,11 +175,13 @@ export function TaskComposer({
   const showRecommendationEmptyState =
     capabilityRecommendations.hasFetched &&
     value.trim().length >= capabilityRecommendations.minQueryLength;
+  const hasInput = value.trim().length > 0;
   const showRecommendationsInFooter =
-    capabilityRecommendations.isLoading ||
-    capabilityRecommendations.items.length > 0 ||
-    trackedCapabilityItems.length > 0 ||
-    showRecommendationEmptyState;
+    hasInput &&
+    (capabilityRecommendations.isLoading ||
+      capabilityRecommendations.items.length > 0 ||
+      trackedCapabilityItems.length > 0 ||
+      showRecommendationEmptyState);
 
   // ---- Derived values ----
   const firstLine =
@@ -211,6 +216,26 @@ export function TaskComposer({
     if (memoryFeatureEnabled) return;
     setMemoryEnabled(false);
   }, [memoryFeatureEnabled]);
+
+  React.useEffect(() => {
+    trackedCapabilityItemsRef.current = trackedCapabilityItems;
+  }, [trackedCapabilityItems]);
+
+  // Reset capability recommendation state when input is cleared
+  React.useEffect(() => {
+    if (value.trim().length > 0) return;
+    const prev = trackedCapabilityItemsRef.current;
+    for (const item of prev) {
+      if (item.type === "mcp") {
+        capabilityToggle?.toggleMcp(item.id, item.default_enabled);
+      } else {
+        capabilityToggle?.toggleSkill(item.id, item.default_enabled);
+      }
+    }
+    setTrackedCapabilityItems([]);
+    setMcpConfig({});
+    setSkillConfig({});
+  }, [value, capabilityToggle]);
 
   // Default scheduled name from input
   React.useEffect(() => {
