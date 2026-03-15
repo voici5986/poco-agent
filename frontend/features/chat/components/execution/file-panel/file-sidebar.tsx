@@ -12,6 +12,7 @@ import {
   ChevronDown,
   Download,
   PackagePlus,
+  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { FileNode } from "@/features/chat/types";
@@ -21,11 +22,11 @@ import { PanelHeaderAction } from "@/components/shared/panel-header";
 import { useT } from "@/lib/i18n/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface FileSidebarProps {
   files: FileNode[];
@@ -34,7 +35,35 @@ interface FileSidebarProps {
   sessionId?: string;
   embedded?: boolean;
   onPackageSkill?: (node: FileNode) => void;
-  onDownloadFile?: (node: FileNode) => void;
+  onDownloadNode?: (node: FileNode) => void;
+}
+
+function collectSkillFolderPaths(nodes: FileNode[]): Set<string> {
+  const skillFolderPaths = new Set<string>();
+
+  const visit = (items: FileNode[]) => {
+    for (const item of items) {
+      if (item.type !== "folder") {
+        continue;
+      }
+
+      const children = item.children ?? [];
+      if (
+        children.some(
+          (child) => child.type === "file" && child.name === "SKILL.md",
+        )
+      ) {
+        skillFolderPaths.add(item.path);
+      }
+
+      if (children.length > 0) {
+        visit(children);
+      }
+    }
+  };
+
+  visit(nodes);
+  return skillFolderPaths;
 }
 
 const isSameOriginUrl = (url: string) => {
@@ -85,18 +114,32 @@ function FileTreeItem({
   selectedId,
   level = 0,
   onPackageSkill,
-  onDownloadFile,
+  onDownloadNode,
+  canDownloadFolder,
+  skillFolderPaths,
 }: {
   node: FileNode;
   onSelect: (file: FileNode) => void;
   selectedId?: string;
   level?: number;
   onPackageSkill?: (node: FileNode) => void;
-  onDownloadFile?: (node: FileNode) => void;
+  onDownloadNode?: (node: FileNode) => void;
+  canDownloadFolder: boolean;
+  skillFolderPaths: ReadonlySet<string>;
 }) {
   const [isExpanded, setIsExpanded] = React.useState(level === 0);
+  const [isActionsOpen, setIsActionsOpen] = React.useState(false);
   const isMobile = useIsMobile();
   const { t } = useT("translation");
+  const canDownloadNode =
+    Boolean(onDownloadNode) &&
+    ((node.type === "file" && Boolean(node.url)) ||
+      (node.type === "folder" && canDownloadFolder));
+  const canPackageAsSkill =
+    node.type === "folder" &&
+    skillFolderPaths.has(node.path) &&
+    Boolean(onPackageSkill);
+  const hasActions = canDownloadNode || canPackageAsSkill;
 
   // Check if this node or any of its children is the selected one
   const containsSelected = React.useMemo(() => {
@@ -202,45 +245,73 @@ function FileTreeItem({
 
   return (
     <div className="w-full min-w-0 max-w-full basis-full overflow-hidden">
-      <ContextMenu>
-        <ContextMenuTrigger asChild>
-          <div
-            className={cn(
-              "group/item relative box-border flex w-full min-w-0 max-w-full items-center gap-2 overflow-hidden rounded-md py-1.5 transition-colors cursor-pointer",
-              selectedId === node.id
-                ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
-            )}
-            style={{
-              paddingInlineStart: `${paddingStartRem}rem`,
-              paddingInlineEnd: "0.5rem",
-            }}
-            onClick={handleClick}
-          >
-            <span className="shrink-0">{nodeIcon}</span>
-            <span
-              className="block w-0 flex-1 min-w-0 max-w-full truncate text-sm"
-              title={node.name}
-            >
-              {node.name}
-            </span>
-          </div>
-        </ContextMenuTrigger>
-        <ContextMenuContent>
-          {node.type === "folder" && onPackageSkill ? (
-            <ContextMenuItem onClick={() => onPackageSkill?.(node)}>
-              <PackagePlus className="mr-2 size-4" />
-              {t("fileSidebar.packageAsSkill")}
-            </ContextMenuItem>
-          ) : null}
-          {node.type === "file" && node.url && onDownloadFile ? (
-            <ContextMenuItem onClick={() => onDownloadFile?.(node)}>
-              <Download className="mr-2 size-4" />
-              {t("fileSidebar.downloadFile")}
-            </ContextMenuItem>
-          ) : null}
-        </ContextMenuContent>
-      </ContextMenu>
+      <div
+        className={cn(
+          "group/item relative box-border flex w-full min-w-0 max-w-full items-center gap-2 overflow-hidden rounded-md py-1.5 transition-colors cursor-pointer",
+          selectedId === node.id
+            ? "bg-sidebar-accent text-sidebar-accent-foreground"
+            : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
+        )}
+        style={{
+          paddingInlineStart: `${paddingStartRem}rem`,
+          paddingInlineEnd: "0.5rem",
+        }}
+        onClick={handleClick}
+      >
+        <span className="shrink-0">{nodeIcon}</span>
+        <span
+          className="block w-0 flex-1 min-w-0 max-w-full truncate text-sm"
+          title={node.name}
+        >
+          {node.name}
+        </span>
+        {hasActions ? (
+          <DropdownMenu open={isActionsOpen} onOpenChange={setIsActionsOpen}>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className={cn(
+                  "flex size-6 shrink-0 items-center justify-center rounded-md text-sidebar-foreground/60 transition-opacity hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:opacity-100 focus-visible:pointer-events-auto",
+                  isActionsOpen
+                    ? "opacity-100 pointer-events-auto"
+                    : "opacity-0 pointer-events-none group-hover/item:opacity-100 group-hover/item:pointer-events-auto group-focus-within/item:opacity-100 group-focus-within/item:pointer-events-auto",
+                )}
+                aria-label={t("fileSidebar.actions")}
+                title={t("fileSidebar.actions")}
+                onClick={(event) => {
+                  event.stopPropagation();
+                }}
+              >
+                <Settings className="size-3.5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" sideOffset={4}>
+              {canDownloadNode ? (
+                <DropdownMenuItem
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onDownloadNode?.(node);
+                  }}
+                >
+                  <Download className="mr-2 size-4" />
+                  {t("fileSidebar.download")}
+                </DropdownMenuItem>
+              ) : null}
+              {canPackageAsSkill ? (
+                <DropdownMenuItem
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onPackageSkill?.(node);
+                  }}
+                >
+                  <PackagePlus className="mr-2 size-4" />
+                  {t("fileSidebar.packageAsSkill")}
+                </DropdownMenuItem>
+              ) : null}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : null}
+      </div>
       {node.type === "folder" && isExpanded && node.children && (
         <div className="w-full min-w-0 max-w-full basis-full overflow-hidden">
           {node.children.map((child) => (
@@ -251,7 +322,9 @@ function FileTreeItem({
               selectedId={selectedId}
               level={level + 1}
               onPackageSkill={onPackageSkill}
-              onDownloadFile={onDownloadFile}
+              onDownloadNode={onDownloadNode}
+              canDownloadFolder={canDownloadFolder}
+              skillFolderPaths={skillFolderPaths}
             />
           ))}
         </div>
@@ -267,10 +340,24 @@ export function FileSidebar({
   sessionId,
   embedded = false,
   onPackageSkill,
-  onDownloadFile,
+  onDownloadNode,
 }: FileSidebarProps) {
   const { t } = useT("translation");
   const canDownloadArchive = Boolean(sessionId) && files.length > 0;
+  const canDownloadFolder = Boolean(sessionId);
+  const [skillFolderPaths, setSkillFolderPaths] = React.useState<Set<string>>(
+    () => new Set(),
+  );
+
+  React.useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setSkillFolderPaths(collectSkillFolderPaths(files));
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [files]);
 
   const handleDownload = async () => {
     if (!sessionId || !canDownloadArchive) return;
@@ -330,7 +417,9 @@ export function FileSidebar({
                 onSelect={onFileSelect}
                 selectedId={selectedFile?.id}
                 onPackageSkill={onPackageSkill}
-                onDownloadFile={onDownloadFile}
+                onDownloadNode={onDownloadNode}
+                canDownloadFolder={canDownloadFolder}
+                skillFolderPaths={skillFolderPaths}
               />
             ))
           )}

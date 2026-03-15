@@ -1464,6 +1464,7 @@
     "fileList": "Dateiliste",
     "actions": "Aktionen",
     "downloadAll": "Alle herunterladen",
+    "download": "Herunterladen",
     "downloadFile": "Datei herunterladen",
     "noFiles": "Noch keine Dateien",
     "packageAsSkill": "Als Skill erstellen",

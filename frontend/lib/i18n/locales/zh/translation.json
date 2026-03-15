@@ -1577,6 +1577,7 @@
     "fileList": "文件列表",
     "actions": "操作",
     "downloadAll": "下载全部",
+    "download": "下载",
     "downloadFile": "下载文件",
     "noFiles": "暂无文件",
     "packageAsSkill": "打包为 Skill",

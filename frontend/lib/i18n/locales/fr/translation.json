@@ -1460,6 +1460,7 @@
     "fileList": "Liste des fichiers",
     "actions": "Actions",
     "downloadAll": "Tout télécharger",
+    "download": "Télécharger",
     "downloadFile": "Télécharger le fichier",
     "noFiles": "Aucun fichier pour le moment",
     "packageAsSkill": "Créer un skill",

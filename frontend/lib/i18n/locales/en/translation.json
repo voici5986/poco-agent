@@ -1577,6 +1577,7 @@
     "fileList": "File List",
     "actions": "Actions",
     "downloadAll": "Download all",
+    "download": "Download",
     "downloadFile": "Download file",
     "noFiles": "No files yet",
     "packageAsSkill": "Package as Skill",

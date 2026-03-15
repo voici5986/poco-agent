@@ -1460,6 +1460,7 @@
     "fileList": "ファイルリスト",
     "actions": "操作",
     "downloadAll": "すべてをダウンロード",
+    "download": "ダウンロード",
     "downloadFile": "ファイルをダウンロード",
     "noFiles": "まだファイルはありません",
     "packageAsSkill": "Skillとしてパッケージ",

@@ -1460,6 +1460,7 @@
     "fileList": "Список файлов",
     "actions": "Действия",
     "downloadAll": "Скачать все",
+    "download": "Скачать",
     "downloadFile": "Скачать файл",
     "noFiles": "Пока нет файлов",
     "packageAsSkill": "Упаковать как Skill",

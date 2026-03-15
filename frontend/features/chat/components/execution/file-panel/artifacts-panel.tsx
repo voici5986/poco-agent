@@ -148,17 +148,29 @@ export function ArtifactsPanel({
     }
   }, [isSidebarCollapsed, viewMode, closeViewer]);
 
-  const handleDownloadFile = React.useCallback(
-    async (file: FileNode) => {
-      if (!file.url) return;
+  const handleDownloadNode = React.useCallback(
+    async (node: FileNode) => {
       try {
-        await downloadFileFromUrl(file.url, file.name);
+        if (node.type === "file") {
+          if (!node.url) return;
+          await downloadFileFromUrl(node.url, node.name);
+          return;
+        }
+
+        if (!sessionId) return;
+        const response = await chatService.getFolderArchive(sessionId, node.path);
+        if (!response.url) {
+          toast.error(t("fileSidebar.archiveNotAvailable"));
+          return;
+        }
+
+        await downloadFileFromUrl(response.url, response.filename);
       } catch (error) {
-        console.error("[Artifacts] Failed to download file", error);
+        console.error("[Artifacts] Failed to download workspace node", error);
         toast.error(t("fileSidebar.downloadFailed"));
       }
     },
-    [t],
+    [sessionId, t],
   );
 
   const handleSubmitSkill = React.useCallback(
@@ -238,7 +250,7 @@ export function ArtifactsPanel({
               onPackageSkill={
                 sessionId ? (node) => setPackageTarget(node) : undefined
               }
-              onDownloadFile={handleDownloadFile}
+              onDownloadNode={handleDownloadNode}
             />
           </div>
         )}

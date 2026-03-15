@@ -36,6 +36,7 @@ import type {
   TaskEnqueueResponse,
   ToolExecutionDeltaResponse,
   ToolExecutionResponse,
+  WorkspaceArchiveResponse,
 } from "@/features/chat/types";
 
 import {
@@ -451,6 +452,16 @@ export const chatService = {
     return apiClient.post<SubmitSkillResponse>(
       API_ENDPOINTS.sessionWorkspaceSubmitSkill(sessionId),
       body,
+    );
+  },
+
+  getFolderArchive: async (
+    sessionId: string,
+    folderPath: string,
+  ): Promise<WorkspaceArchiveResponse> => {
+    const params = new URLSearchParams({ path: folderPath });
+    return apiClient.get<WorkspaceArchiveResponse>(
+      `${API_ENDPOINTS.sessionWorkspaceFolderArchive(sessionId)}?${params.toString()}`,
     );
   },
 };
