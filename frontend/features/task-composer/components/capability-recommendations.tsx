@@ -49,7 +49,7 @@ function RecommendationCard({
       aria-label={toggleLabel}
       onClick={() => onToggle(item, !enabled)}
       title={toggleLabel}
-      className="group h-full min-h-[72px] w-full rounded-xl border border-border/40 bg-background/70 px-3 py-3 text-left transition-[border-color,background-color] hover:border-border/70 hover:bg-muted/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+      className="group h-full min-h-[72px] w-full rounded-xl border border-border/40 dark:border-border/80 bg-background/70 px-3 py-3 text-left transition-[border-color,background-color] hover:border-border/70 dark:hover:border-border hover:bg-muted/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
     >
       <div className="flex min-w-0 items-start gap-3">
         <CapabilitySourceAvatar
@@ -121,7 +121,9 @@ export function CapabilityRecommendations({
   return (
     <div
       className={cn(
-        footerMode ? "py-3" : "border-t border-border/60 px-4 py-2.5",
+        footerMode
+          ? "py-3"
+          : "border-t border-border/60 dark:border-border/90 px-4 py-2.5",
       )}
     >
       {itemsToRender.length > 0 ? (
@@ -151,7 +153,7 @@ export function CapabilityRecommendations({
           </p>
         </>
       ) : showEmptyState && !isLoading ? (
-        <div className="rounded-lg border border-dashed border-border/70 bg-muted/10 px-3 py-2 text-sm text-muted-foreground">
+        <div className="rounded-lg border border-dashed border-border/70 dark:border-border/90 bg-muted/10 px-3 py-2 text-sm text-muted-foreground">
           {t("hero.capabilityRecommendations.empty")}
         </div>
       ) : null}
