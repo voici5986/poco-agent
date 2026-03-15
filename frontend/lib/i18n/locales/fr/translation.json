@@ -185,6 +185,20 @@
       "cancel": "Annuler",
       "confirm": "Confirmer"
     },
+    "capabilityRecommendations": {
+      "title": "Capacités suggérées",
+      "selectedTitle": "Activées pour cette tâche",
+      "loading": "Recherche de correspondances...",
+      "empty": "Aucun MCP ou compétence correspondant à cette saisie.",
+      "useForTask": "Utiliser pour cette tâche",
+      "added": "Ajouté",
+      "enabledByDefault": "Déjà activé",
+      "noDescription": "Aucune description fournie",
+      "remove": "Retirer {{name}}",
+      "mcpLabel": "MCP",
+      "skillLabel": "Compétence",
+      "hint": "En fonction de votre tâche, Poco vous recommande les capacités ci-dessus. Cliquez pour charger."
+    },
     "warnings": {
       "tooManyMcps": "Trop de serveurs MCP activés ({{count}}). Cela peut ralentir le chargement du système et réduire les performances.",
       "tooManySkills": "Trop de compétences activées ({{count}}). Cela peut ralentir le chargement du système et réduire les performances.",

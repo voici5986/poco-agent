@@ -119,19 +119,37 @@ export function CapabilityRecommendations({
   }
 
   return (
-    <div className={cn(footerMode ? "py-3" : "border-t border-border/60 px-4 py-2.5")}>
+    <div
+      className={cn(
+        footerMode ? "py-3" : "border-t border-border/60 px-4 py-2.5",
+      )}
+    >
       {itemsToRender.length > 0 ? (
-        <div className="grid auto-rows-fr grid-cols-3 gap-2">
-          {itemsToRender.map((item) => (
-            <RecommendationCard
-              key={`${item.type}:${item.id}`}
-              item={item}
-              enabled={isEnabled(item)}
-              onToggle={onToggle}
-              t={t}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid auto-rows-fr grid-cols-3 gap-2">
+            {itemsToRender.map((item, index) => (
+              <div
+                key={`${item.type}:${item.id}`}
+                style={{
+                  animationDelay: `${index * 80}ms`,
+                  animationDuration: "300ms",
+                  animationFillMode: "both",
+                }}
+                className="animate-in fade-in slide-in-from-bottom-2 duration-300"
+              >
+                <RecommendationCard
+                  item={item}
+                  enabled={isEnabled(item)}
+                  onToggle={onToggle}
+                  t={t}
+                />
+              </div>
+            ))}
+          </div>
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            {t("hero.capabilityRecommendations.hint")}
+          </p>
+        </>
       ) : showEmptyState && !isLoading ? (
         <div className="rounded-lg border border-dashed border-border/70 bg-muted/10 px-3 py-2 text-sm text-muted-foreground">
           {t("hero.capabilityRecommendations.empty")}

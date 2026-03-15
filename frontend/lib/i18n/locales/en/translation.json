@@ -198,7 +198,8 @@
       "noDescription": "No description provided",
       "remove": "Remove {{name}}",
       "mcpLabel": "MCP",
-      "skillLabel": "Skill"
+      "skillLabel": "Skill",
+      "hint": "Based on your task, Poco recommends the above capabilities for you. Click to load."
     },
     "warnings": {
       "tooManyMcps": "Too many MCP servers enabled ({{count}}). This may slow down system loading and reduce performance.",

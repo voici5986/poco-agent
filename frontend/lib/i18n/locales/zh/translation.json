@@ -198,7 +198,8 @@
       "noDescription": "暂无描述",
       "remove": "移除 {{name}}",
       "mcpLabel": "MCP",
-      "skillLabel": "技能"
+      "skillLabel": "技能",
+      "hint": "根据你的任务，Poco 为你推荐以上能力，点击加载"
     },
     "warnings": {
       "tooManyMcps": "启用的 MCP 服务器过多（{{count}} 个），可能会导致系统加载变慢、性能下降。",
