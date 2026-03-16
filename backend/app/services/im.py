@@ -554,13 +554,14 @@ class CommandService:
         except ValueError as exc:
             return [str(exc)]
 
-        removed = WatchRepository.delete_by_channel_session(
+        watch = WatchRepository.get_watch(
             db,
             channel_id=channel.id,
             session_id=session_id,
         )
-        if removed <= 0:
+        if watch is None:
             return [f"未找到订阅：{session_id}"]
+        WatchRepository.delete(db, watch)
         return [f"✅ 已取消订阅：{session_id}"]
 
     async def _cmd_link(self, db: Session, channel: Channel, args: str) -> list[str]:
@@ -577,7 +578,9 @@ class CommandService:
 
     async def _cmd_clear(self, db: Session, channel: Channel, args: str) -> list[str]:
         _ = args
-        ActiveSessionRepository.delete_by_channel(db, channel_id=channel.id)
+        active = ActiveSessionRepository.get_by_channel(db, channel_id=channel.id)
+        if active is not None:
+            ActiveSessionRepository.delete(db, active)
         return ["已清除当前会话绑定"]
 
     async def _cmd_answer(self, db: Session, channel: Channel, args: str) -> list[str]:
