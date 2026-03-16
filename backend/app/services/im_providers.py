@@ -735,7 +735,9 @@ def _extract_feishu_leading_at_mentions(text: str) -> list[dict[str, str]]:
     items: list[dict[str, str]] = []
     for tag_match in _FEISHU_AT_TAG_RE.finditer(matched.group(0)):
         attrs = tag_match.group(1) or ""
-        display_name = re.sub(r"<[^>]+>", "", tag_match.group(2) or "").strip().casefold()
+        display_name = (
+            re.sub(r"<[^>]+>", "", tag_match.group(2) or "").strip().casefold()
+        )
         candidate_ids = {
             attr_match.group(1).strip()
             for attr_match in _FEISHU_AT_ID_ATTR_RE.finditer(attrs)

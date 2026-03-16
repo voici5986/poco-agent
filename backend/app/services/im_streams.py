@@ -76,9 +76,16 @@ class PocoDingTalkChatbotHandler(dingtalk_stream.ChatbotHandler):
             return dingtalk_stream.AckMessage.STATUS_OK, "OK"
 
         session_webhook = str(incoming.session_webhook or "").strip() or None
-        message_id = str(incoming.message_id or message.headers.message_id or "").strip()
+        message_id = str(
+            incoming.message_id or message.headers.message_id or ""
+        ).strip()
         sender_id = (
-            str(incoming.sender_staff_id or incoming.sender_id or incoming.sender_nick or "").strip()
+            str(
+                incoming.sender_staff_id
+                or incoming.sender_id
+                or incoming.sender_nick
+                or ""
+            ).strip()
             or None
         )
 
@@ -367,7 +374,9 @@ class FeishuStreamService:
             self._inbound_service.handle_message(message=inbound),
             loop,
         )
-        future.add_done_callback(lambda fut: _log_future_exception(fut, inbound=inbound))
+        future.add_done_callback(
+            lambda fut: _log_future_exception(fut, inbound=inbound)
+        )
 
     async def _stop_client(self) -> None:
         thread_loop = self._thread_loop

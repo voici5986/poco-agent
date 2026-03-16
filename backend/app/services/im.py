@@ -68,7 +68,9 @@ class BackendClientError(RuntimeError):
 class BackendClient:
     def __init__(self) -> None:
         settings = get_settings()
-        self.backend_user_id = (settings.backend_user_id or "default").strip() or "default"
+        self.backend_user_id = (
+            settings.backend_user_id or "default"
+        ).strip() or "default"
         self._task_service = _TASK_SERVICE
         self._session_service = _SESSION_SERVICE
         self._title_service = _TITLE_SERVICE
@@ -170,7 +172,10 @@ class BackendClient:
                 None,
                 kind=kind_value,
             )
-            return [SessionResponse.model_validate(session).model_dump(mode="json") for session in sessions]
+            return [
+                SessionResponse.model_validate(session).model_dump(mode="json")
+                for session in sessions
+            ]
         finally:
             db.close()
 
@@ -429,7 +434,9 @@ class CommandService:
     async def _cmd_list(self, db: Session, channel: Channel, args: str) -> list[str]:
         limit = _parse_positive_int(args, default=10, max_value=30)
         try:
-            sessions = await self.backend.list_sessions(limit=limit, offset=0, kind="chat")
+            sessions = await self.backend.list_sessions(
+                limit=limit, offset=0, kind="chat"
+            )
         except BackendClientError as exc:
             return [f"查询失败：{exc}"]
 
@@ -622,7 +629,9 @@ class CommandService:
             if index <= 0:
                 raise ValueError("会话序号必须大于 0")
             limit = min(max(index, 10), 50)
-            sessions = await self.backend.list_sessions(limit=limit, offset=0, kind="chat")
+            sessions = await self.backend.list_sessions(
+                limit=limit, offset=0, kind="chat"
+            )
             if index > len(sessions):
                 raise ValueError(f"序号超出范围：当前仅有 {len(sessions)} 条可选")
             session_id = _extract_session_id(sessions[index - 1])
@@ -662,7 +671,9 @@ class CommandService:
             existing.session_id = session_id
             return
 
-        entry = ActiveSessionRepository.create(db, channel_id=channel_id, session_id=session_id)
+        entry = ActiveSessionRepository.create(
+            db, channel_id=channel_id, session_id=session_id
+        )
         try:
             with db.begin_nested():
                 db.flush([entry])
@@ -752,8 +763,12 @@ class InboundMessageService:
                 db.commit()
                 return
 
-            send_address = self._resolve_send_address(db, channel=channel, message=message)
-            responses = await self.commands.handle_text(db=db, channel=channel, text=message.text)
+            send_address = self._resolve_send_address(
+                db, channel=channel, message=message
+            )
+            responses = await self.commands.handle_text(
+                db=db, channel=channel, text=message.text
+            )
             db.commit()
         except Exception:
             db.rollback()
@@ -801,7 +816,9 @@ class InboundMessageService:
         if existing is not None:
             return existing
 
-        channel = ChannelRepository.create(db, provider=provider, destination=destination)
+        channel = ChannelRepository.create(
+            db, provider=provider, destination=destination
+        )
         try:
             with db.begin_nested():
                 db.flush([channel])
@@ -825,7 +842,9 @@ class InboundMessageService:
     ) -> str:
         candidate = (message.send_address or "").strip()
         if candidate:
-            current = ChannelDeliveryRepository.get_by_channel(db, channel_id=channel.id)
+            current = ChannelDeliveryRepository.get_by_channel(
+                db, channel_id=channel.id
+            )
             if current is not None:
                 current.send_address = candidate
                 return candidate
@@ -839,7 +858,9 @@ class InboundMessageService:
                 with db.begin_nested():
                     db.flush([delivery])
             except IntegrityError:
-                current = ChannelDeliveryRepository.get_by_channel(db, channel_id=channel.id)
+                current = ChannelDeliveryRepository.get_by_channel(
+                    db, channel_id=channel.id
+                )
                 if current is None:
                     raise
                 current.send_address = candidate
@@ -889,7 +910,9 @@ class BackendEventService:
                 if not rendered:
                     self._commit_processed_key(db, key=key)
                     continue
-                if not await self._send_to_channel(db, channel_id=channel_id, text=rendered):
+                if not await self._send_to_channel(
+                    db, channel_id=channel_id, text=rendered
+                ):
                     raise RuntimeError(
                         f"failed to deliver assistant message event to channel {channel_id}"
                     )
@@ -920,7 +943,9 @@ class BackendEventService:
                     run_id=run.id if run is not None else None,
                     last_error=(run.error_message if run is not None else None),
                 )
-                if not await self._send_to_channel(db, channel_id=channel_id, text=rendered):
+                if not await self._send_to_channel(
+                    db, channel_id=channel_id, text=rendered
+                ):
                     raise RuntimeError(
                         f"failed to deliver run terminal event to channel {channel_id}"
                     )
@@ -945,7 +970,9 @@ class BackendEventService:
                     expires_at=request.expires_at.isoformat(),
                     title=event.session.title,
                 )
-                if not await self._send_to_channel(db, channel_id=channel_id, text=rendered):
+                if not await self._send_to_channel(
+                    db, channel_id=channel_id, text=rendered
+                ):
                     raise RuntimeError(
                         f"failed to deliver user input event to channel {channel_id}"
                     )
@@ -983,12 +1010,16 @@ class BackendEventService:
         for watch in WatchRepository.list_by_session(db, session_id=session_id):
             target.add(watch.channel_id)
 
-        for active in ActiveSessionRepository.list_by_session(db, session_id=session_id):
+        for active in ActiveSessionRepository.list_by_session(
+            db, session_id=session_id
+        ):
             target.add(active.channel_id)
 
         return target
 
-    async def _send_to_channel(self, db: Session, *, channel_id: int, text: str) -> bool:
+    async def _send_to_channel(
+        self, db: Session, *, channel_id: int, text: str
+    ) -> bool:
         channel = ChannelRepository.get_by_id(db, channel_id=channel_id)
         if channel is None or not channel.enabled:
             return True
@@ -1068,7 +1099,9 @@ class ImEventService:
     ) -> None:
         terminal_run = db_run
         if terminal_run is None:
-            terminal_run = RunRepository.get_latest_terminal_by_session(db, db_session.id)
+            terminal_run = RunRepository.get_latest_terminal_by_session(
+                db, db_session.id
+            )
 
         run_status = (
             terminal_run.status
@@ -1179,7 +1212,9 @@ class ImEventDispatcher:
     async def _dispatch_once(self) -> None:
         batch_size = max(1, int(self.settings.im_event_dispatch_batch_size))
         lease_seconds = max(5, int(self.settings.im_event_dispatch_lease_seconds))
-        claimed = await asyncio.to_thread(self._claim_due_batch, batch_size, lease_seconds)
+        claimed = await asyncio.to_thread(
+            self._claim_due_batch, batch_size, lease_seconds
+        )
         if not claimed:
             return
 
@@ -1440,7 +1475,9 @@ def _build_run_snapshot(
         status=(db_run.status if db_run is not None else callback_status),
         progress=(db_run.progress if db_run is not None else None),
         error_message=(
-            db_run.last_error if db_run is not None and db_run.last_error else error_message
+            db_run.last_error
+            if db_run is not None and db_run.last_error
+            else error_message
         ),
     )
 
