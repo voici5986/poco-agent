@@ -34,6 +34,7 @@ from app.api.v1 import (
     scheduled_tasks,
     session_queue,
     sessions,
+    skill_marketplace,
     slash_commands,
     skill_installs,
     skill_imports,
@@ -82,6 +83,7 @@ api_v1_router.include_router(internal_plugin_config.router)
 api_v1_router.include_router(mcp_servers.router)
 api_v1_router.include_router(user_mcp_installs.router)
 api_v1_router.include_router(skills.router)
+api_v1_router.include_router(skill_marketplace.router)
 api_v1_router.include_router(skill_imports.router)
 api_v1_router.include_router(skill_installs.router)
 api_v1_router.include_router(pending_skill_creations.router)
