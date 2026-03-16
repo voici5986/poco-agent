@@ -2,10 +2,15 @@ import json
 import re
 from typing import Any
 
+from app.core.settings import get_settings
 from app.im.schemas.im_message import InboundMessage
 
-_LEADING_MENTION_RE = re.compile(r"^(?:<at\s+[^>]*>.*?</at>\s*)+")
-_LEADING_PLAIN_MENTION_RE = re.compile(r"^(?:[@\uff20][^\s]+\s*)+")
+_LEADING_MENTION_RE = re.compile(r"^(?:<at\s+[^>]*>.*?</at>\s*)+", re.IGNORECASE)
+_AT_TAG_RE = re.compile(r"<at\s+([^>]*?)>(.*?)</at>", re.IGNORECASE | re.DOTALL)
+_AT_ID_ATTR_RE = re.compile(
+    r"(?:user_id|open_id|union_id|id)\s*=\s*[\"']?([^\"'\s>]+)",
+    re.IGNORECASE,
+)
 
 
 def parse_feishu_webhook_event(payload: dict[str, Any]) -> InboundMessage | None:
@@ -102,7 +107,11 @@ def _build_inbound_message(
 
     raw_text = extract_text(_read_field(message, "content"))
     chat_type = str(_read_field(message, "chat_type") or "").strip().lower()
-    if _requires_explicit_mention(chat_type) and not _has_leading_mention(raw_text):
+    mentions = _read_field(message, "mentions")
+    if _requires_explicit_mention(chat_type) and not _has_explicit_mention(
+        raw_text=raw_text,
+        mentions=mentions,
+    ):
         return None
 
     text = clean_text(raw_text)
@@ -164,10 +173,159 @@ def _requires_explicit_mention(chat_type: str) -> bool:
     return chat_type != "p2p"
 
 
-def _has_leading_mention(text: str) -> bool:
-    normalized = _normalize_text(text)
+def _has_explicit_mention(*, raw_text: str, mentions: Any) -> bool:
+    normalized = _normalize_text(raw_text)
     if not normalized:
         return False
-    if _LEADING_MENTION_RE.match(normalized):
+
+    bot_ids, bot_names = _bot_identity_candidates()
+
+    tag_mentions = _extract_leading_at_mentions(normalized)
+    if tag_mentions:
+        return _leading_mentions_include_bot(
+            tag_mentions,
+            mentions=mentions,
+            bot_ids=bot_ids,
+            bot_names=bot_names,
+        )
+
+    plain_mentions = _extract_leading_plain_mentions(normalized)
+    if plain_mentions:
+        return _leading_mentions_include_bot(
+            plain_mentions,
+            mentions=mentions,
+            bot_ids=bot_ids,
+            bot_names=bot_names,
+        )
+
+    return False
+
+
+def _bot_identity_candidates() -> tuple[set[str], set[str]]:
+    settings = get_settings()
+
+    ids = {
+        value.strip()
+        for value in (
+            settings.feishu_app_id,
+            settings.feishu_bot_user_id,
+            settings.feishu_bot_open_id,
+            settings.feishu_bot_union_id,
+        )
+        if isinstance(value, str) and value.strip()
+    }
+    names = {
+        _normalize_name(value)
+        for value in (settings.feishu_bot_name,)
+        if isinstance(value, str) and value.strip()
+    }
+    return ids, names
+
+
+def _extract_leading_at_mentions(text: str) -> list[dict[str, str]]:
+    matched = _LEADING_MENTION_RE.match(text)
+    if not matched:
+        return []
+
+    items: list[dict[str, str]] = []
+    for tag_match in _AT_TAG_RE.finditer(matched.group(0)):
+        attrs = tag_match.group(1) or ""
+        display_name = _normalize_name(_strip_xml(tag_match.group(2) or ""))
+        candidate_ids = {
+            attr_match.group(1).strip()
+            for attr_match in _AT_ID_ATTR_RE.finditer(attrs)
+            if attr_match.group(1).strip()
+        }
+        items.append(
+            {
+                "name": display_name,
+                "ids": "\n".join(sorted(candidate_ids)),
+            }
+        )
+    return items
+
+
+def _extract_leading_plain_mentions(text: str) -> list[dict[str, str]]:
+    items: list[dict[str, str]] = []
+    remaining = text
+    while True:
+        if not remaining.startswith(("@", "\uff20")):
+            break
+        parts = remaining.split(maxsplit=1)
+        token = parts[0]
+        mention_name = _normalize_name(token[1:])
+        items.append({"name": mention_name, "ids": ""})
+        if len(parts) == 1:
+            break
+        remaining = parts[1].strip()
+    return items
+
+
+def _leading_mentions_include_bot(
+    leading_mentions: list[dict[str, str]],
+    *,
+    mentions: Any,
+    bot_ids: set[str],
+    bot_names: set[str],
+) -> bool:
+    for mention in leading_mentions:
+        if _mention_matches_bot(
+            mention_name=mention.get("name") or "",
+            mention_ids=_split_ids(mention.get("ids") or ""),
+            bot_ids=bot_ids,
+            bot_names=bot_names,
+        ):
+            return True
+
+    if not isinstance(mentions, list):
+        return False
+
+    for mention in mentions[: len(leading_mentions)]:
+        if _mention_matches_bot(
+            mention_name=_normalize_name(str(_read_field(mention, "name") or "")),
+            mention_ids=_read_mention_ids(mention),
+            bot_ids=bot_ids,
+            bot_names=bot_names,
+        ):
+            return True
+
+    return False
+
+
+def _mention_matches_bot(
+    *,
+    mention_name: str,
+    mention_ids: set[str],
+    bot_ids: set[str],
+    bot_names: set[str],
+) -> bool:
+    if mention_ids and bot_ids and mention_ids.intersection(bot_ids):
         return True
-    return bool(_LEADING_PLAIN_MENTION_RE.match(normalized))
+    if mention_name and bot_names and mention_name in bot_names:
+        return True
+    return False
+
+
+def _read_mention_ids(mention: Any) -> set[str]:
+    values: set[str] = set()
+
+    mention_id = _read_field(mention, "id")
+    for source in (mention, mention_id):
+        for key in ("user_id", "open_id", "union_id"):
+            value = _read_field(source, key)
+            if isinstance(value, str) and value.strip():
+                values.add(value.strip())
+
+    return values
+
+
+def _normalize_name(value: str) -> str:
+    return (value or "").strip().casefold()
+
+
+def _split_ids(raw: str) -> set[str]:
+    return {part for part in raw.split("\n") if part}
+
+
+def _strip_xml(text: str) -> str:
+    return re.sub(r"<[^>]+>", "", text or "").strip()
