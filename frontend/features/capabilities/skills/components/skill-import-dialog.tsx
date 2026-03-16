@@ -160,11 +160,12 @@ export function SkillImportDialog({
   onImported,
 }: SkillImportDialogProps) {
   const { t } = useT("translation");
-  const [tab, setTab] = useState<SourceTab>("github");
+  const [tab, setTab] = useState<SourceTab>("marketplace");
   const [zipFile, setZipFile] = useState<File | null>(null);
   const [githubUrl, setGithubUrl] = useState("");
   const [commandInput, setCommandInput] = useState("");
   const [marketplaceQuery, setMarketplaceQuery] = useState("");
+  const [isSemanticSearch, setIsSemanticSearch] = useState(false);
   const [marketplaceRecommendations, setMarketplaceRecommendations] = useState<
     SkillsMpRecommendationSection[]
   >([]);
@@ -203,11 +204,12 @@ export function SkillImportDialog({
   }, []);
 
   const reset = React.useCallback(() => {
-    setTab("github");
+    setTab("marketplace");
     setZipFile(null);
     setGithubUrl("");
     setCommandInput("");
     setMarketplaceQuery("");
+    setIsSemanticSearch(false);
     setMarketplaceRecommendations([]);
     setMarketplaceSearchItems([]);
     setMarketplaceHasActiveSearch(false);
@@ -337,6 +339,7 @@ export function SkillImportDialog({
         q: query,
         page: 1,
         page_size: 12,
+        semantic: isSemanticSearch,
       });
       if (!isActiveRef.current) return;
       setMarketplaceSearchItems(response.items || []);
@@ -354,7 +357,7 @@ export function SkillImportDialog({
         setIsMarketplaceLoading(false);
       }
     }
-  }, [loadMarketplaceRecommendations, marketplaceQuery, t]);
+  }, [isSemanticSearch, loadMarketplaceRecommendations, marketplaceQuery, t]);
 
   const resetMarketplaceSearch = React.useCallback(async () => {
     setMarketplaceQuery("");
@@ -625,11 +628,11 @@ export function SkillImportDialog({
                 className="gap-4"
               >
                 <TabsList className="flex h-auto flex-wrap gap-1 p-1 transition-colors duration-200">
-                  <TabsTrigger value="github" className="data-[state=inactive]:scale-[0.98]">
-                    {t("library.skillsImport.tabs.github")}
-                  </TabsTrigger>
                   <TabsTrigger value="marketplace" className="data-[state=inactive]:scale-[0.98]">
                     {t("library.skillsImport.tabs.marketplace")}
+                  </TabsTrigger>
+                  <TabsTrigger value="github" className="data-[state=inactive]:scale-[0.98]">
+                    {t("library.skillsImport.tabs.github")}
                   </TabsTrigger>
                   <TabsTrigger value="command" className="data-[state=inactive]:scale-[0.98]">
                     {t("library.skillsImport.tabs.command")}
@@ -643,6 +646,8 @@ export function SkillImportDialog({
                   <SkillMarketplaceBrowser
                     searchQuery={marketplaceQuery}
                     onSearchQueryChange={setMarketplaceQuery}
+                    isSemanticSearch={isSemanticSearch}
+                    onSemanticSearchChange={setIsSemanticSearch}
                     onSearch={() => {
                       void searchMarketplace();
                     }}

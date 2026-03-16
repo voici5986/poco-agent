@@ -16,6 +16,8 @@ from app.schemas.skill_marketplace import (
     SkillsMpSkillItem,
 )
 
+_DEFAULT_RECOMMENDATION_QUERY = "agent"
+
 
 class SkillsMpService:
     def __init__(self) -> None:
@@ -419,6 +421,7 @@ class SkillsMpService:
         query: str,
         page: int = 1,
         page_size: int = 12,
+        semantic: bool = False,
     ) -> SkillsMpSearchResponse:
         clean_query = (query or "").strip()
         if not clean_query:
@@ -436,6 +439,7 @@ class SkillsMpService:
             page_size=page_size,
             sort_by="stars",
             query=clean_query,
+            semantic=semantic,
         )
 
     async def list_recommendations(
@@ -443,26 +447,17 @@ class SkillsMpService:
         *,
         limit: int = 9,
     ) -> SkillsMpRecommendationsResponse:
-        recommendation_query = self._clean_text(
-            self.settings.skillsmp_recommendation_query
-        )
-        if not recommendation_query:
-            raise AppException(
-                error_code=ErrorCode.BAD_REQUEST,
-                message="SKILLSMP_RECOMMENDATION_QUERY cannot be empty",
-            )
-
         popular = await self._request_skills(
             page=1,
             page_size=limit,
             sort_by="stars",
-            query=recommendation_query,
+            query=_DEFAULT_RECOMMENDATION_QUERY,
         )
         recent = await self._request_skills(
             page=1,
             page_size=limit,
             sort_by="recent",
-            query=recommendation_query,
+            query=_DEFAULT_RECOMMENDATION_QUERY,
         )
         return SkillsMpRecommendationsResponse(
             sections=[

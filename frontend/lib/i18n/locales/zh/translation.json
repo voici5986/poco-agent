@@ -1227,7 +1227,8 @@
         "forks": "Forks",
         "sections": {
           "popular": "热门推荐"
-        }
+        },
+        "aiSearchTooltip": "启用 AI Search，使用 SkillsMP 的语义搜索接口"
       }
     },
     "pluginsManager": {

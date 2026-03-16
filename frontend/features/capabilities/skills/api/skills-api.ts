@@ -20,7 +20,7 @@ import type {
 } from "@/features/capabilities/skills/types";
 
 function buildQuery(
-  params: Record<string, string | number | undefined | null>,
+  params: Record<string, string | number | boolean | undefined | null>,
 ): string {
   const searchParams = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
@@ -171,6 +171,7 @@ export const skillsService = {
     q: string;
     page?: number;
     page_size?: number;
+    semantic?: boolean;
   }): Promise<SkillsMpSearchResponse> => {
     return apiClient.get<SkillsMpSearchResponse>(
       `${API_ENDPOINTS.skillsMarketplaceSearch}${buildQuery(params)}`,

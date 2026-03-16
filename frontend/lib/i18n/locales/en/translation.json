@@ -1227,7 +1227,8 @@
         "forks": "Forks",
         "sections": {
           "popular": "Popular"
-        }
+        },
+        "aiSearchTooltip": "Use AI Search with the SkillsMP semantic search endpoint"
       }
     },
     "pluginsManager": {

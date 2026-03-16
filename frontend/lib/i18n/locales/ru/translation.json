@@ -1119,7 +1119,7 @@
         "zip": "Загрузить Zip",
         "github": "GitHub URL",
         "command": "Импорт через npx-команду",
-        "marketplace": "Marketplace"
+        "marketplace": "Маркетплейс навыков"
       },
       "fields": {
         "zip": "Zip-файл",
@@ -1182,8 +1182,8 @@
         "partialFailed": "Не удалось импортировать некоторые навыки. Пожалуйста, просмотрите детали.",
         "commitTimeout": "Истекло время ожидания импорта, попробуйте позже",
         "invalidCommand": "Не удалось разобрать команду. Укажите URL с github.com.",
-        "marketplaceLoadError": "Failed to load SkillsMP data. Please try again later.",
-        "marketplaceDiscoverError": "Failed to resolve this SkillsMP skill. Please try again later."
+        "marketplaceLoadError": "Не удалось загрузить данные SkillsMP. Повторите попытку позже.",
+        "marketplaceDiscoverError": "Не удалось разрешить этот навык SkillsMP. Повторите попытку позже."
       },
       "progress": {
         "title": "Прогресс импорта",
@@ -1191,29 +1191,30 @@
         "jobId": "ID задания"
       },
       "marketplace": {
-        "search": "Search",
-        "reset": "Back to picks",
-        "searchResults": "{{count}} results",
-        "recommendationHint": "Curated SkillsMP picks that you can preview before importing.",
-        "emptySearch": "No SkillsMP skills matched your search.",
-        "emptyRecommendations": "No SkillsMP recommendations are available right now.",
-        "preview": "Preview",
-        "previewBadge": "SkillsMP Preview",
-        "download": "Download",
-        "downloading": "Working...",
-        "jump": "Open",
-        "openGithub": "GitHub",
-        "byAuthor": "by {{author}}",
-        "noDescription": "No description is available yet.",
-        "repo": "Repository",
-        "branch": "Branch",
-        "path": "Path",
-        "updatedAt": "Updated",
-        "stars": "Stars",
-        "forks": "Forks",
+        "search": "Поиск",
+        "reset": "Назад к рекомендациям",
+        "searchResults": "{{count}} результатов",
+        "recommendationHint": "Подборка SkillsMP, которую можно быстро просмотреть перед импортом.",
+        "emptySearch": "Подходящие навыки SkillsMP не найдены.",
+        "emptyRecommendations": "Сейчас нет доступных рекомендаций SkillsMP.",
+        "preview": "Предпросмотр",
+        "previewBadge": "Предпросмотр SkillsMP",
+        "download": "Скачать",
+        "downloading": "Обработка...",
+        "jump": "Открыть",
+        "openGithub": "Открыть GitHub",
+        "byAuthor": "от {{author}}",
+        "noDescription": "Описание пока недоступно.",
+        "repo": "Репозиторий",
+        "branch": "Ветка",
+        "path": "Путь",
+        "updatedAt": "Обновлено",
+        "stars": "Звезды",
+        "forks": "Форки",
         "sections": {
-          "popular": "Popular"
-        }
+          "popular": "Популярное"
+        },
+        "aiSearchTooltip": "Включить AI Search и использовать семантический поиск SkillsMP"
       }
     },
     "pluginsPage": {

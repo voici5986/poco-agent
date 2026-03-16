@@ -15,6 +15,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StaggeredList } from "@/components/ui/staggered-entrance";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type {
   SkillsMpRecommendationSection,
   SkillsMpSkillItem,
@@ -24,6 +29,8 @@ import { useT } from "@/lib/i18n/client";
 interface SkillMarketplaceBrowserProps {
   searchQuery: string;
   onSearchQueryChange: (value: string) => void;
+  isSemanticSearch: boolean;
+  onSemanticSearchChange: (value: boolean) => void;
   onSearch: () => void;
   onReset: () => void;
   isLoading: boolean;
@@ -184,6 +191,8 @@ function SkillMarketplaceCard({
 export function SkillMarketplaceBrowser({
   searchQuery,
   onSearchQueryChange,
+  isSemanticSearch,
+  onSemanticSearchChange,
   onSearch,
   onReset,
   isLoading,
@@ -216,6 +225,25 @@ export function SkillMarketplaceBrowser({
             }}
           />
           <div className="flex items-center gap-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant={isSemanticSearch ? "default" : "outline"}
+                  size="icon"
+                  disabled={isLoading}
+                  onClick={() => onSemanticSearchChange(!isSemanticSearch)}
+                  aria-label={t(
+                    "library.skillsImport.marketplace.aiSearchTooltip",
+                  )}
+                >
+                  <Sparkles className="size-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent sideOffset={6}>
+                {t("library.skillsImport.marketplace.aiSearchTooltip")}
+              </TooltipContent>
+            </Tooltip>
             <Button onClick={onSearch} disabled={isLoading} className="shrink-0">
               <Search className="size-4" />
               {t("library.skillsImport.marketplace.search")}

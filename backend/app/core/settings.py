@@ -137,9 +137,6 @@ class Settings(BaseSettings):
     skillsmp_timeout_seconds: float = Field(
         default=10.0, alias="SKILLSMP_TIMEOUT_SECONDS"
     )
-    skillsmp_recommendation_query: str = Field(
-        default="automation", alias="SKILLSMP_RECOMMENDATION_QUERY"
-    )
 
     # Memory (Mem0)
     mem0_enabled: bool = Field(default=False, alias="MEM0_ENABLED")
