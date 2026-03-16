@@ -1,8 +1,9 @@
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Any
+from typing import Any, cast
 
 from sqlalchemy import delete, or_, select
+from sqlalchemy.engine import CursorResult
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -31,7 +32,7 @@ class ActiveSessionRepository:
     @staticmethod
     def delete_by_channel(db: Session, *, channel_id: int) -> int:
         stmt = delete(ActiveSession).where(ActiveSession.channel_id == channel_id)
-        result = db.execute(stmt)
+        result = cast(CursorResult[Any], db.execute(stmt))
         return int(result.rowcount or 0)
 
     @staticmethod
@@ -136,7 +137,7 @@ class WatchRepository:
             .where(WatchedSession.channel_id == channel_id)
             .where(WatchedSession.session_id == session_id)
         )
-        result = db.execute(stmt)
+        result = cast(CursorResult[Any], db.execute(stmt))
         return int(result.rowcount or 0)
 
     @staticmethod
