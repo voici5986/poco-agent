@@ -93,9 +93,7 @@ class Settings(BaseSettings):
     )
     feishu_bot_user_id: str | None = Field(default=None, alias="FEISHU_BOT_USER_ID")
     feishu_bot_open_id: str | None = Field(default=None, alias="FEISHU_BOT_OPEN_ID")
-    feishu_bot_union_id: str | None = Field(
-        default=None, alias="FEISHU_BOT_UNION_ID"
-    )
+    feishu_bot_union_id: str | None = Field(default=None, alias="FEISHU_BOT_UNION_ID")
     feishu_bot_name: str | None = Field(default=None, alias="FEISHU_BOT_NAME")
 
     s3_endpoint: str | None = Field(default=None, alias="S3_ENDPOINT")
