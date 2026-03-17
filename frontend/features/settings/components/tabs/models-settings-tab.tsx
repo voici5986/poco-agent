@@ -24,6 +24,13 @@ function getStatusLabel(
   return t("settings.providerStatusNone");
 }
 
+function splitModelDraft(value: string): string[] {
+  return value
+    .split(/[,\n，]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 interface ProviderModelFieldProps {
   config: ApiProviderConfig;
   inputId: string;
@@ -38,16 +45,23 @@ function ProviderModelField({
   const { t } = useT("translation");
   const addModel = React.useCallback(
     (modelId: string) => {
-      const clean = modelId.trim();
-      if (!clean) {
+      const nextModels = splitModelDraft(modelId);
+      if (nextModels.length === 0) {
         return;
       }
-      if (config.selectedModelIds.includes(clean)) {
-        onChange({ modelDraft: "" });
-        return;
-      }
+
+      const nextSelectedModelIds = [...config.selectedModelIds];
+      const seenModelIds = new Set(nextSelectedModelIds);
+
+      nextModels.forEach((item) => {
+        if (seenModelIds.has(item)) {
+          return;
+        }
+        seenModelIds.add(item);
+        nextSelectedModelIds.push(item);
+      });
       onChange({
-        selectedModelIds: [...config.selectedModelIds, clean],
+        selectedModelIds: nextSelectedModelIds,
         modelDraft: "",
       });
     },
@@ -60,7 +74,7 @@ function ProviderModelField({
 
   const handleDraftKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key !== "Enter" && event.key !== ",") {
+      if (event.key !== "Enter") {
         return;
       }
       event.preventDefault();

@@ -16,12 +16,18 @@ function normalizeModelIds(modelIds: string[]): string[] {
   const ordered: string[] = [];
 
   modelIds.forEach((modelId) => {
-    const clean = (modelId || "").trim();
-    if (!clean || seen.has(clean)) {
-      return;
-    }
-    seen.add(clean);
-    ordered.push(clean);
+    const segments = (modelId || "")
+      .split(/[,\n，]+/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    segments.forEach((segment) => {
+      if (seen.has(segment)) {
+        return;
+      }
+      seen.add(segment);
+      ordered.push(segment);
+    });
   });
 
   return ordered;
