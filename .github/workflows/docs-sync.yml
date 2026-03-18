@@ -35,7 +35,7 @@ jobs:
       - name: Sync docs folder
         run: |
           mkdir -p target/content
-          rsync -av --delete source/docs/ target/content/
+          rsync -av --delete source/docs/ target/content/docs/
 
       - name: Commit & push changes
         working-directory: target
