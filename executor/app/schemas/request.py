@@ -2,6 +2,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from app.schemas.filesystem import LocalMountConfig, FilesystemMode
+
 
 class InputFile(BaseModel):
     """User-provided input file or URL attachment."""
@@ -49,6 +51,9 @@ class TaskConfig(BaseModel):
     plugin_files: dict = Field(default_factory=dict)
     plugin_ids: list[int] = Field(default_factory=list)
     agents: dict[str, AgentDefinition] = Field(default_factory=dict)
+    subagent_ids: list[int] = Field(default_factory=list)
+    filesystem_mode: FilesystemMode = "sandbox"
+    local_mounts: list[LocalMountConfig] = Field(default_factory=list)
     input_files: list[InputFile] = Field(default_factory=list)
 
 
