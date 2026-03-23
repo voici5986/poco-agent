@@ -16,6 +16,7 @@ from app.services.backend_client import BackendClient
 from app.services.container_pool import ContainerPool
 from app.services.executor_client import ExecutorClient
 from app.services.config_resolver import ConfigResolver
+from app.services.local_mount_service import LocalMountService
 from app.services.skill_stager import SkillStager
 from app.services.plugin_stager import PluginStager
 from app.services.attachment_stager import AttachmentStager
@@ -102,6 +103,7 @@ class TaskDispatcher:
         executor_client = ExecutorClient()
         backend_client = BackendClient()
         config_resolver = ConfigResolver(backend_client)
+        local_mount_service = LocalMountService(settings)
         skill_stager = SkillStager()
         plugin_stager = PluginStager()
         attachment_stager = AttachmentStager()
@@ -147,6 +149,9 @@ class TaskDispatcher:
                 config or {},
                 session_id=session_id,
                 task_id=task_id,
+            )
+            resolved_config, _ = local_mount_service.build_runtime_config(
+                resolved_config
             )
             logger.info(
                 "timing",

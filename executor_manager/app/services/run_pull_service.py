@@ -11,6 +11,7 @@ from app.scheduler.task_dispatcher import TaskDispatcher
 from app.services.backend_client import BackendClient
 from app.services.executor_client import ExecutorClient
 from app.services.config_resolver import ConfigResolver
+from app.services.local_mount_service import LocalMountService
 from app.services.skill_stager import SkillStager
 from app.services.plugin_stager import PluginStager
 from app.services.attachment_stager import AttachmentStager
@@ -47,6 +48,7 @@ class RunPullService:
         self.executor_client = ExecutorClient()
         self.container_pool = None
         self.config_resolver = ConfigResolver(self.backend_client)
+        self.local_mount_service = LocalMountService(self.settings)
         self.skill_stager = SkillStager()
         self.plugin_stager = PluginStager()
         self.attachment_stager = AttachmentStager()
@@ -267,6 +269,9 @@ class RunPullService:
                 config_snapshot,
                 session_id=session_id,
                 run_id=str(run_id),
+            )
+            resolved_config, _ = self.local_mount_service.build_runtime_config(
+                resolved_config
             )
             logger.info(
                 "timing",

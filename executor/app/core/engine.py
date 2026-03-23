@@ -142,8 +142,8 @@ class AgentExecutor:
 
                 prompt = f"{prompt}\n\nPlease reply in the same language as the user's input unless explicitly requested otherwise."
                 prompt = (
-                    f"{prompt}\n\nCurrent working directory: {ctx.cwd}."
-                    "All operations must be performed within this directory only."
+                    f"{prompt}\n\n"
+                    f"{self._build_workspace_scope_hint(ctx.cwd, config)}"
                 )
 
             async def dummy_hook(
@@ -380,21 +380,63 @@ class AgentExecutor:
             reset_trace_id(trace_id_token)
 
     def _build_input_hint(self, config: TaskConfig) -> str | None:
+        lines: list[str] = []
         inputs = config.input_files or []
-        if not inputs:
-            return None
+        if inputs:
+            lines.append(
+                "User-uploaded inputs are available under inputs/ (or /workspace/inputs):"
+            )
+            for item in inputs:
+                path = getattr(item, "path", None) or ""
+                name = getattr(item, "name", None) or ""
+                display = (
+                    path.lstrip("/") if path else (f"inputs/{name}" if name else "")
+                )
+                if display:
+                    lines.append(f"- {display}")
+            lines.append("Do not modify files under inputs/ unless the user asks.")
 
-        lines = [
-            "User-uploaded inputs are available under inputs/ (or /workspace/inputs):",
-        ]
-        for item in inputs:
-            path = getattr(item, "path", None) or ""
-            name = getattr(item, "name", None) or ""
-            display = path.lstrip("/") if path else (f"inputs/{name}" if name else "")
-            if display:
-                lines.append(f"- {display}")
-        lines.append("Do not modify files under inputs/ unless the user asks.")
-        return "\n".join(lines)
+        mounts = config.resolved_local_mounts or []
+        if mounts:
+            if lines:
+                lines.append("")
+            lines.append("Filesystem layout for this task:")
+            lines.append("- /workspace is the Poco sandbox workspace.")
+            lines.append(
+                "- Authorized user local directories are mounted separately under /mnt/local/."
+            )
+            lines.append(
+                "- Changes under /mnt/local/... affect the user's real local files directly."
+            )
+            lines.append(
+                "- Do not treat /mnt/local/... as part of the /workspace git repository."
+            )
+            for mount in mounts:
+                lines.append(
+                    f"- {mount.container_path} ({mount.access_mode}, name: {mount.name})"
+                )
+            lines.append("Respect read-only local mounts and never write to ro paths.")
+
+        return "\n".join(lines) if lines else None
+
+    @staticmethod
+    def _build_workspace_scope_hint(cwd: str, config: TaskConfig) -> str:
+        mounts = config.resolved_local_mounts or []
+        if not mounts:
+            return (
+                f"Current working directory: {cwd}. "
+                "Keep normal work inside this workspace unless the user explicitly asks otherwise."
+            )
+
+        mount_paths = ", ".join(
+            mount.container_path for mount in sorted(mounts, key=lambda item: item.id)
+        )
+        return (
+            f"Current working directory: {cwd}. "
+            "Use /workspace as the default working area. "
+            f"You may explicitly access these authorized local mount paths when needed: {mount_paths}. "
+            "Do not mix local mount changes into workspace git operations unless the user asks."
+        )
 
     def _discover_plugins(self) -> list[SdkPluginConfig]:
         """Discover staged plugins under /workspace/.claude_data/plugins.

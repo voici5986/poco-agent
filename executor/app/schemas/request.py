@@ -2,7 +2,13 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from app.schemas.filesystem import LocalMountConfig, FilesystemMode
+from app.schemas.filesystem import (
+    DeploymentMode,
+    LocalMountConfig,
+    FilesystemMode,
+    MountProviderType,
+    ResolvedLocalMount,
+)
 
 
 class InputFile(BaseModel):
@@ -54,6 +60,10 @@ class TaskConfig(BaseModel):
     subagent_ids: list[int] = Field(default_factory=list)
     filesystem_mode: FilesystemMode = "sandbox"
     local_mounts: list[LocalMountConfig] = Field(default_factory=list)
+    deployment_mode: DeploymentMode = "local"
+    mount_provider_type: MountProviderType | None = None
+    mount_fingerprint: str | None = None
+    resolved_local_mounts: list[ResolvedLocalMount] = Field(default_factory=list)
     input_files: list[InputFile] = Field(default_factory=list)
 
 
