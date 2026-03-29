@@ -437,11 +437,34 @@ class AgentExecutor:
                         f"{requested_host_path} is exposed inside the container as "
                         f"{mount.container_path}."
                     )
-            lines.append(
-                "- When the user references an authorized host path, translate it to the "
-                "corresponding mounted workspace path before reading or writing."
+            # Build an explicit resolution table so the agent can match
+            # user-referenced paths without reasoning.
+            resolution_lines = [
+                "Path resolution table — MUST consult before ANY file I/O:",
+            ]
+            for mount in mounts:
+                host_path = None
+                cfg = configured_mounts.get(mount.id)
+                if cfg:
+                    host_path = cfg.host_path
+                dir_name = (
+                    Path(host_path).name if host_path else mount.name
+                )
+                resolution_lines.append(
+                    f'  "{dir_name}" or "{mount.name}"'
+                    + (f' or "{host_path}"' if host_path else "")
+                    + f" => {mount.container_path}"
+                )
+            resolution_lines.append(
+                "If the user's mentioned path matches a key above, use the "
+                "mapped container path. NEVER create a duplicate under /workspace."
             )
-            lines.append("Respect read-only local mounts and never write to ro paths.")
+            lines.append("")
+            lines.extend(resolution_lines)
+            lines.append("")
+            lines.append(
+                "- Respect read-only local mounts and never write to ro paths."
+            )
 
         return "\n".join(lines) if lines else None
 
@@ -459,8 +482,9 @@ class AgentExecutor:
         )
         return (
             f"Current working directory: {cwd}. "
-            "Use /workspace as the default working area. "
-            f"The following authorized local mount paths are available inside the workspace tree when needed: {mount_paths}. "
+            f"The following authorized local mount paths are available: {mount_paths}. "
+            "Before creating or writing any file, check the path resolution table above. "
+            "If the path matches a local mount, use the container mount path instead of /workspace. "
             "Do not mix local mount changes into workspace git operations unless the user asks."
         )
 

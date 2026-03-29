@@ -1,108 +1,127 @@
 #!/bin/bash
-# Poco 本地开发启动脚本（EM 在 Docker 中运行）
+# Poco 本地开发启动脚本
+# 所有服务（postgres, rustfs, backend, EM, frontend）一起启动
 
 set -e
 
-echo "🚀 启动 Poco 本地开发环境..."
-
-# 颜色定义
+# Colors
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# 检查是否在项目根目录
-if [ ! -f "docker-compose.yml" ]; then
-    echo "❌ 请在项目根目录运行此脚本"
-    exit 1
-fi
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+EXECUTOR_DOCKERFILE="$SCRIPT_DIR/docker/executor/Dockerfile"
 
-# 1. 构建本地镜像（首次或代码修改后）
-echo -e "\n${BLUE}🔨 检查本地镜像...${NC}"
+# ─── Step 1: Build local executor images ──────────────────────────────
+echo -e "\n${BLUE}Step 1/4: Executor images${NC}"
 
-if ! docker images | grep -q "poco-executor-manager:local"; then
-    echo -e "${YELLOW}⚠️  EM Manager 本地镜像不存在，开始构建...${NC}"
-    docker build -t poco-executor-manager:local \
-        -f docker/executor_manager/Dockerfile \
-        .
-    echo -e "${GREEN}✅ EM Manager 镜像构建完成${NC}"
-else
-    # 镜像已存在，询问是否需要重建
-    echo -e "${GREEN}✅ EM Manager 本地镜像已存在${NC}"
-    read -p "是否重新构建镜像？[y/N] " -n 1 -r
+LITE_EXISTS=$(docker images -q poco-executor:lite 2>/dev/null)
+FULL_EXISTS=$(docker images -q poco-executor:full 2>/dev/null)
+
+if [ -n "$LITE_EXISTS" ] || [ -n "$FULL_EXISTS" ]; then
+    read -p "Rebuild local executor images? (lite + full) [y/N] " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        docker build -t poco-executor-manager:local \
-            -f docker/executor_manager/Dockerfile \
-            .
-        echo -e "${GREEN}✅ EM Manager 镜像构建完成${NC}"
+        NEED_BUILD=true
+    else
+        NEED_BUILD=false
     fi
-fi
-
-# 2. 启动依赖服务（包括 EM Manager）
-echo -e "\n${BLUE}📦 启动 Docker 服务 (postgres, rustfs)...${NC}"
-docker-compose up -d postgres rustfs
-
-echo -e "\n${BLUE}📦 启动 Executor Manager（不启动 backend 依赖）...${NC}"
-docker-compose up -d --no-deps executor-manager
-
-# 等待服务就绪
-echo "⏳ 等待服务启动..."
-sleep 5
-
-# 3. 验证 EM Manager 容器是否使用本地镜像
-EM_IMAGE=$(docker-compose images executor-manager | awk 'NR==2 {print $2":"$3}')
-if [[ "$EM_IMAGE" == "poco-executor-manager:local" ]]; then
-    echo -e "${GREEN}✅ EM Manager 使用本地镜像${NC}"
 else
-    echo -e "${RED}❌ EM Manager 未使用本地镜像 (当前: $EM_IMAGE)${NC}"
-    echo -e "${YELLOW}检查 .env 中 EXECUTOR_MANAGER_IMAGE 配置${NC}"
+    echo -e "${YELLOW}No local executor images found. Building...${NC}"
+    NEED_BUILD=true
 fi
 
-# 4. 检查端口占用
+if [ "$NEED_BUILD" = true ]; then
+    echo -e "${BLUE}  Building poco-executor:lite ...${NC}"
+    docker build -t poco-executor:lite \
+        --build-arg SANDBOX_VARIANT=lite \
+        -f "$EXECUTOR_DOCKERFILE" "$SCRIPT_DIR" \
+        || { echo -e "${RED}Failed to build lite image${NC}"; exit 1; }
+    echo -e "${GREEN}  ✅ poco-executor:lite${NC}"
+
+    echo -e "${BLUE}  Building poco-executor:full ...${NC}"
+    docker build -t poco-executor:full \
+        --build-arg SANDBOX_VARIANT=full \
+        -f "$EXECUTOR_DOCKERFILE" "$SCRIPT_DIR" \
+        || { echo -e "${RED}Failed to build full image${NC}"; exit 1; }
+    echo -e "${GREEN}  ✅ poco-executor:full${NC}"
+else
+    echo -e "${GREEN}  ✅ Using existing executor images${NC}"
+fi
+
+# ─── Step 2: Start infrastructure (postgres, rustfs) ─────────────────
+echo -e "\n${BLUE}Step 2/4: Infrastructure (postgres, rustfs)${NC}"
+docker compose up -d postgres rustfs
+echo -e "${GREEN}  ✅ Infrastructure started${NC}"
+
+# ─── Step 3: Check port availability ──────────────────────────────────
+echo -e "\n${BLUE}Step 3/4: Port check${NC}"
 check_port() {
-    if lsof -Pi :$1 -sTCP:LISTEN -t >/dev/null 2>&1 ; then
-        echo -e "${YELLOW}⚠️  端口 $1 已被占用${NC}"
+    if lsof -Pi :$1 -sTCP:LISTEN -t >/dev/null 2>&1; then
+        echo -e "${YELLOW}  ⚠️  Port $1 in use ($2)${NC}"
         return 1
     fi
     return 0
 }
 
-check_port 8000 || echo "Backend 可能已在运行"
-check_port 3000 || echo "Frontend 可能已在运行"
+check_port 8000 "Backend" || true
+check_port 8001 "Executor Manager" || true
+check_port 3000 "Frontend" || true
 
-# 5. 提示启动命令
-echo -e "\n${GREEN}✅ Docker 服务已启动${NC}"
-echo -e "\n请在不同终端中运行以下命令："
-echo -e "\n${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${BLUE}1. Backend:${NC}"
-echo -e "   ${GREEN}cd backend && uv sync && uv run python -m app.main${NC}"
-echo -e "\n${BLUE}2. Frontend:${NC}"
-echo -e "   ${GREEN}cd frontend && pnpm dev${NC}"
-echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "\n${YELLOW}Docker 服务:${NC}"
-echo "  - EM Manager:   http://localhost:8001 (poco-executor-manager:local)"
-echo "  - PostgreSQL:   localhost:5432"
-echo "  - RustFS:       localhost:9000"
-echo -e "\n${YELLOW}本地服务:${NC}"
-echo "  - Backend:      http://localhost:8000"
-echo "  - Frontend:     http://localhost:3000"
-echo -e "\n${YELLOW}查看 EM 日志:${NC}"
-echo "  docker-compose logs -f executor-manager"
-echo -e "\n${YELLOW}重建 EM 镜像:${NC}"
-echo "  docker build -t poco-executor-manager:local -f docker/executor_manager/Dockerfile ."
-echo -e "\n${YELLOW}停止服务:${NC}"
-echo "  ./dev-stop.sh"
+# ─── Step 4: Start application services ───────────────────────────────
+echo -e "\n${BLUE}Step 4/4: Application services${NC}"
 
-# 6. 可选：使用 tmux 启动本地服务
-if command -v tmux &> /dev/null && [ "$1" == "--tmux" ]; then
-    echo -e "\n${BLUE}🚀 使用 tmux 启动本地服务...${NC}"
-
-    tmux new-session -d -s poco "cd backend && uv sync && uv run python -m app.main"
-    tmux rename-window -t poco:0 backend
-
-    tmux new-window -t poco:1 -n frontend "cd frontend && pnpm dev"
-
-    tmux attach-session -t poco
+TMUX_MODE=false
+if [ "$1" = "--manual" ]; then
+    TMUX_MODE=false
+elif command -v tmux &>/dev/null; then
+    TMUX_MODE=true
 fi
+
+if [ "$TMUX_MODE" = true ]; then
+    # ── tmux mode: all services in one session ──
+    SESSION="poco"
+
+    # Kill existing session if any
+    tmux kill-session -t "$SESSION" 2>/dev/null || true
+
+    tmux new-session -d -s "$SESSION" -c "$SCRIPT_DIR/backend" \
+        "uv sync 2>&1 | tail -1 && uv run python -m app.main"
+    tmux rename-window -t "$SESSION:0" backend
+
+    tmux new-window -t "$SESSION:1" -n executor-manager -c "$SCRIPT_DIR/executor_manager" \
+        "uv sync 2>&1 | tail -1 && uv run python -m app.main"
+
+    tmux new-window -t "$SESSION:2" -n frontend -c "$SCRIPT_DIR/frontend" \
+        "pnpm dev"
+
+    tmux new-window -t "$SESSION:3" -n infra \
+        "docker compose logs -f postgres rustfs"
+
+    tmux attach-session -t "$SESSION"
+else
+    # ── Manual mode: print commands ──
+    echo -e "\n${GREEN}✅ Infrastructure ready. Start application services in separate terminals:${NC}"
+    echo -e "\n${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}1. Executor Manager:${NC}"
+    echo -e "   ${GREEN}cd executor_manager && uv sync && uv run python -m app.main${NC}"
+    echo -e "\n${BLUE}2. Backend:${NC}"
+    echo -e "   ${GREEN}cd backend && uv sync && uv run python -m app.main${NC}"
+    echo -e "\n${BLUE}3. Frontend:${NC}"
+    echo -e "   ${GREEN}cd frontend && pnpm dev${NC}"
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "\n${YELLOW}Install tmux or run ./dev-start.sh (tmux detected automatically).${NC}"
+fi
+
+echo -e "\n${GREEN}Services:${NC}"
+echo "  PostgreSQL:       localhost:5432"
+echo "  RustFS:           localhost:9000 / 9001"
+echo "  Executor Manager: localhost:8001"
+echo "  Backend:          localhost:8000"
+echo "  Frontend:         localhost:3000"
+echo -e "\n${YELLOW}Logs:${NC}"
+echo "  docker compose logs -f postgres rustfs"
+echo -e "\n${YELLOW}Stop infrastructure:${NC}"
+echo "  ./dev-stop.sh"
