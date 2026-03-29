@@ -2108,6 +2108,10 @@
     "toasts": {
       "saved": "Configuration enregistrée. Elle sera appliquée à la prochaine exécution.",
       "saveFailed": "Impossible d’enregistrer les paramètres des fichiers locaux"
+    },
+    "picker": {
+      "notSupported": "Le sélecteur de dossiers natif n’est pas pris en charge dans ce navigateur. Veuillez saisir le chemin manuellement.",
+      "resolveFailed": "Impossible de détecter automatiquement le chemin. Veuillez saisir le chemin d’hôte manuellement."
     }
   }
 }

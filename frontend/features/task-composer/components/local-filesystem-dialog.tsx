@@ -42,6 +42,20 @@ import type {
   LocalMountDraftRow,
 } from "@/features/task-composer/types/local-filesystem";
 
+async function resolveDirectoryPath(name: string): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `/api/resolve-directory?name=${encodeURIComponent(name)}`,
+    );
+    if (!res.ok) return null;
+    const data: { paths: string[] } = await res.json();
+    // Only auto-fill when there's exactly one match to avoid ambiguity
+    return data.paths.length === 1 ? data.paths[0] : null;
+  } catch {
+    return null;
+  }
+}
+
 interface LocalFilesystemDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -141,9 +155,36 @@ export function LocalFilesystemDialog({
     [],
   );
 
-  const handleAddRow = React.useCallback(() => {
-    setRows((prev) => [...prev, createEmptyLocalMountDraftRow()]);
-  }, []);
+  const handleAddRow = React.useCallback(async () => {
+    if (!("showDirectoryPicker" in window)) {
+      toast.error(t("filesystem.picker.notSupported"));
+      setRows((prev) => [...prev, createEmptyLocalMountDraftRow()]);
+      return;
+    }
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const handle = (await (window as any).showDirectoryPicker()) as {
+        name: string;
+      };
+      const displayName = handle.name;
+      const hostPath = await resolveDirectoryPath(displayName);
+
+      setRows((prev) => [
+        ...prev,
+        createEmptyLocalMountDraftRow({
+          host_path: hostPath ?? "",
+          name: displayName,
+        }),
+      ]);
+
+      if (!hostPath) {
+        toast.warning(t("filesystem.picker.resolveFailed"));
+      }
+    } catch {
+      // User cancelled the native picker — do nothing
+    }
+  }, [t]);
 
   const handleRemoveRow = React.useCallback((clientId: string) => {
     setRows((prev) => {

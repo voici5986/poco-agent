@@ -2108,6 +2108,10 @@
     "toasts": {
       "saved": "Configuration saved. It will apply on the next run.",
       "saveFailed": "Failed to save local file settings"
+    },
+    "picker": {
+      "notSupported": "Native folder picker is not supported in this browser. Please enter the path manually.",
+      "resolveFailed": "Could not auto-detect the path. Please enter the host path manually."
     }
   }
 }

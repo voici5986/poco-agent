@@ -2108,6 +2108,10 @@
     "toasts": {
       "saved": "Konfiguration gespeichert. Sie gilt ab dem nächsten Lauf.",
       "saveFailed": "Lokale Dateieinstellungen konnten nicht gespeichert werden"
+    },
+    "picker": {
+      "notSupported": "Der native Ordnerwähler wird in diesem Browser nicht unterstützt. Bitte gib den Pfad manuell ein.",
+      "resolveFailed": "Der Pfad konnte nicht automatisch erkannt werden. Bitte gib den Hostpfad manuell ein."
     }
   }
 }

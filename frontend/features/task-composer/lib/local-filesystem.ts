@@ -26,11 +26,13 @@ function createClientId(): string {
   return `mount-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-export function createEmptyLocalMountDraftRow(): LocalMountDraftRow {
+export function createEmptyLocalMountDraftRow(
+  overrides?: Partial<Pick<LocalMountDraftRow, "name" | "host_path">>,
+): LocalMountDraftRow {
   return {
     client_id: createClientId(),
-    name: "",
-    host_path: "",
+    name: overrides?.name ?? "",
+    host_path: overrides?.host_path ?? "",
     access_mode: "ro",
   };
 }
