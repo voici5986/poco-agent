@@ -56,6 +56,7 @@ class MountProvider(Protocol):
         session_id: str | None = None,
     ) -> list[ResolvedLocalMount]:
         """Resolve user-visible local mounts into host/container bind targets."""
+        ...
 
 
 class DirectBindMountProvider:
