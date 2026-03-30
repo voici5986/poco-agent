@@ -13,6 +13,55 @@ NC='\033[0m'
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 EXECUTOR_DOCKERFILE="$SCRIPT_DIR/docker/executor/Dockerfile"
+BACKEND_HEALTH_URL="http://localhost:8000/api/v1/health"
+
+wait_for_container_health() {
+    local service="$1"
+    local timeout="${2:-60}"
+    local elapsed=0
+    local container_id
+
+    container_id="$(docker compose ps -q "$service" 2>/dev/null)"
+    if [ -z "$container_id" ]; then
+        echo -e "${RED}  ❌ Could not find container for service: $service${NC}"
+        return 1
+    fi
+
+    echo -e "${BLUE}  Waiting for $service to become healthy...${NC}"
+    while [ "$elapsed" -lt "$timeout" ]; do
+        local status
+        status="$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}no-healthcheck{{end}}' "$container_id" 2>/dev/null || true)"
+        if [ "$status" = "healthy" ] || [ "$status" = "no-healthcheck" ]; then
+            echo -e "${GREEN}  ✅ $service is ready${NC}"
+            return 0
+        fi
+        sleep 2
+        elapsed=$((elapsed + 2))
+    done
+
+    echo -e "${RED}  ❌ Timed out waiting for $service health${NC}"
+    return 1
+}
+
+wait_for_http_ready() {
+    local name="$1"
+    local url="$2"
+    local timeout="${3:-90}"
+    local elapsed=0
+
+    echo -e "${BLUE}  Waiting for $name at $url ...${NC}"
+    while [ "$elapsed" -lt "$timeout" ]; do
+        if curl -fsS "$url" >/dev/null 2>&1; then
+            echo -e "${GREEN}  ✅ $name is ready${NC}"
+            return 0
+        fi
+        sleep 2
+        elapsed=$((elapsed + 2))
+    done
+
+    echo -e "${RED}  ❌ Timed out waiting for $name${NC}"
+    return 1
+}
 
 # ─── Step 1: Build local executor images ──────────────────────────────
 echo -e "\n${BLUE}Step 1/4: Executor images${NC}"
@@ -54,6 +103,7 @@ fi
 # ─── Step 2: Start infrastructure (postgres, rustfs) ─────────────────
 echo -e "\n${BLUE}Step 2/4: Infrastructure (postgres, rustfs)${NC}"
 docker compose up -d postgres rustfs
+wait_for_container_health postgres 60
 echo -e "${GREEN}  ✅ Infrastructure started${NC}"
 
 # ─── Step 3: Check port availability ──────────────────────────────────
@@ -91,6 +141,11 @@ if [ "$TMUX_MODE" = true ]; then
         "uv sync 2>&1 | tail -1 && uv run python -m app.main"
     tmux rename-window -t "$SESSION:0" backend
 
+    if ! wait_for_http_ready "Backend" "$BACKEND_HEALTH_URL" 90; then
+        echo -e "${YELLOW}  ⚠️  Backend did not become healthy before starting dependent services.${NC}"
+        echo -e "${YELLOW}     Inspect the tmux backend window for the real startup error.${NC}"
+    fi
+
     tmux new-window -t "$SESSION:1" -n executor-manager -c "$SCRIPT_DIR/executor_manager" \
         "uv sync 2>&1 | tail -1 && uv run python -m app.main"
 
@@ -105,11 +160,13 @@ else
     # ── Manual mode: print commands ──
     echo -e "\n${GREEN}✅ Infrastructure ready. Start application services in separate terminals:${NC}"
     echo -e "\n${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${BLUE}1. Executor Manager:${NC}"
-    echo -e "   ${GREEN}cd executor_manager && uv sync && uv run python -m app.main${NC}"
-    echo -e "\n${BLUE}2. Backend:${NC}"
+    echo -e "${BLUE}1. Backend:${NC}"
     echo -e "   ${GREEN}cd backend && uv sync && uv run python -m app.main${NC}"
-    echo -e "\n${BLUE}3. Frontend:${NC}"
+    echo -e "\n${BLUE}2. Wait until backend health is OK:${NC}"
+    echo -e "   ${GREEN}curl -fsS $BACKEND_HEALTH_URL${NC}"
+    echo -e "\n${BLUE}3. Executor Manager:${NC}"
+    echo -e "   ${GREEN}cd executor_manager && uv sync && uv run python -m app.main${NC}"
+    echo -e "\n${BLUE}4. Frontend:${NC}"
     echo -e "   ${GREEN}cd frontend && pnpm dev${NC}"
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "\n${YELLOW}Install tmux or run ./dev-start.sh (tmux detected automatically).${NC}"
