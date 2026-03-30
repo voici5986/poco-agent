@@ -1,7 +1,13 @@
 import * as React from "react";
-import { Upload } from "lucide-react";
+import { Sparkles, Upload } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n/client";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { ScheduledTaskSettingsDialog } from "@/features/scheduled-tasks/components/scheduled-task-settings-dialog";
 import {
@@ -13,10 +19,11 @@ import { ComposerAttachments } from "@/features/task-composer/components/compose
 import { CapabilityRecommendations } from "@/features/task-composer/components/capability-recommendations";
 import { ComposerToolbar } from "@/features/task-composer/components/composer-toolbar";
 import { LocalFilesystemDialog } from "@/features/task-composer/components/local-filesystem-dialog";
+import { PresetPickerDialog } from "@/features/task-composer/components/preset-picker-dialog";
 import { RepoDialog } from "@/features/task-composer/components/repo-dialog";
 import { SlashAutocompleteDropdown } from "@/features/task-composer/components/slash-autocomplete-dropdown";
-import { PresetSelect } from "@/features/capabilities/presets";
 import { presetsService } from "@/features/capabilities/presets/api/presets-api";
+import { getPresetIcon } from "@/features/capabilities/presets/lib/preset-visuals";
 import { useCapabilityRecommendations } from "@/features/task-composer/hooks/use-capability-recommendations";
 import { getNextComposerMode } from "@/features/task-composer/lib/mode-utils";
 import { resolveInitialPresetSelection } from "@/features/task-composer/lib/preset-selection";
@@ -174,6 +181,7 @@ export function TaskComposer({
     TrackedCapabilityItem[]
   >([]);
   const [presets, setPresets] = React.useState<Preset[]>([]);
+  const [presetDialogOpen, setPresetDialogOpen] = React.useState(false);
   const [selectedPresetId, setSelectedPresetId] = React.useState<number | null>(
     null,
   );
@@ -243,6 +251,12 @@ export function TaskComposer({
   const [scheduledEnabled, setScheduledEnabled] = React.useState(true);
   const [scheduledReuseSession, setScheduledReuseSession] =
     React.useState(true);
+
+  const selectedPreset = React.useMemo(
+    () =>
+      presets.find((preset) => preset.preset_id === selectedPresetId) ?? null,
+    [presets, selectedPresetId],
+  );
 
   const capabilityRecommendations = useCapabilityRecommendations(value, {
     enabled: !isSubmitting,
@@ -605,21 +619,19 @@ export function TaskComposer({
           }}
         />
 
+        <PresetPickerDialog
+          open={presetDialogOpen}
+          onOpenChange={setPresetDialogOpen}
+          presets={presets}
+          value={selectedPresetId}
+          onChange={(nextValue) => {
+            hasTouchedPresetRef.current = true;
+            setSelectedPresetId(nextValue);
+          }}
+        />
+
         {/* Textarea with slash autocomplete */}
         <div className="relative px-4 pb-3 pt-4">
-          {presets.length > 0 ? (
-            <div className="mb-3 flex justify-end">
-              <PresetSelect
-                presets={presets}
-                value={selectedPresetId}
-                onChange={(value) => {
-                  hasTouchedPresetRef.current = true;
-                  setSelectedPresetId(value);
-                }}
-                disabled={Boolean(isSubmitting)}
-              />
-            </div>
-          ) : null}
           <SlashAutocompleteDropdown
             isOpen={slashAutocomplete.isOpen}
             suggestions={slashAutocomplete.suggestions}
@@ -694,6 +706,49 @@ export function TaskComposer({
               onToggleVoiceInput={() => {
                 void voiceInput.toggleRecording();
               }}
+              leadingAddon={
+                presets.length > 0 ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        disabled={Boolean(isSubmitting) || upload.isUploading}
+                        className={cn(
+                          "rounded-xl border text-sm",
+                          selectedPreset
+                            ? "h-9 max-w-[220px] items-center gap-2 border-primary/20 bg-primary/10 px-3 text-foreground hover:bg-primary/15"
+                            : "size-9 border-border/70 p-0 text-muted-foreground hover:bg-accent",
+                        )}
+                        onClick={() => setPresetDialogOpen(true)}
+                        aria-label={
+                          selectedPreset?.name ??
+                          t("library.presetsPage.picker.placeholder")
+                        }
+                      >
+                        {selectedPreset ? (
+                          React.createElement(getPresetIcon(selectedPreset.icon), {
+                            className: "size-4 shrink-0",
+                            style: selectedPreset.color
+                              ? { color: selectedPreset.color }
+                              : undefined,
+                          })
+                        ) : (
+                          <Sparkles className="size-4 shrink-0" />
+                        )}
+                        {selectedPreset ? (
+                          <span className="truncate">{selectedPreset.name}</span>
+                        ) : null}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" sideOffset={8}>
+                      {selectedPreset
+                        ? t("library.presetsPage.picker.change")
+                        : t("library.presetsPage.picker.placeholder")}
+                    </TooltipContent>
+                  </Tooltip>
+                ) : null
+              }
               onSubmit={handleSubmit}
               scheduledSummary={
                 mode === "scheduled" ? scheduledSummary : undefined

@@ -70,6 +70,7 @@ interface ComposerToolbarProps {
   onSubmit: () => void;
   scheduledSummary?: string;
   onOpenScheduledSettings?: () => void;
+  leadingAddon?: React.ReactNode;
 }
 
 /**
@@ -99,6 +100,7 @@ export function ComposerToolbar({
   onSubmit,
   scheduledSummary,
   onOpenScheduledSettings,
+  leadingAddon,
 }: ComposerToolbarProps) {
   const { t } = useT("translation");
   const disabled = isSubmitting || isUploading;
@@ -147,6 +149,8 @@ export function ComposerToolbar({
             {t("hero.uploadFile")}
           </TooltipContent>
         </Tooltip>
+
+        {leadingAddon}
 
         {/* Plan mode indicator */}
         {mode === "plan" ? (

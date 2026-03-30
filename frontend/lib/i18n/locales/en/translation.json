@@ -1426,7 +1426,12 @@
       },
       "picker": {
         "placeholder": "Select a preset",
-        "none": "No preset"
+        "none": "No preset",
+        "change": "Change preset",
+        "selected": "Selected",
+        "dialogTitle": "Choose a preset",
+        "dialogDescription": "Apply a reusable setup to this run, or continue without one.",
+        "noneDescription": "Keep the current run independent and do not apply a preset."
       },
       "selectors": {
         "skills": "Choose the reusable skills bundled into this preset.",

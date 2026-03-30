@@ -1426,7 +1426,12 @@
       },
       "picker": {
         "placeholder": "Vorlage auswählen",
-        "none": "Keine Vorlage"
+        "none": "Keine Vorlage",
+        "change": "Vorlage wechseln",
+        "selected": "Ausgewählt",
+        "dialogTitle": "Vorlage auswählen",
+        "dialogDescription": "Wende für diesen Lauf eine wiederverwendbare Konfiguration an oder fahre ohne Vorlage fort.",
+        "noneDescription": "Diesen Lauf unabhängig halten und keine Vorlage anwenden."
       },
       "selectors": {
         "skills": "Wähle die wiederverwendbaren Skills für diese Vorlage aus.",

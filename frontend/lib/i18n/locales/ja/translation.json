@@ -1426,7 +1426,12 @@
       },
       "picker": {
         "placeholder": "プリセットを選択",
-        "none": "プリセットなし"
+        "none": "プリセットなし",
+        "change": "プリセットを変更",
+        "selected": "選択中",
+        "dialogTitle": "プリセットを選択",
+        "dialogDescription": "この実行に再利用可能な設定を適用するか、プリセットなしで続行します。",
+        "noneDescription": "この実行を独立したままにし、プリセットを適用しません。"
       },
       "selectors": {
         "skills": "このプリセットに含める再利用可能なスキルを選択します。",

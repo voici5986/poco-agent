@@ -1426,7 +1426,12 @@
       },
       "picker": {
         "placeholder": "Sélectionner un préréglage",
-        "none": "Aucun préréglage"
+        "none": "Aucun préréglage",
+        "change": "Changer de préréglage",
+        "selected": "Sélectionné",
+        "dialogTitle": "Choisir un préréglage",
+        "dialogDescription": "Appliquez une configuration réutilisable à cette exécution, ou continuez sans préréglage.",
+        "noneDescription": "Conserver cette exécution indépendante sans appliquer de préréglage."
       },
       "selectors": {
         "skills": "Choisissez les compétences réutilisables incluses dans ce préréglage.",

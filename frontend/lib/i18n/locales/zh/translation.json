@@ -1426,7 +1426,12 @@
       },
       "picker": {
         "placeholder": "选择预设",
-        "none": "不使用预设"
+        "none": "不使用预设",
+        "change": "切换预设",
+        "selected": "当前使用",
+        "dialogTitle": "选择预设",
+        "dialogDescription": "为本次会话套用一组可复用配置，或者继续不使用预设。",
+        "noneDescription": "保持当前会话独立运行，不额外套用任何预设。"
       },
       "selectors": {
         "skills": "选择这个预设默认启用的 Skills。",
