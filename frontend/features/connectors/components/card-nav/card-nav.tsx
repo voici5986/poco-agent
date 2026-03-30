@@ -30,7 +30,7 @@ import {
 const MCP_LIMIT = 3;
 const SKILL_LIMIT = 5;
 
-type CapabilityViewId = "mcp" | "skills" | "presets";
+type CapabilityViewId = "mcp" | "skills" | "plugins";
 
 export interface CardNavProps {
   triggerText?: string;
@@ -56,7 +56,7 @@ interface PreviewItem {
 /**
  * CardNav Component
  *
- * Entry card that opens a dialog with MCP, Skill, and Preset controls
+ * Entry card that opens a dialog with MCP, Skill, and Plugin controls
  */
 export function CardNav({
   triggerText,
@@ -214,7 +214,7 @@ export function CardNav({
     return {
       id: install.plugin_id,
       name:
-        plugin?.name || t("cardNav.fallbackPreset", { id: install.plugin_id }),
+        plugin?.name || t("cardNav.fallbackPlugin", { id: install.plugin_id }),
       enabled: install.enabled,
       toggleId: install.id,
     };
@@ -455,7 +455,7 @@ export function CardNav({
         items: installedPlugins,
         emptyText: t("cardNav.noPluginsInstalled"),
         onToggle: togglePluginEnabled,
-        onNavigate: () => handleCardClick("presets"),
+        onNavigate: () => handleCardClick("plugins"),
       },
     ],
     [

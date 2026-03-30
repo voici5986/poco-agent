@@ -6,6 +6,7 @@ import {
   Sparkles,
   Store,
   Puzzle,
+  Plug,
   Server,
   KeySquare,
   FileText,
@@ -18,6 +19,7 @@ import { SkillsMarketplacePageClient } from "@/features/capabilities/marketplace
 import { PresetsPageClient } from "@/features/capabilities/presets/components/presets-page-client";
 import { SkillsPageClient } from "@/features/capabilities/skills/components/skills-page-client";
 import { McpPageClient } from "@/features/capabilities/mcp/components/mcp-page-client";
+import { PluginsPageClient } from "@/features/capabilities/plugins/components/plugins-page-client";
 import { EnvVarsPageClient } from "@/features/capabilities/env-vars/components/env-vars-page-client";
 import { PersonalizationPageClient } from "@/features/capabilities/personalization/components/personalization-page-client";
 import { SlashCommandsPageClient } from "@/features/capabilities/slash-commands/components/slash-commands-page-client";
@@ -71,6 +73,14 @@ export function useCapabilityViews(): CapabilityView[] {
         group: "primary",
         icon: Server,
         component: McpPageClient,
+      },
+      {
+        id: "plugins",
+        label: t("library.pluginsManager.title"),
+        description: t("library.pluginsManager.description"),
+        group: "primary",
+        icon: Plug,
+        component: PluginsPageClient,
       },
       {
         id: "slash-commands",
