@@ -8,6 +8,7 @@
     "newTaskWithShortcut": "Новая задача ({{shortcut}})",
     "search": "Поиск",
     "library": "Возможности",
+    "presets": "Пресеты",
     "openMain": "Открыть основную боковую панель",
     "scheduledTasks": "Запланированные задачи",
     "memories": "Память",

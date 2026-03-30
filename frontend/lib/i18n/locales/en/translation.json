@@ -8,6 +8,7 @@
     "newTaskWithShortcut": "New Task ({{shortcut}})",
     "search": "Search",
     "library": "Capabilities",
+    "presets": "Presets",
     "openMain": "Open main sidebar",
     "scheduledTasks": "Scheduled Tasks",
     "memories": "Memories",

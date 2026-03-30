@@ -8,6 +8,7 @@
     "newTaskWithShortcut": "新建任务 ({{shortcut}})",
     "search": "搜索",
     "library": "能力",
+    "presets": "预设",
     "openMain": "打开主侧边栏",
     "scheduledTasks": "定时任务",
     "memories": "记忆",

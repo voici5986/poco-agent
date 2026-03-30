@@ -8,6 +8,7 @@
     "newTaskWithShortcut": "新しいタスク ({{shortcut}})",
     "search": "検索",
     "library": "機能",
+    "presets": "プリセット",
     "openMain": "メインサイドバーを開く",
     "scheduledTasks": "スケジュールタスク",
     "memories": "メモリ",
