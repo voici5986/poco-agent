@@ -50,7 +50,9 @@ class SessionService:
         self, db: Session, user_id: str, request: SessionCreateRequest
     ) -> AgentSession:
         """Creates a new session."""
-        config_dict = request.config.model_dump() if request.config else None
+        config_dict = (
+            request.config.model_dump(exclude_unset=True) if request.config else None
+        )
         project_id = request.project_id
         if project_id is not None:
             project = ProjectRepository.get_by_id(db, project_id)

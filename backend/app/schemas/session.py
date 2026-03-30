@@ -7,11 +7,21 @@ from pydantic import BaseModel, ConfigDict, Field
 from app.schemas.callback import AgentCurrentState
 from app.schemas.filesystem import LocalMountConfig, FilesystemMode
 from app.schemas.input_file import InputFile
+from app.schemas.sub_agent import SubAgentModel
+
+
+class TaskSubAgentConfig(BaseModel):
+    name: str = Field(min_length=1, max_length=255)
+    description: str | None = Field(default=None, max_length=255)
+    prompt: str | None = None
+    model: SubAgentModel | None = None
+    tools: list[str] | None = None
 
 
 class TaskConfig(BaseModel):
     """Task configuration."""
 
+    preset_id: int | None = None
     repo_url: str | None = None
     git_branch: str = "main"
     git_token_env_key: str | None = None
@@ -25,6 +35,7 @@ class TaskConfig(BaseModel):
     skill_config: dict[str, bool] = Field(default_factory=dict)
     plugin_config: dict[str, bool] = Field(default_factory=dict)
     subagent_ids: list[int] = Field(default_factory=list)
+    subagent_configs: list[TaskSubAgentConfig] = Field(default_factory=list)
     filesystem_mode: FilesystemMode = "sandbox"
     local_mounts: list[LocalMountConfig] = Field(default_factory=list)
     input_files: list[InputFile] = Field(default_factory=list)

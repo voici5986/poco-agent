@@ -3,6 +3,8 @@ from typing import Any
 
 import httpx
 
+from app.core.errors.error_codes import ErrorCode
+from app.core.errors.exceptions import AppException
 from app.core.settings import get_settings
 from app.core.observability.request_context import (
     generate_request_id,
@@ -245,6 +247,27 @@ class BackendClient:
         if not isinstance(resolved, dict):
             return {}
         return {str(k): str(v) for k, v in resolved.items() if isinstance(v, str)}
+
+    async def get_preset(self, user_id: str, preset_id: int) -> dict[str, Any]:
+        try:
+            response = await self._request(
+                "GET",
+                f"/api/v1/presets/{preset_id}",
+                headers={
+                    "X-User-Id": user_id,
+                    **self._trace_headers(),
+                },
+            )
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == 404:
+                raise AppException(
+                    error_code=ErrorCode.NOT_FOUND,
+                    message=f"Preset not found: {preset_id}",
+                ) from exc
+            raise
+        data = response.json()
+        result = data.get("data", {}) or {}
+        return result if isinstance(result, dict) else {}
 
     async def get_claude_md(self, user_id: str) -> dict:
         """Fetch user-level CLAUDE.md settings for execution staging."""

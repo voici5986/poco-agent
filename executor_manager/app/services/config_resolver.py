@@ -8,6 +8,7 @@ from app.core.settings import get_settings
 from app.core.errors.error_codes import ErrorCode
 from app.core.errors.exceptions import AppException
 from app.services.backend_client import BackendClient
+from app.services.preset_service import PresetResolver
 
 
 _ENV_PATTERN = re.compile(r"\$\{([^}]+)\}")
@@ -103,6 +104,7 @@ class ConfigResolver:
     def __init__(self, backend_client: BackendClient | None = None) -> None:
         self.backend_client = backend_client or BackendClient()
         self.settings = get_settings()
+        self.preset_resolver = PresetResolver(self.backend_client)
 
     async def resolve(
         self,
@@ -122,6 +124,21 @@ class ConfigResolver:
         }
 
         step_started = time.perf_counter()
+        effective_config = await self.preset_resolver.apply_preset_config(
+            user_id=user_id,
+            config_snapshot=config_snapshot,
+        )
+        logger.info(
+            "timing",
+            extra={
+                "step": "config_resolve_apply_preset",
+                "duration_ms": int((time.perf_counter() - step_started) * 1000),
+                "preset_applied": bool(effective_config.get("preset_id")),
+                **ctx,
+            },
+        )
+
+        step_started = time.perf_counter()
         env_map = await self._get_env_map(user_id)
         logger.info(
             "timing",
@@ -133,7 +150,7 @@ class ConfigResolver:
         )
 
         step_started = time.perf_counter()
-        mcp_config = await self._resolve_effective_mcp_config(user_id, config_snapshot)
+        mcp_config = await self._resolve_effective_mcp_config(user_id, effective_config)
         logger.info(
             "timing",
             extra={
@@ -146,7 +163,7 @@ class ConfigResolver:
 
         step_started = time.perf_counter()
         skill_files = await self._resolve_effective_skill_files(
-            user_id, config_snapshot
+            user_id, effective_config
         )
         logger.info(
             "timing",
@@ -157,11 +174,11 @@ class ConfigResolver:
                 **ctx,
             },
         )
-        input_files = config_snapshot.get("input_files") or []
+        input_files = effective_config.get("input_files") or []
 
         step_started = time.perf_counter()
         plugin_files = await self._resolve_effective_plugin_files(
-            user_id, config_snapshot
+            user_id, effective_config
         )
         logger.info(
             "timing",
@@ -176,7 +193,7 @@ class ConfigResolver:
         step_started = time.perf_counter()
         try:
             resolved_subagents = await self._resolve_effective_subagents(
-                user_id, config_snapshot
+                user_id, effective_config
             )
         except Exception as exc:
             logger.warning(f"Failed to resolve subagents for user {user_id}: {exc}")
@@ -221,11 +238,20 @@ class ConfigResolver:
             },
         )
 
-        resolved = dict(config_snapshot)
+        resolved = dict(effective_config)
         resolved["mcp_config"] = resolved_mcp
         resolved["skill_files"] = resolved_skills
         resolved["plugin_files"] = resolved_plugins
         resolved["input_files"] = resolved_inputs
+        inline_subagents = self._resolve_inline_subagent_configs(
+            effective_config.get("subagent_configs")
+        )
+        if inline_subagents:
+            structured_agents = {
+                **(structured_agents if isinstance(structured_agents, dict) else {}),
+                **inline_subagents,
+            }
+
         if isinstance(structured_agents, dict):
             # Expose as `agents` to match ClaudeAgentOptions (programmatic subagents).
             resolved["agents"] = structured_agents
@@ -443,6 +469,38 @@ class ConfigResolver:
         return await self.backend_client.resolve_subagents(
             user_id=user_id, subagent_ids=subagent_ids
         )
+
+    @staticmethod
+    def _resolve_inline_subagent_configs(value: Any) -> dict[str, dict[str, Any]]:
+        if not isinstance(value, list):
+            return {}
+        resolved: dict[str, dict[str, Any]] = {}
+        for item in value:
+            if not isinstance(item, dict):
+                continue
+            name = str(item.get("name") or "").strip()
+            description = str(item.get("description") or "").strip()
+            prompt = str(item.get("prompt") or "").strip()
+            if not name or not description or not prompt:
+                continue
+            agent_config: dict[str, Any] = {
+                "description": description,
+                "prompt": prompt,
+            }
+            tools = item.get("tools")
+            if isinstance(tools, list):
+                normalized_tools = [
+                    str(tool).strip()
+                    for tool in tools
+                    if isinstance(tool, str) and str(tool).strip()
+                ]
+                if normalized_tools:
+                    agent_config["tools"] = normalized_tools
+            model = item.get("model")
+            if isinstance(model, str) and model.strip():
+                agent_config["model"] = model.strip()
+            resolved[name] = agent_config
+        return resolved
 
     @staticmethod
     def _normalize_ids(value: Any) -> list[int]:

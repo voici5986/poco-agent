@@ -18,9 +18,21 @@ class InputFile(BaseModel):
     path: str | None = None
 
 
+AgentModel = Literal["sonnet", "opus", "haiku", "inherit"]
+
+
+class SubAgentConfig(BaseModel):
+    name: str = Field(min_length=1, max_length=255)
+    description: str | None = Field(default=None, max_length=255)
+    prompt: str | None = None
+    model: AgentModel | None = None
+    tools: list[str] | None = None
+
+
 class TaskConfig(BaseModel):
     """Task configuration."""
 
+    preset_id: int | None = None
     repo_url: str | None = None
     git_branch: str = "main"
     git_token_env_key: str | None = None
@@ -39,6 +51,7 @@ class TaskConfig(BaseModel):
     plugin_files: dict = Field(default_factory=dict)
     plugin_ids: list[int] = Field(default_factory=list)
     subagent_ids: list[int] = Field(default_factory=list)
+    subagent_configs: list[SubAgentConfig] = Field(default_factory=list)
     filesystem_mode: FilesystemMode = "sandbox"
     local_mounts: list[LocalMountConfig] = Field(default_factory=list)
     input_files: list[InputFile] = Field(default_factory=list)
