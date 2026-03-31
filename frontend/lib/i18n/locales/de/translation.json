@@ -1544,6 +1544,12 @@
         "presets": "Vorlagen",
         "updated": "Zuletzt aktualisiert"
       },
+      "sessionList": {
+        "title": "Sitzungsverlauf",
+        "subtitle": "{{count}} Sitzungen in diesem Projekt",
+        "emptyTitle": "Noch keine Projektsitzungen",
+        "emptyDescription": "Der nächste Lauf in diesem Projekt erscheint hier, damit du schnell wieder in den Kontext springen kannst."
+      },
       "quickActions": {
         "title": "Schnellaktionen",
         "subtitle": "Die wichtigsten Projektaktionen an einem Ort im Detailbereich halten.",

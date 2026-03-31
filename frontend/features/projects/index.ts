@@ -3,6 +3,7 @@ export { MoveTaskToProjectDialog } from "@/features/projects/components/move-tas
 export { ProjectHeader } from "@/features/projects/components/project-header";
 export { ProjectInfoSection } from "@/features/projects/components/project-info-section";
 export { ProjectPageClient } from "@/features/projects/components/project-page-client";
+export { ProjectSessionList } from "@/features/projects/components/project-session-list";
 export { ProjectSettingsDialog } from "@/features/projects/components/project-settings-dialog";
 export { RenameProjectDialog } from "@/features/projects/components/rename-project-dialog";
 export { RenameTaskDialog } from "@/features/projects/components/rename-task-dialog";

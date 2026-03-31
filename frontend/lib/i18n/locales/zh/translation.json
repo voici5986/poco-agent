@@ -1544,6 +1544,12 @@
         "presets": "预设",
         "updated": "最近更新"
       },
+      "sessionList": {
+        "title": "会话历史",
+        "subtitle": "这个项目中共有 {{count}} 个会话",
+        "emptyTitle": "项目里还没有会话",
+        "emptyDescription": "你在这个项目中的下一次运行会出现在这里，方便快速回到上下文。"
+      },
       "quickActions": {
         "title": "快捷操作",
         "subtitle": "把常用入口放在项目上下文里，减少来回切换。",

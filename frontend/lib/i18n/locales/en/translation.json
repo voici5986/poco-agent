@@ -1544,6 +1544,12 @@
         "presets": "Presets",
         "updated": "Last updated"
       },
+      "sessionList": {
+        "title": "Session history",
+        "subtitle": "{{count}} sessions in this project",
+        "emptyTitle": "No project sessions yet",
+        "emptyDescription": "Your next run in this project will appear here so you can jump back into context quickly."
+      },
       "quickActions": {
         "title": "Quick actions",
         "subtitle": "Keep the most common project controls in one panel.",

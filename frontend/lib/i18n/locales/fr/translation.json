@@ -1544,6 +1544,12 @@
         "presets": "Préréglages",
         "updated": "Dernière mise à jour"
       },
+      "sessionList": {
+        "title": "Historique des sessions",
+        "subtitle": "{{count}} sessions dans ce projet",
+        "emptyTitle": "Aucune session de projet pour le moment",
+        "emptyDescription": "La prochaine exécution dans ce projet apparaîtra ici pour vous permettre de revenir rapidement au bon contexte."
+      },
       "quickActions": {
         "title": "Actions rapides",
         "subtitle": "Gardez les actions de projet les plus courantes dans un seul panneau.",

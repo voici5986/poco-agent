@@ -18,6 +18,7 @@ import type { ProjectItem, TaskHistoryItem } from "@/features/projects/types";
 
 import { ProjectHeader } from "@/features/projects/components/project-header";
 import { ProjectInfoSection } from "@/features/projects/components/project-info-section";
+import { ProjectSessionList } from "@/features/projects/components/project-session-list";
 import { ProjectSettingsDialog } from "@/features/projects/components/project-settings-dialog";
 import { getDefaultProjectPresetId } from "@/features/projects/lib/project-presets";
 import { CapabilityToggleProvider, ConnectorsBar } from "@/features/connectors";
@@ -56,6 +57,13 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
       taskHistory.filter(
         (task: TaskHistoryItem) => task.projectId === projectId,
       ).length,
+    [projectId, taskHistory],
+  );
+  const projectTasks = React.useMemo(
+    () =>
+      taskHistory.filter(
+        (task: TaskHistoryItem) => task.projectId === projectId,
+      ),
     [projectId, taskHistory],
   );
 
@@ -217,6 +225,7 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
           onModeChange={setMode}
           footer={<ConnectorsBar />}
           className="px-4 pt-8 sm:px-6"
+          bottomPanel={<ProjectSessionList tasks={projectTasks} />}
           composerProps={{
             textareaRef,
             value: inputValue,
