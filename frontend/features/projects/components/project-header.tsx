@@ -1,165 +1,83 @@
 "use client";
 
 import * as React from "react";
-import {
-  MoreHorizontal,
-  PenSquare,
-  Settings2,
-  Share2,
-  Trash2,
-} from "lucide-react";
+import { FolderKanban, PanelLeftClose, PanelLeftOpen, Settings2 } from "lucide-react";
 
 import { useT } from "@/lib/i18n/client";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import type { ProjectItem } from "@/features/projects/types";
-import { RenameProjectDialog } from "@/features/projects/components/rename-project-dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { PageHeaderShell } from "@/components/shared/page-header-shell";
+import { cn } from "@/lib/utils";
 
 interface ProjectHeaderProps {
   project?: ProjectItem;
+  isDrawerOpen?: boolean;
+  onToggleDrawer?: () => void;
   onOpenSettings?: () => void;
-  onRenameProject?: (projectId: string, name: string) => void;
-  onDeleteProject?: (projectId: string) => Promise<void> | void;
 }
 
 export function ProjectHeader({
   project,
+  isDrawerOpen,
+  onToggleDrawer,
   onOpenSettings,
-  onRenameProject,
-  onDeleteProject,
 }: ProjectHeaderProps) {
   const { t } = useT("translation");
-  const [isRenameDialogOpen, setIsRenameDialogOpen] = React.useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
-  const [isDeleting, setIsDeleting] = React.useState(false);
 
-  const handleRename = React.useCallback(
-    (newName: string) => {
-      if (!project) return;
-      onRenameProject?.(project.id, newName);
-    },
-    [onRenameProject, project],
-  );
-
-  const handleDelete = React.useCallback(async () => {
-    if (!project || !onDeleteProject) return;
-    try {
-      setIsDeleting(true);
-      await onDeleteProject(project.id);
-    } finally {
-      setIsDeleting(false);
-      setIsDeleteDialogOpen(false);
-    }
-  }, [onDeleteProject, project]);
+  if (isDrawerOpen) {
+    return (
+      <div className="flex h-14 min-h-14 items-center justify-between px-4 sm:px-6">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <FolderKanban className="size-4 shrink-0 text-primary" />
+          <span className="truncate text-sm font-medium text-foreground">
+            {project?.name ?? t("project.untitled", "Untitled Project")}
+          </span>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 text-muted-foreground hover:bg-muted"
+            onClick={onOpenSettings}
+            aria-label={t("project.settings")}
+            title={t("project.settings")}
+          >
+            <Settings2 className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 text-muted-foreground hover:bg-muted"
+            onClick={onToggleDrawer}
+            aria-label={t("chat.collapse")}
+            title={t("chat.collapse")}
+          >
+            <PanelLeftClose className="size-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <PageHeaderShell
-        left={
-          <div className="flex min-w-0 flex-1 items-center gap-2">
-            <div className="flex flex-col min-w-0">
-              <p className="truncate text-base font-semibold text-foreground">
-                {project?.name ?? t("project.untitled", "Untitled Project")}
-              </p>
-              {project?.description ? (
-                <p className="truncate text-xs text-muted-foreground">
-                  {project.description}
-                </p>
-              ) : null}
-            </div>
-          </div>
-        }
-        right={
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-8 text-muted-foreground hover:bg-muted"
-              >
-                <MoreHorizontal className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" side="right">
-              {onOpenSettings ? (
-                <DropdownMenuItem onClick={onOpenSettings}>
-                  <Settings2 className="size-4" />
-                  <span>{t("project.settingsAction")}</span>
-                </DropdownMenuItem>
-              ) : null}
-              <DropdownMenuItem onClick={() => setIsRenameDialogOpen(true)}>
-                <PenSquare className="size-4" />
-                <span>{t("project.rename")}</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Share2 className="size-4" />
-                <span>{t("project.share")}</span>
-              </DropdownMenuItem>
-              {onDeleteProject && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    className="text-destructive focus:bg-destructive/10 focus:text-destructive"
-                    onClick={() => setIsDeleteDialogOpen(true)}
-                  >
-                    <Trash2 className="size-4 text-destructive" />
-                    <span>{t("project.delete")}</span>
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        }
-      />
-
-      <RenameProjectDialog
-        open={isRenameDialogOpen}
-        onOpenChange={setIsRenameDialogOpen}
-        projectName={project?.name ?? ""}
-        onRename={handleRename}
-      />
-      <AlertDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t("project.delete")}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("project.deleteDescription")}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>
-              {t("common.cancel", "Cancel")}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {t("project.deleteConfirm", "Delete")}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
+    <PageHeaderShell
+      className="border-b-0"
+      left={
+        <div className="flex min-w-0 items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className={cn("-ml-2 gap-2 px-2 text-sm")}
+            onClick={onToggleDrawer}
+          >
+            <PanelLeftOpen className="size-4 shrink-0 text-muted-foreground" />
+            <FolderKanban className="size-4 shrink-0 text-primary" />
+            <span className="truncate font-medium text-foreground">
+              {project?.name ?? t("project.untitled", "Untitled Project")}
+            </span>
+          </Button>
+        </div>
+      }
+    />
   );
 }

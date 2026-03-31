@@ -19,10 +19,12 @@ import type { ProjectItem, TaskHistoryItem } from "@/features/projects/types";
 
 import { ProjectDetailPanel } from "@/features/projects/components/project-detail-panel";
 import { ProjectHeader } from "@/features/projects/components/project-header";
+import { ProjectInfoDrawer } from "@/features/projects/components/project-info-drawer";
 import { ProjectSettingsDialog } from "@/features/projects/components/project-settings-dialog";
 import { getDefaultProjectPresetId } from "@/features/projects/lib/project-presets";
 import { CapabilityToggleProvider } from "@/features/connectors";
 import { useAppShell } from "@/components/shell/app-shell-context";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { projectPresetsService } from "@/features/projects/api/project-presets-api";
 
@@ -48,6 +50,7 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
   const [projectPresets, setProjectPresets] = React.useState<ProjectPreset[]>(
     [],
   );
+  const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
   useAutosizeTextarea(textareaRef, inputValue);
@@ -170,55 +173,90 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
     ],
   );
 
-  const handleRenameProject = React.useCallback(
-    (targetProjectId: string, newName: string) => {
-      void updateProject(targetProjectId, { name: newName });
-    },
-    [updateProject],
-  );
-
-  const handleDeleteProject = React.useCallback(
-    async (targetProjectId: string) => {
-      await deleteProject(targetProjectId);
-      if (targetProjectId === projectId) {
-        router.push(homePath);
-      }
-    },
-    [deleteProject, homePath, projectId, router],
-  );
+  const toggleDrawer = React.useCallback(() => {
+    setIsDrawerOpen((prev) => !prev);
+  }, []);
 
   return (
     <CapabilityToggleProvider>
       <div className="flex min-h-0 flex-1 flex-col bg-background">
-        <ProjectHeader
-          project={currentProject}
-          onOpenSettings={() => setSettingsOpen(true)}
-          onRenameProject={handleRenameProject}
-          onDeleteProject={handleDeleteProject}
-        />
-
         {currentProject ? (
-          <ProjectDetailPanel
-            project={currentProject}
-            projectTitle={projectTitle}
-            projectTasks={projectTasks}
-            projectPresets={projectPresets}
-            mode={mode}
-            onModeChange={setMode}
-            onUpdateProject={async (updates) => {
-              await updateProject(projectId, { name: updates.name });
+          <div
+            className="grid min-h-0 flex-1 overflow-hidden transition-[grid-template-columns] duration-200 ease-linear"
+            style={{
+              gridTemplateColumns: isDrawerOpen
+                ? "18rem minmax(0, 1fr)"
+                : "0px minmax(0, 1fr)",
+              gridTemplateRows: "3.5rem minmax(0, 1fr)",
             }}
-            onOpenSettings={() => setSettingsOpen(true)}
-            textareaRef={textareaRef}
-            inputValue={inputValue}
-            onInputChange={setInputValue}
-            onSendTask={handleSendTask}
-            isSubmitting={isSubmitting}
-            initialPresetId={defaultPresetId}
-            onRepoDefaultsSave={async (payload) => {
-              await updateProject(projectId, payload);
-            }}
-          />
+          >
+            <div
+              className={cn(
+                "row-span-2 min-h-0 overflow-hidden bg-background transition-[border-color] duration-200",
+                isDrawerOpen ? "border-r border-border/60" : "border-r border-transparent",
+              )}
+            >
+              <div
+                className={cn(
+                  "flex h-full w-72 flex-col transition-opacity duration-150",
+                  isDrawerOpen
+                    ? "opacity-100"
+                    : "pointer-events-none opacity-0",
+                )}
+                aria-hidden={!isDrawerOpen}
+              >
+                <ProjectHeader
+                  project={currentProject}
+                  isDrawerOpen
+                  onToggleDrawer={toggleDrawer}
+                  onOpenSettings={() => setSettingsOpen(true)}
+                />
+                <div className="min-h-0 flex-1 overflow-hidden">
+                  <ProjectInfoDrawer
+                    project={currentProject}
+                    sessionCount={projectTasks.length}
+                    presetCount={projectPresets.length}
+                    onUpdateProject={async (updates) => {
+                      await updateProject(projectId, { name: updates.name });
+                    }}
+                    onOpenSettings={() => setSettingsOpen(true)}
+                    onDeleteProject={async () => {
+                      await deleteProject(projectId);
+                      router.push(homePath);
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="min-w-0 bg-background">
+              {isDrawerOpen ? (
+                <div className="h-14 min-h-14 bg-background" />
+              ) : (
+                <ProjectHeader
+                  project={currentProject}
+                  isDrawerOpen={false}
+                  onToggleDrawer={toggleDrawer}
+                  onOpenSettings={() => setSettingsOpen(true)}
+                />
+              )}
+            </div>
+            <div className="flex min-h-0 min-w-0 flex-col bg-background">
+              <ProjectDetailPanel
+                projectTitle={projectTitle}
+                mode={mode}
+                onModeChange={setMode}
+                textareaRef={textareaRef}
+                inputValue={inputValue}
+                onInputChange={setInputValue}
+                onSendTask={handleSendTask}
+                isSubmitting={isSubmitting}
+                initialPresetId={defaultPresetId}
+                onRepoDefaultsSave={async (payload) => {
+                  await updateProject(projectId, payload);
+                }}
+              />
+            </div>
+          </div>
         ) : (
           <div className="flex flex-1 items-center justify-center px-4 py-10 sm:px-6">
             <section className="w-full max-w-xl rounded-3xl border border-dashed border-border/70 bg-background px-6 py-10 text-center shadow-sm">
