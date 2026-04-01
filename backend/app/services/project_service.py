@@ -7,9 +7,11 @@ from sqlalchemy.orm import Session
 from app.core.errors.error_codes import ErrorCode
 from app.core.errors.exceptions import AppException
 from app.models.project import Project
+from app.models.project_local_mount import ProjectLocalMount
 from app.repositories.project_file_repository import ProjectFileRepository
 from app.repositories.project_repository import ProjectRepository
 from app.repositories.session_repository import SessionRepository
+from app.schemas.filesystem import LocalMountConfig
 from app.schemas.project import (
     ProjectCreateRequest,
     ProjectResponse,
@@ -84,30 +86,87 @@ class ProjectService:
         return normalized_url, branch, token_key
 
     @classmethod
-    def _normalize_runtime_settings(
+    def _normalize_local_mounts(
         cls,
-        *,
-        default_model: str | None,
-        mount_enabled: bool | None,
-        mount_name: str | None,
-        mount_path: str | None,
-        mount_access_mode: str | None,
-    ) -> tuple[str | None, bool, str | None, str | None, str | None]:
-        normalized_model = cls._normalize_optional_str(default_model)
-        normalized_mount_name = cls._normalize_optional_str(mount_name)
-        normalized_mount_path = cls._normalize_optional_str(mount_path)
-        normalized_mount_access_mode = cls._normalize_optional_str(mount_access_mode)
-        return (
-            normalized_model,
-            bool(mount_enabled),
-            normalized_mount_name,
-            normalized_mount_path,
-            normalized_mount_access_mode,
+        mounts: list[LocalMountConfig] | None,
+    ) -> list[LocalMountConfig]:
+        if not mounts:
+            return []
+
+        normalized_mounts: list[LocalMountConfig] = []
+        seen_ids: set[str] = set()
+        seen_paths: set[str] = set()
+        for mount in mounts:
+            normalized = LocalMountConfig.model_validate(mount)
+            mount_id = normalized.id.strip()
+            path_key = normalized.host_path.strip().lower()
+
+            if mount_id in seen_ids:
+                raise AppException(
+                    error_code=ErrorCode.BAD_REQUEST,
+                    message=f"Duplicate local mount id: {mount_id}",
+                )
+            if path_key in seen_paths:
+                raise AppException(
+                    error_code=ErrorCode.BAD_REQUEST,
+                    message=f"Duplicate local mount path: {normalized.host_path}",
+                )
+
+            seen_ids.add(mount_id)
+            seen_paths.add(path_key)
+            normalized_mounts.append(normalized)
+
+        return normalized_mounts
+
+    @classmethod
+    def _build_project_local_mount_models(
+        cls,
+        mounts: list[LocalMountConfig],
+    ) -> list[ProjectLocalMount]:
+        return [
+            ProjectLocalMount(
+                mount_id=mount.id,
+                name=mount.name,
+                host_path=mount.host_path,
+                access_mode=mount.access_mode,
+                sort_order=index,
+            )
+            for index, mount in enumerate(mounts)
+        ]
+
+    @classmethod
+    def _resolve_project_local_mounts(cls, project: Project) -> list[LocalMountConfig]:
+        mounts = sorted(project.project_local_mounts, key=lambda item: item.sort_order)
+        return [
+            LocalMountConfig(
+                id=mount.mount_id,
+                name=mount.name,
+                host_path=mount.host_path,
+                access_mode=mount.access_mode,
+            )
+            for mount in mounts
+        ]
+
+    @classmethod
+    def _build_project_response(cls, project: Project) -> ProjectResponse:
+        local_mounts = cls._resolve_project_local_mounts(project)
+        return ProjectResponse(
+            project_id=project.id,
+            user_id=project.user_id,
+            name=project.name,
+            description=project.description,
+            default_model=project.default_model,
+            local_mounts=local_mounts,
+            repo_url=project.repo_url,
+            git_branch=project.git_branch,
+            git_token_env_key=project.git_token_env_key,
+            created_at=project.created_at,
+            updated_at=project.updated_at,
         )
 
     def list_projects(self, db: Session, user_id: str) -> list[ProjectResponse]:
         projects = ProjectRepository.list_by_user(db, user_id)
-        return [ProjectResponse.model_validate(p) for p in projects]
+        return [self._build_project_response(p) for p in projects]
 
     def get_project(
         self, db: Session, user_id: str, project_id: UUID
@@ -118,25 +177,14 @@ class ProjectService:
                 error_code=ErrorCode.PROJECT_NOT_FOUND,
                 message=f"Project not found: {project_id}",
             )
-        return ProjectResponse.model_validate(project)
+        return self._build_project_response(project)
 
     def create_project(
         self, db: Session, user_id: str, request: ProjectCreateRequest
     ) -> ProjectResponse:
         description = self._normalize_optional_str(request.description)
-        (
-            default_model,
-            mount_enabled,
-            mount_name,
-            mount_path,
-            mount_access_mode,
-        ) = self._normalize_runtime_settings(
-            default_model=request.default_model,
-            mount_enabled=request.mount_enabled,
-            mount_name=request.mount_name,
-            mount_path=request.mount_path,
-            mount_access_mode=request.mount_access_mode,
-        )
+        default_model = self._normalize_optional_str(request.default_model)
+        local_mounts = self._normalize_local_mounts(request.local_mounts)
         repo_url, git_branch, git_token_env_key = self._normalize_repo_settings(
             repo_url=request.repo_url,
             git_branch=request.git_branch,
@@ -147,18 +195,15 @@ class ProjectService:
             name=request.name,
             description=description,
             default_model=default_model,
-            mount_enabled=mount_enabled,
-            mount_name=mount_name,
-            mount_path=mount_path,
-            mount_access_mode=mount_access_mode,
             repo_url=repo_url,
             git_branch=git_branch,
             git_token_env_key=git_token_env_key,
         )
+        project.project_local_mounts = self._build_project_local_mount_models(local_mounts)
         ProjectRepository.create(db, project)
         db.commit()
         db.refresh(project)
-        return ProjectResponse.model_validate(project)
+        return self._build_project_response(project)
 
     def update_project(
         self,
@@ -181,15 +226,10 @@ class ProjectService:
             project.description = self._normalize_optional_str(request.description)
         if "default_model" in update:
             project.default_model = self._normalize_optional_str(request.default_model)
-        if "mount_enabled" in update:
-            project.mount_enabled = bool(request.mount_enabled)
-        if "mount_name" in update:
-            project.mount_name = self._normalize_optional_str(request.mount_name)
-        if "mount_path" in update:
-            project.mount_path = self._normalize_optional_str(request.mount_path)
-        if "mount_access_mode" in update:
-            project.mount_access_mode = self._normalize_optional_str(
-                request.mount_access_mode
+        if "local_mounts" in update:
+            local_mounts = self._normalize_local_mounts(request.local_mounts)
+            project.project_local_mounts = self._build_project_local_mount_models(
+                local_mounts
             )
 
         if "repo_url" in update:
@@ -227,7 +267,7 @@ class ProjectService:
 
         db.commit()
         db.refresh(project)
-        return ProjectResponse.model_validate(project)
+        return self._build_project_response(project)
 
     def delete_project(self, db: Session, user_id: str, project_id: UUID) -> None:
         project = ProjectRepository.get_by_id(db, project_id)

@@ -1533,11 +1533,12 @@
     "namePlaceholder": "Entrez le nom du projet",
     "advanced": {
       "title": "Configuration avancée",
-      "description": "Définissez un modèle par défaut et un chemin de montage local pour les nouvelles exécutions de ce projet.",
+      "description": "Définissez un modèle par défaut et une liste de montages locaux pour les nouvelles exécutions de ce projet.",
       "defaultModelLabel": "Modèle par défaut",
       "defaultModelPlaceholder": "Utiliser le modèle par défaut de l'espace de travail",
-      "mountTitle": "Monter le chemin du projet",
-      "mountDescription": "Ajoutez un répertoire local aux nouvelles exécutions de ce projet.",
+      "mountTitle": "Montages du projet",
+      "mountDescription": "Ajoutez un ou plusieurs répertoires locaux aux nouvelles exécutions de ce projet.",
+      "chooseFolder": "Choisir un dossier",
       "mountPathLabel": "Chemin de montage",
       "mountPathPlaceholder": "ex. /Users/alice/Workspace/my-project"
     },

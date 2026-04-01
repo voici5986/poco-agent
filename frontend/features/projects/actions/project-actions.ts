@@ -12,24 +12,22 @@ const VALIDATION_ERRORS = {
   missingTaskId: "validation.missingTaskId",
 } as const;
 
+const localMountSchema = z.object({
+  id: z.string().trim().min(1),
+  name: z.string().trim().min(1),
+  host_path: z.string().trim().min(1),
+  access_mode: z.enum(["ro", "rw"]).optional(),
+});
+
 const createProjectSchema = z.object({
   name: z.string().trim().min(1, VALIDATION_ERRORS.projectNameRequired),
   description: z.string().trim().max(2000).optional().nullable(),
   default_model: z.string().trim().max(255).optional().nullable(),
-  mount_enabled: z.boolean().optional().nullable(),
-  mount_name: z.string().trim().max(255).optional().nullable(),
-  mount_path: z.string().trim().max(4000).optional().nullable(),
-  mount_access_mode: z.enum(["ro", "rw"]).optional().nullable(),
+  local_mounts: z.array(localMountSchema).optional().nullable(),
   repo_url: z.string().trim().optional().nullable(),
   git_branch: z.string().trim().optional().nullable(),
   git_token_env_key: z.string().trim().optional().nullable(),
-}).refine(
-  (data) => !data.mount_enabled || Boolean((data.mount_path || "").trim()),
-  {
-    message: VALIDATION_ERRORS.projectNameRequired,
-    path: ["mount_path"],
-  },
-);
+});
 
 const listProjectsSchema = z.object({
   revalidate: z.number().int().positive().optional(),
@@ -48,20 +46,11 @@ const updateProjectSchema = z.object({
     .optional(),
   description: z.string().trim().max(2000).optional().nullable(),
   default_model: z.string().trim().max(255).optional().nullable(),
-  mount_enabled: z.boolean().optional().nullable(),
-  mount_name: z.string().trim().max(255).optional().nullable(),
-  mount_path: z.string().trim().max(4000).optional().nullable(),
-  mount_access_mode: z.enum(["ro", "rw"]).optional().nullable(),
+  local_mounts: z.array(localMountSchema).optional().nullable(),
   repo_url: z.string().trim().optional().nullable(),
   git_branch: z.string().trim().optional().nullable(),
   git_token_env_key: z.string().trim().optional().nullable(),
-}).refine(
-  (data) => !data.mount_enabled || Boolean((data.mount_path || "").trim()),
-  {
-    message: VALIDATION_ERRORS.projectNameRequired,
-    path: ["mount_path"],
-  },
-);
+});
 
 const deleteProjectSchema = z.object({
   projectId: z.string().trim().min(1, VALIDATION_ERRORS.selectProject),
@@ -84,10 +73,7 @@ export async function createProjectAction(input: CreateProjectInput) {
     name,
     description,
     default_model,
-    mount_enabled,
-    mount_name,
-    mount_path,
-    mount_access_mode,
+    local_mounts,
     repo_url,
     git_branch,
     git_token_env_key,
@@ -97,10 +83,7 @@ export async function createProjectAction(input: CreateProjectInput) {
     name,
     description,
     default_model: default_model ?? undefined,
-    mount_enabled: mount_enabled ?? undefined,
-    mount_name: mount_name ?? undefined,
-    mount_path: mount_path ?? undefined,
-    mount_access_mode: mount_access_mode ?? undefined,
+    local_mounts: local_mounts ?? undefined,
     repo_url: repo_url ?? undefined,
     git_branch: git_branch ?? undefined,
     git_token_env_key: git_token_env_key ?? undefined,
@@ -123,10 +106,7 @@ export async function updateProjectAction(input: UpdateProjectInput) {
     name,
     description,
     default_model,
-    mount_enabled,
-    mount_name,
-    mount_path,
-    mount_access_mode,
+    local_mounts,
     repo_url,
     git_branch,
     git_token_env_key,
@@ -136,10 +116,7 @@ export async function updateProjectAction(input: UpdateProjectInput) {
     name,
     description,
     default_model: default_model ?? undefined,
-    mount_enabled: mount_enabled ?? undefined,
-    mount_name: mount_name ?? undefined,
-    mount_path: mount_path ?? undefined,
-    mount_access_mode: mount_access_mode ?? undefined,
+    local_mounts: local_mounts ?? undefined,
     repo_url: repo_url ?? undefined,
     git_branch: git_branch ?? undefined,
     git_token_env_key: git_token_env_key ?? undefined,

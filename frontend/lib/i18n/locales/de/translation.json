@@ -1533,11 +1533,12 @@
     "namePlaceholder": "Projektnamen eingeben",
     "advanced": {
       "title": "Erweiterte Konfiguration",
-      "description": "Lege ein Standardmodell und einen lokalen Mount-Pfad für neue Ausführungen in diesem Projekt fest.",
+      "description": "Lege ein Standardmodell und eine Liste lokaler Mounts für neue Ausführungen in diesem Projekt fest.",
       "defaultModelLabel": "Standardmodell",
       "defaultModelPlaceholder": "Standardmodell des Arbeitsbereichs verwenden",
-      "mountTitle": "Projektpfad einbinden",
-      "mountDescription": "Hänge für neue Ausführungen in diesem Projekt ein lokales Verzeichnis an.",
+      "mountTitle": "Projekt-Mounts",
+      "mountDescription": "Hänge für neue Ausführungen in diesem Projekt ein oder mehrere lokale Verzeichnisse an.",
+      "chooseFolder": "Ordner auswählen",
       "mountPathLabel": "Mount-Pfad",
       "mountPathPlaceholder": "z. B. /Users/alice/Workspace/my-project"
     },

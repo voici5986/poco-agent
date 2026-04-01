@@ -23,6 +23,7 @@ from app.models.plugin_import_job import PluginImportJob
 from app.models.preset import Preset
 from app.models.project import Project
 from app.models.project_file import ProjectFile
+from app.models.project_local_mount import ProjectLocalMount
 from app.models.project_preset import ProjectPreset
 from app.models.session_queue_item import AgentSessionQueueItem
 from app.models.skill import Skill
@@ -60,6 +61,7 @@ __all__ = [
     "Preset",
     "Project",
     "ProjectFile",
+    "ProjectLocalMount",
     "ProjectPreset",
     "Skill",
     "SkillImportJob",

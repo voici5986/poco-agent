@@ -4,6 +4,8 @@ import uuid
 from unittest.mock import MagicMock, patch
 
 from app.models.project import Project
+from app.models.project_local_mount import ProjectLocalMount
+from app.schemas.filesystem import LocalMountConfig
 from app.schemas.project import ProjectCreateRequest, ProjectUpdateRequest
 from app.services.project_service import ProjectService
 
@@ -40,10 +42,20 @@ class ProjectServiceTests(unittest.TestCase):
                 name="Demo",
                 description="  Project description  ",
                 default_model="  claude-sonnet-4-20250514  ",
-                mount_enabled=True,
-                mount_name="  Demo workspace  ",
-                mount_path="  /workspace/demo  ",
-                mount_access_mode="rw",
+                local_mounts=[
+                    LocalMountConfig(
+                        id="workspace",
+                        name="  Demo workspace  ",
+                        host_path="  /workspace/demo  ",
+                        access_mode="rw",
+                    ),
+                    LocalMountConfig(
+                        id="docs",
+                        name="  Docs  ",
+                        host_path="  /workspace/docs  ",
+                        access_mode="ro",
+                    ),
+                ],
             ),
         )
 
@@ -51,16 +63,14 @@ class ProjectServiceTests(unittest.TestCase):
         assert created_project is not None
         self.assertEqual(created_project.description, "Project description")
         self.assertEqual(created_project.default_model, "claude-sonnet-4-20250514")
-        self.assertTrue(created_project.mount_enabled)
-        self.assertEqual(created_project.mount_name, "Demo workspace")
-        self.assertEqual(created_project.mount_path, "/workspace/demo")
-        self.assertEqual(created_project.mount_access_mode, "rw")
+        self.assertEqual(len(created_project.project_local_mounts), 2)
+        self.assertEqual(created_project.project_local_mounts[1].mount_id, "docs")
+        self.assertEqual(created_project.project_local_mounts[1].access_mode, "ro")
         self.db.commit.assert_called_once()
         self.assertEqual(result.default_model, "claude-sonnet-4-20250514")
-        self.assertTrue(result.mount_enabled)
-        self.assertEqual(result.mount_name, "Demo workspace")
-        self.assertEqual(result.mount_path, "/workspace/demo")
-        self.assertEqual(result.mount_access_mode, "rw")
+        self.assertEqual(len(result.local_mounts), 2)
+        self.assertEqual(result.local_mounts[0].name, "Demo workspace")
+        self.assertEqual(result.local_mounts[1].host_path, "/workspace/docs")
 
     @patch("app.services.project_service.ProjectRepository.get_by_id")
     def test_update_project_updates_runtime_settings_independently(
@@ -73,10 +83,6 @@ class ProjectServiceTests(unittest.TestCase):
             name="Demo",
             description=None,
             default_model=None,
-            mount_enabled=False,
-            mount_name=None,
-            mount_path=None,
-            mount_access_mode=None,
             repo_url=None,
             git_branch=None,
             git_token_env_key=None,
@@ -84,6 +90,15 @@ class ProjectServiceTests(unittest.TestCase):
             created_at=self.now,
             updated_at=self.now,
         )
+        project.project_local_mounts = [
+            ProjectLocalMount(
+                mount_id="workspace",
+                name="Workspace",
+                host_path="/workspace/demo",
+                access_mode="rw",
+                sort_order=0,
+            )
+        ]
         get_by_id.return_value = project
         self.db.refresh.side_effect = lambda _: None
 
@@ -93,24 +108,31 @@ class ProjectServiceTests(unittest.TestCase):
             project.id,
             ProjectUpdateRequest(
                 default_model="  claude-opus-4-1  ",
-                mount_enabled=True,
-                mount_name="  Next workspace  ",
-                mount_path="  /workspace/next  ",
-                mount_access_mode="ro",
+                local_mounts=[
+                    LocalMountConfig(
+                        id="workspace",
+                        name="  Next workspace  ",
+                        host_path="  /workspace/next  ",
+                        access_mode="ro",
+                    ),
+                    LocalMountConfig(
+                        id="assets",
+                        name="Assets",
+                        host_path="/workspace/assets",
+                        access_mode="rw",
+                    ),
+                ],
             ),
         )
 
         self.assertEqual(project.default_model, "claude-opus-4-1")
-        self.assertTrue(project.mount_enabled)
-        self.assertEqual(project.mount_name, "Next workspace")
-        self.assertEqual(project.mount_path, "/workspace/next")
-        self.assertEqual(project.mount_access_mode, "ro")
+        self.assertEqual(len(project.project_local_mounts), 2)
+        self.assertEqual(project.project_local_mounts[1].mount_id, "assets")
         self.db.commit.assert_called_once()
         self.assertEqual(result.default_model, "claude-opus-4-1")
-        self.assertTrue(result.mount_enabled)
-        self.assertEqual(result.mount_name, "Next workspace")
-        self.assertEqual(result.mount_path, "/workspace/next")
-        self.assertEqual(result.mount_access_mode, "ro")
+        self.assertEqual(len(result.local_mounts), 2)
+        self.assertEqual(result.local_mounts[0].access_mode, "ro")
+        self.assertEqual(result.local_mounts[1].id, "assets")
 
 
 if __name__ == "__main__":

@@ -1,12 +1,11 @@
+import type { LocalMountConfig } from "@/features/chat/types/api/session";
+
 export interface ProjectItem {
   id: string;
   name: string;
   icon?: string;
   defaultModel?: string | null;
-  mountEnabled?: boolean;
-  mountName?: string | null;
-  mountPath?: string | null;
-  mountAccessMode?: "ro" | "rw" | null;
+  localMounts?: LocalMountConfig[];
   /** Default git repository context (GitHub-only in v1). */
   repoUrl?: string | null;
   gitBranch?: string | null;

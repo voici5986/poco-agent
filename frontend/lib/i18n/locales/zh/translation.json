@@ -1533,11 +1533,12 @@
     "namePlaceholder": "请输入项目名称",
     "advanced": {
       "title": "高级配置",
-      "description": "为这个项目的新运行设置默认模型和本地挂载路径。",
+      "description": "为这个项目的新运行设置默认模型和本地挂载列表。",
       "defaultModelLabel": "默认模型",
       "defaultModelPlaceholder": "使用工作区默认模型",
-      "mountTitle": "挂载项目路径",
-      "mountDescription": "为这个项目的新运行附加一个本地目录。",
+      "mountTitle": "项目挂载",
+      "mountDescription": "为这个项目的新运行附加一个或多个本地目录。",
+      "chooseFolder": "选择文件夹",
       "mountPathLabel": "挂载路径",
       "mountPathPlaceholder": "例如：/Users/alice/Workspace/my-project"
     },

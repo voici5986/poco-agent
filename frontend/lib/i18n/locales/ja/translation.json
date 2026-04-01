@@ -1533,11 +1533,12 @@
     "namePlaceholder": "プロジェクト名を入力",
     "advanced": {
       "title": "詳細設定",
-      "description": "このプロジェクトの新しい実行に既定モデルとローカルマウントパスを設定します。",
+      "description": "このプロジェクトの新しい実行に既定モデルとローカルマウント一覧を設定します。",
       "defaultModelLabel": "既定モデル",
       "defaultModelPlaceholder": "ワークスペースの既定モデルを使用",
-      "mountTitle": "プロジェクトパスをマウント",
-      "mountDescription": "このプロジェクトの新しい実行にローカルディレクトリを追加します。",
+      "mountTitle": "プロジェクトのマウント",
+      "mountDescription": "このプロジェクトの新しい実行に1つ以上のローカルディレクトリを追加します。",
+      "chooseFolder": "フォルダーを選択",
       "mountPathLabel": "マウントパス",
       "mountPathPlaceholder": "例: /Users/alice/Workspace/my-project"
     },

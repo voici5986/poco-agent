@@ -3,17 +3,14 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.schemas.filesystem import LocalMountAccessMode
+from app.schemas.filesystem import LocalMountConfig
 
 
 class ProjectCreateRequest(BaseModel):
     name: str
     description: str | None = None
     default_model: str | None = None
-    mount_enabled: bool | None = None
-    mount_name: str | None = None
-    mount_path: str | None = None
-    mount_access_mode: LocalMountAccessMode | None = None
+    local_mounts: list[LocalMountConfig] | None = None
     repo_url: str | None = None
     git_branch: str | None = None
     git_token_env_key: str | None = None
@@ -23,10 +20,7 @@ class ProjectUpdateRequest(BaseModel):
     name: str | None = None
     description: str | None = None
     default_model: str | None = None
-    mount_enabled: bool | None = None
-    mount_name: str | None = None
-    mount_path: str | None = None
-    mount_access_mode: LocalMountAccessMode | None = None
+    local_mounts: list[LocalMountConfig] | None = None
     repo_url: str | None = None
     git_branch: str | None = None
     git_token_env_key: str | None = None
@@ -38,10 +32,7 @@ class ProjectResponse(BaseModel):
     name: str
     description: str | None = None
     default_model: str | None = None
-    mount_enabled: bool
-    mount_name: str | None = None
-    mount_path: str | None = None
-    mount_access_mode: LocalMountAccessMode | None = None
+    local_mounts: list[LocalMountConfig] = Field(default_factory=list)
     repo_url: str | None = None
     git_branch: str | None = None
     git_token_env_key: str | None = None

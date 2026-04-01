@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.models.project import Project
 
@@ -18,7 +18,11 @@ class ProjectRepository:
         *,
         include_deleted: bool = False,
     ) -> Project | None:
-        query = session_db.query(Project).filter(Project.id == project_id)
+        query = (
+            session_db.query(Project)
+            .options(selectinload(Project.project_local_mounts))
+            .filter(Project.id == project_id)
+        )
         if not include_deleted:
             query = query.filter(Project.is_deleted.is_(False))
         return query.first()
@@ -30,7 +34,11 @@ class ProjectRepository:
         *,
         include_deleted: bool = False,
     ) -> list[Project]:
-        query = session_db.query(Project).filter(Project.user_id == user_id)
+        query = (
+            session_db.query(Project)
+            .options(selectinload(Project.project_local_mounts))
+            .filter(Project.user_id == user_id)
+        )
         if not include_deleted:
             query = query.filter(Project.is_deleted.is_(False))
         return query.order_by(Project.created_at.desc()).all()

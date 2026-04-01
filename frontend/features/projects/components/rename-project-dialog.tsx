@@ -1,7 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { ChevronDown, FolderPlus, HardDrive, Sparkles } from "lucide-react";
+import {
+  ChevronDown,
+  FolderPlus,
+  HardDrive,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useT } from "@/lib/i18n/client";
 import {
@@ -32,32 +38,34 @@ import { Textarea } from "@/components/ui/textarea";
 import { ModelSelector } from "@/features/chat/components/chat/model-selector";
 import { useModelCatalog } from "@/features/chat/hooks/use-model-catalog";
 import type { ModelSelection } from "@/features/chat/lib/model-catalog";
-import type { LocalMountAccessMode } from "@/features/chat/types/api/session";
+import type {
+  LocalMountAccessMode,
+  LocalMountConfig,
+} from "@/features/chat/types/api/session";
+import {
+  createEmptyLocalMountDraftRow,
+  toLocalMountDraftRows,
+  validateLocalFilesystemDraft,
+} from "@/features/task-composer/lib/local-filesystem";
+import type { LocalMountDraftRow } from "@/features/task-composer/types/local-filesystem";
 import {
   pickLocalDirectory,
   supportsNativeDirectoryPicker,
 } from "@/lib/local-directory-picker";
 
-function getDefaultMountName(
-  projectName: string,
-  mountEnabled: boolean,
-  mountName: string | null | undefined,
-  mountPath: string | null | undefined,
-): string {
-  const trimmedMountName = (mountName || "").trim();
-  if (trimmedMountName) {
-    return trimmedMountName;
-  }
-  if (mountEnabled && (mountPath || "").trim()) {
-    return projectName.trim();
-  }
-  return "";
+function serializeLocalMounts(mounts: LocalMountConfig[]): string {
+  return JSON.stringify(
+    mounts.map((mount) => ({
+      id: mount.id,
+      name: mount.name,
+      host_path: mount.host_path,
+      access_mode: mount.access_mode ?? "ro",
+    })),
+  );
 }
 
-function getDefaultMountAccessMode(
-  mountAccessMode: LocalMountAccessMode | null | undefined,
-): LocalMountAccessMode {
-  return mountAccessMode ?? "rw";
+function hasMeaningfulMountInput(rows: LocalMountDraftRow[]): boolean {
+  return rows.some((row) => row.name.trim() || row.host_path.trim());
 }
 
 interface RenameProjectDialogProps {
@@ -66,18 +74,12 @@ interface RenameProjectDialogProps {
   projectName: string;
   projectDescription?: string | null;
   projectDefaultModel?: string | null;
-  projectMountEnabled?: boolean;
-  projectMountName?: string | null;
-  projectMountPath?: string | null;
-  projectMountAccessMode?: LocalMountAccessMode | null;
+  projectLocalMounts?: LocalMountConfig[] | null;
   onRename: (
     newName: string,
     newDescription?: string | null,
     defaultModel?: string | null,
-    mountEnabled?: boolean,
-    mountName?: string | null,
-    mountPath?: string | null,
-    mountAccessMode?: LocalMountAccessMode | null,
+    localMounts?: LocalMountConfig[],
   ) => void;
   allowDescriptionEdit?: boolean;
 }
@@ -88,10 +90,7 @@ export function RenameProjectDialog({
   projectName,
   projectDescription,
   projectDefaultModel,
-  projectMountEnabled = false,
-  projectMountName,
-  projectMountPath,
-  projectMountAccessMode,
+  projectLocalMounts,
   onRename,
   allowDescriptionEdit = false,
 }: RenameProjectDialogProps) {
@@ -106,20 +105,12 @@ export function RenameProjectDialog({
   const [advancedOpen, setAdvancedOpen] = React.useState(false);
   const [modelSelection, setModelSelection] =
     React.useState<ModelSelection | null>(null);
-  const [mountEnabled, setMountEnabled] = React.useState(projectMountEnabled);
-  const [mountName, setMountName] = React.useState(() =>
-    getDefaultMountName(
-      projectName,
-      projectMountEnabled,
-      projectMountName,
-      projectMountPath,
-    ),
+  const [mountsEnabled, setMountsEnabled] = React.useState(
+    (projectLocalMounts?.length ?? 0) > 0,
   );
-  const [mountPath, setMountPath] = React.useState(projectMountPath ?? "");
-  const [mountAccessMode, setMountAccessMode] =
-    React.useState<LocalMountAccessMode>(() =>
-      getDefaultMountAccessMode(projectMountAccessMode),
-    );
+  const [mountRows, setMountRows] = React.useState<LocalMountDraftRow[]>(() =>
+    toLocalMountDraftRows(projectLocalMounts),
+  );
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   const defaultSelection = React.useMemo(() => {
@@ -150,25 +141,13 @@ export function RenameProjectDialog({
     setName(projectName);
     setDescription(projectDescription ?? "");
     setModelSelection(projectModelSelection);
-    setMountEnabled(projectMountEnabled);
-    setMountName(
-      getDefaultMountName(
-        projectName,
-        projectMountEnabled,
-        projectMountName,
-        projectMountPath,
-      ),
-    );
-    setMountPath(projectMountPath ?? "");
-    setMountAccessMode(getDefaultMountAccessMode(projectMountAccessMode));
+    setMountsEnabled((projectLocalMounts?.length ?? 0) > 0);
+    setMountRows(toLocalMountDraftRows(projectLocalMounts));
     setAdvancedOpen(false);
   }, [
     projectDescription,
+    projectLocalMounts,
     projectModelSelection,
-    projectMountAccessMode,
-    projectMountEnabled,
-    projectMountName,
-    projectMountPath,
     projectName,
   ]);
 
@@ -181,102 +160,133 @@ export function RenameProjectDialog({
     }
   }, [open]);
 
-  const handlePickMountDirectory = React.useCallback(async () => {
-    if (!supportsNativeDirectoryPicker()) {
-      toast.error(t("filesystem.picker.notSupported"));
-      return;
-    }
+  const handleRowChange = React.useCallback(
+    (clientId: string, field: keyof LocalMountDraftRow, nextValue: string) => {
+      setMountRows((prev) =>
+        prev.map((row) =>
+          row.client_id === clientId
+            ? {
+                ...row,
+                [field]: nextValue,
+              }
+            : row,
+        ),
+      );
+    },
+    [],
+  );
 
-    try {
-      const pickedDirectory = await pickLocalDirectory();
-      if (!pickedDirectory) {
+  const handleAddRow = React.useCallback(() => {
+    setMountsEnabled(true);
+    setMountRows((prev) => [...prev, createEmptyLocalMountDraftRow()]);
+  }, []);
+
+  const handleRemoveRow = React.useCallback((clientId: string) => {
+    setMountRows((prev) => {
+      const nextRows = prev.filter((row) => row.client_id !== clientId);
+      return nextRows.length > 0 ? nextRows : [createEmptyLocalMountDraftRow()];
+    });
+  }, []);
+
+  const handlePickMountDirectory = React.useCallback(
+    async (clientId: string) => {
+      if (!supportsNativeDirectoryPicker()) {
+        toast.error(t("filesystem.picker.notSupported"));
         return;
       }
 
-      setMountPath(pickedDirectory.hostPath ?? "");
-      setMountName((prev) => prev.trim() || pickedDirectory.displayName);
+      try {
+        const pickedDirectory = await pickLocalDirectory();
+        if (!pickedDirectory) {
+          return;
+        }
 
-      if (!pickedDirectory.hostPath) {
-        toast.warning(t("filesystem.picker.resolveFailed"));
+        setMountRows((prev) =>
+          prev.map((row) =>
+            row.client_id === clientId
+              ? {
+                  ...row,
+                  name: row.name.trim() || pickedDirectory.displayName,
+                  host_path: pickedDirectory.hostPath ?? "",
+                }
+              : row,
+          ),
+        );
+
+        if (!pickedDirectory.hostPath) {
+          toast.warning(t("filesystem.picker.resolveFailed"));
+        }
+      } catch {
+        // User cancelled the native picker — do nothing
       }
-    } catch {
-      // User cancelled the native picker — do nothing
+    },
+    [t],
+  );
+
+  const handleMountToggle = React.useCallback((checked: boolean) => {
+    setMountsEnabled(checked);
+    if (checked) {
+      setMountRows((prev) =>
+        hasMeaningfulMountInput(prev) ? prev : [createEmptyLocalMountDraftRow()],
+      );
     }
-  }, [t]);
+  }, []);
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
+
+    const validationResult = validateLocalFilesystemDraft(
+      mountsEnabled ? "local_mount" : "sandbox",
+      mountRows,
+      null,
+    );
+    if (!validationResult.ok || !validationResult.value) {
+      toast.error(
+        t(
+          validationResult.error?.key || "hero.toasts.actionFailed",
+          validationResult.error?.values,
+        ),
+      );
+      return;
+    }
+
     const trimmed = name.trim();
     const trimmedDescription = description.trim();
-    const trimmedMountName = mountName.trim();
-    const trimmedMountPath = mountPath.trim();
     const currentDescription = projectDescription?.trim() ?? "";
     const currentDefaultModel = projectDefaultModel?.trim() ?? "";
-    const currentMountName = getDefaultMountName(
-      projectName,
-      projectMountEnabled,
-      projectMountName,
-      projectMountPath,
-    );
-    const currentMountPath = projectMountPath?.trim() ?? "";
-    const currentMountAccessMode = getDefaultMountAccessMode(projectMountAccessMode);
     const nextDescription = trimmedDescription || null;
     const nextDefaultModel = modelSelection?.modelId?.trim() || null;
-    const nextMountName = trimmedMountName || null;
-    const nextMountPath = trimmedMountPath || null;
+    const nextLocalMounts = validationResult.value.local_mounts;
     const hasNameChange = trimmed !== projectName;
     const hasDescriptionChange =
       allowDescriptionEdit && trimmedDescription !== currentDescription;
     const hasDefaultModelChange =
       nextDefaultModel !== (currentDefaultModel || null);
-    const hasMountEnabledChange = mountEnabled !== projectMountEnabled;
-    const hasMountNameChange = nextMountName !== (currentMountName || null);
-    const hasMountPathChange = nextMountPath !== (currentMountPath || null);
-    const hasMountAccessModeChange = mountAccessMode !== currentMountAccessMode;
+    const hasLocalMountChange =
+      serializeLocalMounts(nextLocalMounts) !==
+      serializeLocalMounts(projectLocalMounts ?? []);
 
     if (
       !trimmed ||
       (!hasNameChange &&
         !hasDescriptionChange &&
         !hasDefaultModelChange &&
-        !hasMountEnabledChange &&
-        !hasMountNameChange &&
-        !hasMountPathChange &&
-        !hasMountAccessModeChange)
+        !hasLocalMountChange)
     ) {
       return;
     }
 
     if (allowDescriptionEdit) {
-      onRename(
-        trimmed,
-        nextDescription,
-        nextDefaultModel,
-        mountEnabled,
-        nextMountName,
-        nextMountPath,
-        mountAccessMode,
-      );
+      onRename(trimmed, nextDescription, nextDefaultModel, nextLocalMounts);
     } else {
-      onRename(
-        trimmed,
-        undefined,
-        nextDefaultModel,
-        mountEnabled,
-        nextMountName,
-        nextMountPath,
-        mountAccessMode,
-      );
+      onRename(trimmed, undefined, nextDefaultModel, nextLocalMounts);
     }
     onOpenChange(false);
   };
 
-  const isMountNameInvalid = mountEnabled && !mountName.trim();
-  const isMountPathInvalid = mountEnabled && !mountPath.trim();
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[560px]">
+      <DialogContent className="sm:max-w-[640px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{t("project.rename")}</DialogTitle>
@@ -364,7 +374,7 @@ export function RenameProjectDialog({
                   </div>
 
                   <div className="rounded-xl border border-border/60 bg-background px-4 py-3">
-                    <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <Label
                           htmlFor="project-mount-enabled"
@@ -379,74 +389,135 @@ export function RenameProjectDialog({
                       </div>
                       <Switch
                         id="project-mount-enabled"
-                        checked={mountEnabled}
-                        onCheckedChange={setMountEnabled}
+                        checked={mountsEnabled}
+                        onCheckedChange={handleMountToggle}
                       />
                     </div>
 
-                    {mountEnabled ? (
-                      <div className="mt-4 grid gap-4">
-                        <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_10rem]">
-                          <div className="grid gap-2">
-                            <Label htmlFor="project-mount-name">
-                              {t("filesystem.fields.name")}
-                            </Label>
-                            <Input
-                              id="project-mount-name"
-                              value={mountName}
-                              onChange={(e) => setMountName(e.target.value)}
-                              placeholder={t("filesystem.placeholders.name")}
-                            />
-                          </div>
-                          <div className="grid gap-2">
-                            <Label htmlFor="project-mount-access">
-                              {t("filesystem.fields.access")}
-                            </Label>
-                            <Select
-                              value={mountAccessMode}
-                              onValueChange={(value) =>
-                                setMountAccessMode(value as LocalMountAccessMode)
-                              }
-                            >
-                              <SelectTrigger id="project-mount-access" className="w-full">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="ro">
-                                  {t("filesystem.accessModes.ro")}
-                                </SelectItem>
-                                <SelectItem value="rw">
-                                  {t("filesystem.accessModes.rw")}
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
+                    {mountsEnabled ? (
+                      <div className="mt-4 grid gap-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-xs text-muted-foreground">
+                            {t("filesystem.mounts.description")}
+                          </p>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={handleAddRow}
+                          >
+                            <FolderPlus className="size-4" />
+                            {t("filesystem.actions.addMount")}
+                          </Button>
                         </div>
 
-                        <div className="grid gap-2">
-                          <Label htmlFor="project-mount-path">
-                            {t("filesystem.fields.path")}
-                          </Label>
-                          <div className="flex flex-col gap-2 sm:flex-row">
-                            <Input
-                              id="project-mount-path"
-                              value={mountPath}
-                              onChange={(e) => setMountPath(e.target.value)}
-                              placeholder={t("filesystem.placeholders.path")}
-                              className="flex-1"
-                            />
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className="shrink-0"
-                              onClick={() => {
-                                void handlePickMountDirectory();
-                              }}
+                        <div className="max-h-80 space-y-3 overflow-y-auto pr-1">
+                          {mountRows.map((row, index) => (
+                            <div
+                              key={row.client_id}
+                              className="rounded-xl border border-border/60 bg-muted/20 p-3"
                             >
-                              <FolderPlus className="size-4" />
-                              {t("filesystem.actions.addMount")}
-                            </Button>
-                          </div>
+                              <div className="mb-3 flex items-center justify-between gap-3">
+                                <p className="text-sm font-medium text-foreground">
+                                  {t("filesystem.mounts.itemTitle", {
+                                    index: index + 1,
+                                  })}
+                                </p>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="size-8 text-muted-foreground"
+                                  onClick={() => handleRemoveRow(row.client_id)}
+                                  aria-label={t("filesystem.actions.removeMount")}
+                                  title={t("filesystem.actions.removeMount")}
+                                >
+                                  <Trash2 className="size-4" />
+                                </Button>
+                              </div>
+
+                              <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_10rem]">
+                                <div className="grid gap-2">
+                                  <Label htmlFor={`project-mount-name-${row.client_id}`}>
+                                    {t("filesystem.fields.name")}
+                                  </Label>
+                                  <Input
+                                    id={`project-mount-name-${row.client_id}`}
+                                    value={row.name}
+                                    onChange={(event) =>
+                                      handleRowChange(
+                                        row.client_id,
+                                        "name",
+                                        event.target.value,
+                                      )
+                                    }
+                                    placeholder={t("filesystem.placeholders.name")}
+                                  />
+                                </div>
+                                <div className="grid gap-2">
+                                  <Label htmlFor={`project-mount-access-${row.client_id}`}>
+                                    {t("filesystem.fields.access")}
+                                  </Label>
+                                  <Select
+                                    value={row.access_mode}
+                                    onValueChange={(value) =>
+                                      handleRowChange(
+                                        row.client_id,
+                                        "access_mode",
+                                        value as LocalMountAccessMode,
+                                      )
+                                    }
+                                  >
+                                    <SelectTrigger
+                                      id={`project-mount-access-${row.client_id}`}
+                                    >
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="ro">
+                                        {t("filesystem.accessModes.ro")}
+                                      </SelectItem>
+                                      <SelectItem value="rw">
+                                        {t("filesystem.accessModes.rw")}
+                                      </SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+
+                              <div className="mt-3 grid gap-2">
+                                <Label htmlFor={`project-mount-path-${row.client_id}`}>
+                                  {t("filesystem.fields.path")}
+                                </Label>
+                                <div className="flex flex-col gap-2 sm:flex-row">
+                                  <Input
+                                    id={`project-mount-path-${row.client_id}`}
+                                    value={row.host_path}
+                                    onChange={(event) =>
+                                      handleRowChange(
+                                        row.client_id,
+                                        "host_path",
+                                        event.target.value,
+                                      )
+                                    }
+                                    placeholder={t("filesystem.placeholders.path")}
+                                    className="flex-1"
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    className="shrink-0"
+                                    onClick={() => {
+                                      void handlePickMountDirectory(row.client_id);
+                                    }}
+                                  >
+                                    <FolderPlus className="size-4" />
+                                    {t("project.advanced.chooseFolder")}
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     ) : null}
@@ -463,10 +534,7 @@ export function RenameProjectDialog({
             >
               {t("common.cancel")}
             </Button>
-            <Button
-              type="submit"
-              disabled={!name.trim() || isMountNameInvalid || isMountPathInvalid}
-            >
+            <Button type="submit" disabled={!name.trim()}>
               {t("common.save")}
             </Button>
           </DialogFooter>

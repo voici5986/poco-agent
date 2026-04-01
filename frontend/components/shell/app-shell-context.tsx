@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import type { LocalMountConfig } from "@/features/chat/types/api/session";
 import type {
   AddTaskOptions,
   ProjectItem,
@@ -19,20 +20,14 @@ export type ProjectCreateInput = {
   name: string;
   description?: string | null;
   default_model?: string | null;
-  mount_enabled?: boolean;
-  mount_name?: string | null;
-  mount_path?: string | null;
-  mount_access_mode?: "ro" | "rw" | null;
+  local_mounts?: LocalMountConfig[] | null;
 } & ProjectRepoDefaultsInput;
 
 export type ProjectUpdatesInput = {
   name?: string;
   description?: string | null;
   default_model?: string | null;
-  mount_enabled?: boolean;
-  mount_name?: string | null;
-  mount_path?: string | null;
-  mount_access_mode?: "ro" | "rw" | null;
+  local_mounts?: LocalMountConfig[] | null;
 } & ProjectRepoDefaultsInput;
 
 export interface AppShellContextValue {

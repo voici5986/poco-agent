@@ -27,7 +27,7 @@ import {
 import { RenameProjectDialog } from "@/features/projects/components/rename-project-dialog";
 import { ProjectFilesDialog } from "@/features/projects/components/project-files-dialog";
 import { projectFilesService } from "@/features/projects/api/project-files-api";
-import type { LocalMountAccessMode } from "@/features/chat/types/api/session";
+import type { LocalMountConfig } from "@/features/chat/types/api/session";
 import type { ProjectItem } from "@/features/projects/types";
 import { useLanguage } from "@/hooks/use-language";
 import { useT } from "@/lib/i18n/client";
@@ -145,19 +145,13 @@ export function ProjectInfoDrawer({
       newName: string,
       newDescription?: string | null,
       defaultModel?: string | null,
-      mountEnabled?: boolean,
-      mountName?: string | null,
-      mountPath?: string | null,
-      mountAccessMode?: LocalMountAccessMode | null,
+      localMounts?: LocalMountConfig[],
     ) => {
       void onUpdateProject({
         name: newName,
         description: newDescription,
         defaultModel,
-        mountEnabled,
-        mountName,
-        mountPath,
-        mountAccessMode,
+        localMounts,
       });
     },
     [onUpdateProject],
@@ -276,10 +270,7 @@ export function ProjectInfoDrawer({
         projectName={project.name}
         projectDescription={project.description}
         projectDefaultModel={project.defaultModel}
-        projectMountEnabled={project.mountEnabled}
-        projectMountName={project.mountName}
-        projectMountPath={project.mountPath}
-        projectMountAccessMode={project.mountAccessMode}
+        projectLocalMounts={project.localMounts}
         allowDescriptionEdit
         onRename={handleRename}
       />

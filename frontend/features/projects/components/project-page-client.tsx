@@ -109,8 +109,7 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
   }, [currentProject?.defaultModel]);
 
   const projectFilesystemDraft = React.useMemo<LocalFilesystemDraft>(() => {
-    const mountPath = (currentProject?.mountPath || "").trim();
-    if (!currentProject?.mountEnabled || !mountPath) {
+    if (!currentProject?.localMounts?.length) {
       return {
         filesystem_mode: "sandbox",
         local_mounts: [],
@@ -119,22 +118,12 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
 
     return {
       filesystem_mode: "local_mount",
-      local_mounts: [
-        {
-          id: "project-default",
-          name: (currentProject?.mountName || "").trim() || currentProject.name,
-          host_path: mountPath,
-          access_mode: currentProject?.mountAccessMode ?? "rw",
-        },
-      ],
+      local_mounts: currentProject.localMounts.map((mount) => ({
+        ...mount,
+        access_mode: mount.access_mode ?? "ro",
+      })),
     };
-  }, [
-    currentProject?.mountEnabled,
-    currentProject?.mountName,
-    currentProject?.mountPath,
-    currentProject?.mountAccessMode,
-    currentProject?.name,
-  ]);
+  }, [currentProject?.localMounts]);
 
   const handleSendTask = React.useCallback(
     async (options?: TaskSendOptions) => {
@@ -146,11 +135,13 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
       const scheduledTask = options?.scheduled_task ?? null;
       const effectiveFilesystemMode =
         options?.filesystem_mode ??
-        (currentProject?.mountEnabled ? projectFilesystemDraft.filesystem_mode : null);
+        (currentProject?.localMounts?.length
+          ? projectFilesystemDraft.filesystem_mode
+          : null);
       const effectiveLocalMounts =
         options?.local_mounts && options.local_mounts.length > 0
           ? options.local_mounts
-          : currentProject?.mountEnabled
+          : currentProject?.localMounts?.length
             ? projectFilesystemDraft.local_mounts
             : null;
       if (
@@ -231,7 +222,7 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
       router,
       t,
       updateProject,
-      currentProject?.mountEnabled,
+      currentProject?.localMounts,
     ],
   );
 
@@ -283,10 +274,7 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
                         name: updates.name,
                         description: updates.description,
                         default_model: updates.defaultModel,
-                        mount_enabled: updates.mountEnabled,
-                        mount_name: updates.mountName,
-                        mount_path: updates.mountPath,
-                        mount_access_mode: updates.mountAccessMode,
+                        local_mounts: updates.localMounts,
                       });
                     }}
                     onOpenSettings={() => setSettingsOpen(true)}

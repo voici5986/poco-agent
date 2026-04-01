@@ -6,7 +6,7 @@ import { FolderKanban, GitBranch, Link2, PenSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RenameProjectDialog } from "@/features/projects/components/rename-project-dialog";
-import type { LocalMountAccessMode } from "@/features/chat/types/api/session";
+import type { LocalMountConfig } from "@/features/chat/types/api/session";
 import type { ProjectItem } from "@/features/projects/types";
 import { useT } from "@/lib/i18n/client";
 
@@ -34,19 +34,13 @@ export function ProjectInfoHeader({
       name: string,
       description?: string | null,
       defaultModel?: string | null,
-      mountEnabled?: boolean,
-      mountName?: string | null,
-      mountPath?: string | null,
-      mountAccessMode?: LocalMountAccessMode | null,
+      localMounts?: LocalMountConfig[],
     ) => {
       await onUpdate({
         name,
         description,
         defaultModel,
-        mountEnabled,
-        mountName,
-        mountPath,
-        mountAccessMode,
+        localMounts,
       });
     },
     [onUpdate],
@@ -123,29 +117,10 @@ export function ProjectInfoHeader({
         projectName={project.name}
         projectDescription={project.description}
         projectDefaultModel={project.defaultModel}
-        projectMountEnabled={project.mountEnabled}
-        projectMountName={project.mountName}
-        projectMountPath={project.mountPath}
-        projectMountAccessMode={project.mountAccessMode}
+        projectLocalMounts={project.localMounts}
         allowDescriptionEdit
-        onRename={(
-          name,
-          description,
-          defaultModel,
-          mountEnabled,
-          mountName,
-          mountPath,
-          mountAccessMode,
-        ) => {
-          void handleRename(
-            name,
-            description,
-            defaultModel,
-            mountEnabled,
-            mountName,
-            mountPath,
-            mountAccessMode,
-          );
+        onRename={(name, description, defaultModel, localMounts) => {
+          void handleRename(name, description, defaultModel, localMounts);
         }}
       />
     </>

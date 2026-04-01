@@ -1533,11 +1533,12 @@
     "namePlaceholder": "Enter project name",
     "advanced": {
       "title": "Advanced config",
-      "description": "Set a default model and local mount path for new runs in this project.",
+      "description": "Set a default model and local mount list for new runs in this project.",
       "defaultModelLabel": "Default model",
       "defaultModelPlaceholder": "Use workspace default model",
-      "mountTitle": "Mount project path",
-      "mountDescription": "Apply one local directory to new runs in this project.",
+      "mountTitle": "Project mounts",
+      "mountDescription": "Apply one or more local directories to new runs in this project.",
+      "chooseFolder": "Choose folder",
       "mountPathLabel": "Mount path",
       "mountPathPlaceholder": "e.g. /Users/alice/Workspace/my-project"
     },
