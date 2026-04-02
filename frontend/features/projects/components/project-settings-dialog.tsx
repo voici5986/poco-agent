@@ -5,13 +5,16 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { HeaderSearchInput } from "@/components/shared/header-search-input";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogFooter } from "@/components/ui/dialog";
 import { CapabilityDialogContent } from "@/features/capabilities/components/capability-dialog-content";
 import { PresetCardSurface } from "@/features/capabilities/presets/components/preset-card-surface";
 import { presetsService } from "@/features/capabilities/presets/api/presets-api";
 import type { Preset } from "@/features/capabilities/presets/lib/preset-types";
+import {
+  filterProjectPresets,
+  getProjectPresetCardState,
+} from "@/features/projects/lib/project-preset-selection";
 import { useT } from "@/lib/i18n/client";
 
 interface ProjectSettingsDialogProps {
@@ -32,6 +35,7 @@ export function ProjectSettingsDialog({
   onProjectDefaultPresetChange,
 }: ProjectSettingsDialogProps) {
   const { t } = useT("translation");
+  const prevOpenRef = React.useRef(open);
   const [allPresets, setAllPresets] = React.useState<Preset[]>([]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [activeDefaultPresetId, setActiveDefaultPresetId] = React.useState<
@@ -57,7 +61,13 @@ export function ProjectSettingsDialog({
   }, [projectId, t]);
 
   React.useEffect(() => {
-    if (!open) return;
+    const wasOpen = prevOpenRef.current;
+    prevOpenRef.current = open;
+
+    if (!open || wasOpen) {
+      return;
+    }
+
     setSearchQuery("");
     setActiveDefaultPresetId(projectDefaultPresetId);
     void refresh();
@@ -69,15 +79,7 @@ export function ProjectSettingsDialog({
   }, [open, projectDefaultPresetId]);
 
   const filteredPresets = React.useMemo(() => {
-    const normalizedQuery = searchQuery.trim().toLowerCase();
-    if (!normalizedQuery) return allPresets;
-
-    return allPresets.filter((preset) => {
-      return (
-        preset.name.toLowerCase().includes(normalizedQuery) ||
-        (preset.description || "").toLowerCase().includes(normalizedQuery)
-      );
-    });
+    return filterProjectPresets(allPresets, searchQuery);
   }, [allPresets, searchQuery]);
 
   const persistDefaultPreset = React.useCallback(
@@ -132,7 +134,7 @@ export function ProjectSettingsDialog({
       <CapabilityDialogContent
         title={t("project.settingsPanel.dialogTitle", { name: projectName })}
         description={t("project.settingsPanel.dialogDescription")}
-        maxWidth="64rem"
+        maxWidth="48rem"
         maxHeight="80dvh"
         desktopMaxHeight="86dvh"
         footer={
@@ -149,7 +151,7 @@ export function ProjectSettingsDialog({
               value={searchQuery}
               onChange={setSearchQuery}
               placeholder={t("project.settingsPanel.presets.searchPlaceholder")}
-              className="w-full sm:w-80"
+              className="w-full sm:max-w-sm"
             />
             <Button
               variant="outline"
@@ -183,25 +185,23 @@ export function ProjectSettingsDialog({
               {t("project.settingsPanel.presets.emptySearch")}
             </div>
           ) : (
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid justify-items-center gap-4 md:grid-cols-2">
               {filteredPresets.map((preset) => {
-                const selected = activeDefaultPresetId === preset.preset_id;
+                const cardState = getProjectPresetCardState(
+                  preset,
+                  activeDefaultPresetId,
+                );
 
                 return (
                   <PresetCardSurface
                     key={preset.preset_id}
                     preset={preset}
-                    selected={selected}
-                    iconTone={selected ? "accent" : "muted"}
+                    selected={cardState.selected}
+                    iconTone={cardState.iconTone}
+                    selectedBackgroundColor={cardState.cardBackgroundColor}
                     disabled={savingKey !== null}
                     onActivate={() => handleSelectPreset(preset.preset_id)}
-                    meta={
-                      selected ? (
-                        <Badge variant="secondary">
-                          {t("project.settingsPanel.presets.default")}
-                        </Badge>
-                      ) : null
-                    }
+                    className="w-full max-w-[20rem]"
                   />
                 );
               })}

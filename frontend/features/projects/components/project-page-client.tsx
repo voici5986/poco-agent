@@ -326,9 +326,12 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
             projectName={currentProject.name}
             projectDefaultPresetId={currentProject.defaultPresetId ?? null}
             onProjectDefaultPresetChange={async (presetId) => {
-              await updateProject(projectId, {
+              const updatedProject = await updateProject(projectId, {
                 default_preset_id: presetId,
               });
+              if (!updatedProject) {
+                throw new Error("Failed to persist project default preset");
+              }
             }}
           />
         ) : null}

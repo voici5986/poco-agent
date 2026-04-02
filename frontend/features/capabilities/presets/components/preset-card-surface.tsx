@@ -14,6 +14,7 @@ interface PresetCardSurfaceProps {
   preset: Preset;
   selected?: boolean;
   iconTone?: "accent" | "muted";
+  selectedBackgroundColor?: string;
   meta?: React.ReactNode;
   onActivate?: () => void;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
@@ -26,6 +27,7 @@ export function PresetCardSurface({
   preset,
   selected = false,
   iconTone = "accent",
+  selectedBackgroundColor,
   meta,
   onActivate,
   onClick,
@@ -80,13 +82,18 @@ export function PresetCardSurface({
       onKeyDown={isInteractive ? onKeyDown ?? handleKeyDown : undefined}
       aria-pressed={isInteractive ? selected : undefined}
       className={cn(
-        "overflow-hidden rounded-2xl border border-border/60 transition-all duration-200",
+        "overflow-hidden rounded-2xl border border-border/60 bg-card transition-all duration-200",
         isInteractive &&
           "cursor-pointer hover:border-border hover:shadow-sm focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
-        selected && "border-primary/40 bg-primary/[0.03] shadow-sm",
+        selected && "border-border shadow-sm ring-1 ring-border/60",
         disabled && "pointer-events-none opacity-70",
         className,
       )}
+      style={
+        selected && selectedBackgroundColor
+          ? { backgroundColor: selectedBackgroundColor }
+          : undefined
+      }
     >
       <CardContent className="p-0">
         <div className="flex items-start gap-4 p-5">
