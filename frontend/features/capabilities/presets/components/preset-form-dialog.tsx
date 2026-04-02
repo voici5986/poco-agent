@@ -263,7 +263,7 @@ export function PresetFormDialog({
         }
       >
         <form id={formId} onSubmit={handleSubmit}>
-          <Tabs defaultValue="general" className="space-y-4">
+          <Tabs defaultValue="general" className="flex flex-col gap-4">
             <TabsList>
               <TabsTrigger value="general">
                 {t("library.presetsPage.tabs.general")}
@@ -276,7 +276,7 @@ export function PresetFormDialog({
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="general" className="space-y-4">
+            <TabsContent value="general" className="min-h-[30rem] space-y-4">
               <div className="grid gap-4 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
                 <div className="space-y-4">
                   <div className="space-y-2">
@@ -368,7 +368,7 @@ export function PresetFormDialog({
               </div>
             </TabsContent>
 
-            <TabsContent value="capabilities" className="space-y-4">
+            <TabsContent value="capabilities" className="min-h-[30rem] space-y-4">
               {isLoadingCapabilities ? (
                 <div className="flex min-h-40 items-center justify-center rounded-2xl border border-dashed border-border/60 text-sm text-muted-foreground">
                   <Loader2 className="mr-2 size-4 animate-spin" />
@@ -382,9 +382,7 @@ export function PresetFormDialog({
                     items={capabilityItems.skills}
                     selectedIds={skillIds}
                     onChange={setSkillIds}
-                    searchPlaceholder={t(
-                      "library.presetsPage.searchPlaceholder",
-                    )}
+                    searchPlaceholder={t("library.skillsPage.searchPlaceholder")}
                     emptyLabel={t("library.presetsPage.emptySkills")}
                   />
                   <CapabilitySelector
@@ -393,9 +391,7 @@ export function PresetFormDialog({
                     items={capabilityItems.mcp}
                     selectedIds={mcpServerIds}
                     onChange={setMcpServerIds}
-                    searchPlaceholder={t(
-                      "library.presetsPage.searchPlaceholder",
-                    )}
+                    searchPlaceholder={t("library.mcpLibrary.searchPlaceholder")}
                     emptyLabel={t("library.presetsPage.emptyMcp")}
                   />
                   <CapabilitySelector
@@ -404,16 +400,14 @@ export function PresetFormDialog({
                     items={capabilityItems.plugins}
                     selectedIds={pluginIds}
                     onChange={setPluginIds}
-                    searchPlaceholder={t(
-                      "library.presetsPage.searchPlaceholder",
-                    )}
+                    searchPlaceholder={t("library.pluginsPage.searchPlaceholder")}
                     emptyLabel={t("library.presetsPage.emptyPlugins")}
                   />
                 </div>
               )}
             </TabsContent>
 
-            <TabsContent value="subagents" className="space-y-4">
+            <TabsContent value="subagents" className="min-h-[30rem] space-y-4">
               <div className="flex items-center justify-between gap-4 rounded-2xl border border-border/60 p-4">
                 <div>
                   <p className="text-sm font-medium text-foreground">

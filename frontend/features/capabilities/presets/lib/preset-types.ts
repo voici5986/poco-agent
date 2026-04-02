@@ -7,7 +7,26 @@ export type PresetIcon =
   | "paintbrush"
   | "book"
   | "chip"
-  | "robot";
+  | "robot"
+  | "file"
+  | "message"
+  | "chart"
+  | "shield"
+  | "terminal"
+  | "zap"
+  | "pen"
+  | "wrench"
+  | "link"
+  | "cpu"
+  | "search"
+  | "mail"
+  | "image"
+  | "folder"
+  | "clipboard"
+  | "bug"
+  | "cloud"
+  | "rocket"
+  | "target"
 
 export type PresetSubAgentModel = "sonnet" | "opus" | "haiku" | "inherit";
 
