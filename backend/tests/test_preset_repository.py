@@ -1,7 +1,6 @@
 import unittest
 from unittest.mock import MagicMock
 
-from app.models.project import Project
 from app.repositories.preset_repository import PresetRepository
 
 

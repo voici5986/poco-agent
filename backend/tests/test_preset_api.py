@@ -1,5 +1,6 @@
 import unittest
 from datetime import UTC, datetime
+from uuid import UUID
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
@@ -12,7 +13,7 @@ from app.schemas.project import ProjectResponse
 def build_preset_response(preset_id: int = 1, name: str = "Frontend") -> PresetResponse:
     now = datetime.now(UTC)
     return PresetResponse(
-        preset_id=preset_id,
+        id=preset_id,
         user_id="user-1",
         name=name,
         description="Reusable preset",
@@ -31,11 +32,11 @@ def build_preset_response(preset_id: int = 1, name: str = "Frontend") -> PresetR
 
 
 def build_project_response(
-    project_id: str, *, default_preset_id: int | None
+    project_id: UUID, *, default_preset_id: int | None
 ) -> ProjectResponse:
     now = datetime.now(UTC)
     return ProjectResponse(
-        project_id=project_id,
+        id=project_id,
         user_id="user-1",
         name="Project",
         description="Reusable project",
@@ -114,7 +115,7 @@ class ProjectApiTests(unittest.TestCase):
     @patch("app.api.v1.projects.service.update_project")
     def test_update_project_returns_default_preset_id(self, update_project) -> None:
         update_project.return_value = build_project_response(
-            self.project_id,
+            UUID(self.project_id),
             default_preset_id=3,
         )
 

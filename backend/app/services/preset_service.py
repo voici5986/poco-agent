@@ -1,4 +1,4 @@
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 
 from sqlalchemy.orm import Session
 
@@ -235,7 +235,7 @@ class PresetService:
     def _validate_component_ids(
         *,
         requested_ids: list[int],
-        items: list[Skill | McpServer | Plugin],
+        items: Sequence[Skill | McpServer | Plugin],
         ownership_check: Callable[[Skill | McpServer | Plugin], bool],
         component_name: str,
     ) -> None:

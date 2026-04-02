@@ -5,6 +5,7 @@ from sqlalchemy import ForeignKey, Index, Integer, String, Text, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models import Base, TimestampMixin
+from app.schemas.filesystem import LocalMountAccessMode
 
 if TYPE_CHECKING:
     from app.models.project import Project
@@ -30,7 +31,10 @@ class ProjectLocalMount(Base, TimestampMixin):
     mount_id: Mapped[str] = mapped_column(String(255), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     host_path: Mapped[str] = mapped_column(Text, nullable=False)
-    access_mode: Mapped[str] = mapped_column(String(2), nullable=False)
+    access_mode: Mapped[LocalMountAccessMode] = mapped_column(
+        String(2),
+        nullable=False,
+    )
     sort_order: Mapped[int] = mapped_column(
         Integer,
         nullable=False,

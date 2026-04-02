@@ -152,7 +152,7 @@ class ProjectService:
     def _build_project_response(cls, project: Project) -> ProjectResponse:
         local_mounts = cls._resolve_project_local_mounts(project)
         return ProjectResponse(
-            project_id=project.id,
+            id=project.id,
             user_id=project.user_id,
             name=project.name,
             description=project.description,
