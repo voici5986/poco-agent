@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 import unittest
 import uuid
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 
 from app.models.preset import Preset
 from app.models.project import Project
@@ -230,8 +230,8 @@ class ProjectServiceTests(unittest.TestCase):
 
         self.db.flush.assert_called_once()
         self.assertLess(
-            self.db.method_calls.index(unittest.mock.call.flush()),
-            self.db.method_calls.index(unittest.mock.call.commit()),
+            self.db.method_calls.index(call.flush()),
+            self.db.method_calls.index(call.commit()),
         )
 
 
