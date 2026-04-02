@@ -370,6 +370,9 @@ class TaskService:
             else:
                 base_config = db_session.config_snapshot or {}
 
+            if project is None and db_session.project_id is not None:
+                project = ProjectRepository.get_by_id(db, db_session.project_id)
+
             merged_config = self._build_config_snapshot(
                 db, user_id, request.config, base_config=base_config
             )
