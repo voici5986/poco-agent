@@ -9,6 +9,7 @@ import {
   PenSquare,
   Search,
   Sparkles,
+  Bookmark,
   Clock,
   Brain,
 } from "lucide-react";
@@ -47,6 +48,13 @@ const TOP_NAV_ITEMS = [
     href: "/capabilities",
   },
   {
+    id: "presets",
+    labelKey: "sidebar.presets",
+    defaultLabel: "Presets",
+    icon: Bookmark,
+    href: "/presets",
+  },
+  {
     id: "scheduled-tasks",
     labelKey: "sidebar.scheduledTasks",
     defaultLabel: "Scheduled Tasks",
@@ -67,6 +75,8 @@ const ICON_ANIMATIONS: Record<string, string> = {
     "transition-transform duration-300 group-hover/menu-item:scale-110 group-hover/menu-item:-translate-y-0.5",
   capabilities:
     "transition-all duration-300 group-hover/menu-item:rotate-12 group-hover/menu-item:scale-110",
+  presets:
+    "transition-transform duration-300 group-hover/menu-item:-translate-y-0.5 group-hover/menu-item:scale-110",
   "scheduled-tasks":
     "transition-transform duration-500 group-hover/menu-item:rotate-[360deg]",
   memories:

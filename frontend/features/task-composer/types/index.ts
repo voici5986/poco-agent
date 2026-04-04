@@ -1,5 +1,13 @@
 import type { AddTaskOptions } from "@/features/projects/types";
-import type { InputFile } from "@/features/chat/types/api/session";
+import type {
+  InputFile,
+  LocalMountConfig,
+} from "@/features/chat/types/api/session";
+export type {
+  LocalFilesystemDraft,
+  LocalFilesystemSupport,
+  LocalMountDraftRow,
+} from "@/features/task-composer/types/local-filesystem";
 import type { ModelSelection } from "@/features/chat/lib/model-catalog";
 import type { RunScheduleMode } from "@/features/task-composer/model/run-schedule";
 
@@ -13,10 +21,15 @@ export interface TaskSendOptions {
   git_token_env_key?: string | null;
   repo_usage?: RepoUsageMode | null;
   project_name?: string | null;
+  preset_id?: number | null;
   browser_enabled?: boolean | null;
   memory_enabled?: boolean | null;
   mcp_config?: Record<string, boolean> | null;
   skill_config?: Record<string, boolean> | null;
+  plugin_config?: Record<string, boolean> | null;
+  subagent_ids?: number[] | null;
+  filesystem_mode?: "sandbox" | "local_mount" | null;
+  local_mounts?: LocalMountConfig[] | null;
   run_schedule?: {
     schedule_mode: RunScheduleMode;
     timezone: string;

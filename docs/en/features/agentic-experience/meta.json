@@ -3,6 +3,7 @@
   "pages": [
     "!index",
     "claude-code",
+    "preset",
     "mcp-skills",
     "browser",
     "github",

@@ -8,6 +8,7 @@
     "newTaskWithShortcut": "New Task ({{shortcut}})",
     "search": "Search",
     "library": "Capabilities",
+    "presets": "Presets",
     "openMain": "Open main sidebar",
     "scheduledTasks": "Scheduled Tasks",
     "memories": "Memories",
@@ -325,7 +326,7 @@
       "skillsUsed": "Skills",
       "mcpConfigured": "MCP servers (configured)",
       "mcp": "MCP servers",
-      "pluginsConfigured": "Presets (configured)"
+      "pluginsConfigured": "Plugins (configured)"
     },
     "typingWords": [
       "Accomplishing",
@@ -666,7 +667,7 @@
   },
   "library": {
     "title": "Capabilities",
-    "subtitle": "Manage your skills, presets and tools",
+    "subtitle": "Manage your skills, plugins, and tools",
     "comingSoon": "Coming Soon",
     "mobile": {
       "back": "Back to capabilities"
@@ -704,8 +705,8 @@
       "action": "Manage Servers"
     },
     "pluginsStore": {
-      "title": "Presets",
-      "description": "Browse and install capability presets"
+      "title": "Plugins",
+      "description": "Browse and install plugins"
     },
     "envVars": {
       "title": "Environment Variables",
@@ -1088,8 +1089,8 @@
       }
     },
     "pluginsPage": {
-      "searchPlaceholder": "Search presets...",
-      "addCard": "Add a preset"
+      "searchPlaceholder": "Search plugins...",
+      "addCard": "Add a plugin"
     },
     "skillsManager": {
       "stats": {
@@ -1254,21 +1255,21 @@
         "uninstall": "Uninstall"
       },
       "toasts": {
-        "loadError": "Failed to load presets",
+        "loadError": "Failed to load plugins",
         "actionError": "Operation failed, please try again later",
-        "installed": "Preset installed",
-        "uninstalled": "Preset uninstalled",
-        "enabled": "Preset enabled",
-        "disabled": "Preset disabled",
+        "installed": "Plugin installed",
+        "uninstalled": "Plugin uninstalled",
+        "enabled": "Plugin enabled",
+        "disabled": "Plugin disabled",
         "actionFailed": "Operation failed, please try again later",
-        "exclusiveEnabled": "(Other presets were turned off)"
+        "exclusiveEnabled": "(Other plugins were turned off)"
       },
-      "empty": "No presets yet",
-      "unknownPlugin": "Unknown preset"
+      "empty": "No plugins yet",
+      "unknownPlugin": "Unknown plugin"
     },
     "pluginsImport": {
-      "title": "Import Presets",
-      "description": "Upload a preset zip or import from a public GitHub repository.",
+      "title": "Import Plugins",
+      "description": "Upload a plugin zip or import from a public GitHub repository.",
       "relativePath": "Relative path",
       "tabs": {
         "zip": "Upload Zip",
@@ -1277,11 +1278,11 @@
       "fields": {
         "zip": "Zip file",
         "githubUrl": "GitHub public repo URL",
-        "nameOverride": "Preset name"
+        "nameOverride": "Plugin name"
       },
       "placeholders": {
         "githubUrl": "https://github.com/owner/repo",
-        "name": "e.g. my-preset"
+        "name": "e.g. my-plugin"
       },
       "hints": {
         "github": "Defaults to main/master (public github.com repos only)"
@@ -1295,9 +1296,9 @@
       },
       "preview": {
         "found": "Found",
-        "items": "preset definitions",
+        "items": "plugin definitions",
         "overwrite": "will overwrite",
-        "overwriteItems": "existing presets",
+        "overwriteItems": "existing plugins",
         "willOverwrite": "Overwrite",
         "root": "Root",
         "path": "Path",
@@ -1326,7 +1327,7 @@
         "discoverError": "Discover failed, please try again later",
         "committed": "Import succeeded",
         "commitError": "Import failed, please try again later",
-        "partialFailed": "Some presets failed to import. Please review the details.",
+        "partialFailed": "Some plugins failed to import. Please review the details.",
         "commitTimeout": "Import timed out, please try again later"
       },
       "progress": {
@@ -1403,6 +1404,80 @@
     "presetsPage": {
       "header": {
         "title": "Presets"
+      },
+      "summary": "{{count}} reusable presets",
+      "searchPlaceholder": "Search presets...",
+      "addCard": "Create a preset",
+      "empty": "No presets yet",
+      "emptySearch": "No presets match your search",
+      "emptyDescription": "No description yet",
+      "emptyBadgesHint": "Teach your preset a few skills to make it more capable.",
+      "emptySkills": "No skills available",
+      "emptyMcp": "No MCP servers available",
+      "emptyPlugins": "No plugins available",
+      "loadingCapabilities": "Loading capabilities...",
+      "flags": {
+        "browser": "Browser",
+        "memory": "Memory"
+      },
+      "tabs": {
+        "general": "General",
+        "capabilities": "Capabilities",
+        "subagents": "Subagents"
+      },
+      "picker": {
+        "placeholder": "Select a preset",
+        "none": "No preset",
+        "change": "Change preset",
+        "selected": "Selected",
+        "dialogTitle": "Choose a preset",
+        "dialogDescription": "Apply a reusable setup to this run, or continue without one.",
+        "noneDescription": "Keep the current run independent and do not apply a preset."
+      },
+      "selectors": {
+        "skills": "Choose the reusable skills bundled into this preset.",
+        "mcp": "Choose the MCP servers this preset should enable.",
+        "plugins": "Choose the plugins this preset should carry."
+      },
+      "form": {
+        "name": "Name",
+        "namePlaceholder": "For example: Frontend delivery",
+        "description": "Description",
+        "descriptionPlaceholder": "Describe when to use this preset",
+        "promptTemplate": "Prompt template",
+        "promptTemplatePlaceholder": "Optional baseline instructions for runs created from this preset",
+        "visual": "Visual",
+        "browserEnabled": "Enable browser",
+        "browserEnabledHint": "Add browser capability whenever this preset is applied.",
+        "memoryEnabled": "Enable memory",
+        "memoryEnabledHint": "Carry memory capability into runs created from this preset."
+      },
+      "dialog": {
+        "createTitle": "Create preset",
+        "editTitle": "Edit preset"
+      },
+      "subagents": {
+        "title": "Inline subagents",
+        "description": "Define extra subagents that should be injected with this preset.",
+        "add": "Add subagent",
+        "empty": "No subagents configured",
+        "itemTitle": "Subagent {{index}}",
+        "fields": {
+          "name": "Name",
+          "model": "Model",
+          "description": "Description",
+          "tools": "Tools",
+          "toolsPlaceholder": "Read, Edit, Bash",
+          "prompt": "Prompt"
+        }
+      },
+      "toasts": {
+        "loadError": "Failed to load presets",
+        "created": "Preset created",
+        "updated": "Preset updated",
+        "deleted": "Preset deleted",
+        "saveFailed": "Failed to save preset",
+        "deleteFailed": "Failed to delete preset"
       }
     },
     "skillSettings": {
@@ -1449,13 +1524,137 @@
     "titleWithCount": "{{name}} · {{count}} tasks",
     "share": "Share Project",
     "settings": "Project Settings",
+    "settingsAction": "Manage Presets",
+    "edit": "Edit Project",
     "rename": "Rename Project",
-    "renameDescription": "Enter a new project name",
     "nameLabel": "Project name",
+    "descriptionLabel": "Description",
     "namePlaceholder": "Enter project name",
+    "advanced": {
+      "title": "Advanced config",
+      "defaultModelLabel": "Default model",
+      "defaultModelPlaceholder": "Use workspace default model",
+      "gitTitle": "Git Repository",
+      "gitDescription": "Configure the default Git repo URL, branch, and authentication for this project.",
+      "gitRepoUrlLabel": "Repository URL",
+      "gitRepoUrlPlaceholder": "https://github.com/user/repo.git",
+      "gitBranchLabel": "Branch",
+      "gitBranchPlaceholder": "main",
+      "gitTokenEnvKeyLabel": "Auth Env Variable",
+      "gitTokenEnvKeyPlaceholder": "GITHUB_TOKEN",
+      "mountTitle": "Project mounts",
+      "mountDescription": "Apply one or more local directories to new runs in this project.",
+      "chooseFolder": "Choose folder",
+      "mountPathLabel": "Mount path",
+      "mountPathPlaceholder": "e.g. /Users/alice/Workspace/my-project"
+    },
     "delete": "Delete Project",
     "deleteDescription": "Deleting this project will move all of its tasks back to the main list.",
-    "deleteConfirm": "Delete"
+    "deleteConfirm": "Delete",
+    "detail": {
+      "overview": "Project overview",
+      "renameAction": "Edit project",
+      "descriptionPlaceholder": "Add project description...",
+      "editDescription": "Edit description",
+      "emptyDescription": "This project does not have a summary yet. Start with a new session to build context.",
+      "unknownUpdatedAt": "No activity yet",
+      "composerTitle": "Continue directing Poco in {{name}}",
+      "infoDrawer": {
+        "title": "Project Info"
+      },
+      "files": {
+        "title": "Project files",
+        "description": "Files attached to {{name}} are available in every run for this project.",
+        "uploadTitle": "Upload files",
+        "uploadDescription": "Attach documents, notes, or snippets to keep project context close at hand.",
+        "uploadButton": "Add files",
+        "loading": "Loading project files...",
+        "emptyTitle": "No project files yet",
+        "emptyDescription": "Add files here so every run in this project can use them as context.",
+        "count": "{{count}} files",
+        "unknownSize": "Unknown size",
+        "toasts": {
+          "loadFailed": "Failed to load project files",
+          "added": "{{name}} added to project files",
+          "addFailed": "Failed to add file to project",
+          "removed": "{{name}} removed from project files",
+          "removeFailed": "Failed to remove project file"
+        }
+      },
+      "notFoundTitle": "Project not found",
+      "notFoundDescription": "This project is unavailable or you no longer have access to it.",
+      "backHome": "Back to home",
+      "stats": {
+        "sessions": "Sessions",
+        "presets": "Presets",
+        "updated": "Last updated"
+      },
+      "sessionList": {
+        "title": "Session history",
+        "subtitle": "{{count}} sessions in this project",
+        "emptyTitle": "No project sessions yet",
+        "emptyDescription": "Your next run in this project will appear here so you can jump back into context quickly."
+      },
+      "quickActions": {
+        "title": "Quick actions",
+        "subtitle": "Keep the most common project controls in one panel.",
+        "soon": "Soon",
+        "presets": {
+          "title": "Manage presets",
+          "description": "Set the default preset and control what new sessions start with."
+        },
+        "rename": {
+          "title": "Edit project",
+          "description": "Update the project name without leaving the detail view."
+        },
+        "files": {
+          "title": "Project files",
+          "description": "Upload files that every run in this project can use."
+        },
+        "docs": {
+          "title": "Project docs",
+          "description": "Reserved entry point for documentation and shared context assets."
+        }
+      }
+    },
+    "settingsPanel": {
+      "dialogTitle": "{{name}} settings",
+      "dialogDescription": "Search across all presets and choose the default one for new runs in this project.",
+      "git": {
+        "title": "Git Repository",
+        "repoUrlLabel": "Repository URL",
+        "repoUrlPlaceholder": "https://github.com/user/repo.git",
+        "branchLabel": "Branch",
+        "branchPlaceholder": "main",
+        "tokenEnvKeyLabel": "Auth Env Variable",
+        "tokenEnvKeyPlaceholder": "GITHUB_TOKEN",
+        "toasts": {
+          "updated": "Git configuration updated",
+          "failed": "Failed to update git configuration"
+        }
+      },
+      "presets": {
+        "title": "Default preset",
+        "description": "Pick one preset for this project, or clear the default to start new runs without one.",
+        "searchPlaceholder": "Search presets...",
+        "clearDefault": "Clear default",
+        "loading": "Loading presets...",
+        "empty": "No default preset selected",
+        "emptySearch": "No presets match your search",
+        "default": "Default",
+        "emptyDescription": "No description yet",
+        "stats": {
+          "skills": "{{count}} skills",
+          "mcp": "{{count}} MCP",
+          "plugins": "{{count}} plugins"
+        },
+        "toasts": {
+          "loadError": "Failed to load presets",
+          "defaultUpdated": "Default preset updated",
+          "defaultFailed": "Failed to update default preset"
+        }
+      }
+    }
   },
   "userMenu": {
     "credits": "Credits",
@@ -1676,7 +1875,12 @@
     "missingToolUseId": "Missing tool use ID",
     "messageContentRequired": "Please enter message content",
     "sessionNameRequired": "Please enter session name",
-    "sessionNameTooLong": "Session name too long"
+    "sessionNameTooLong": "Session name too long",
+    "localMountNameRequired": "Please enter a directory name",
+    "localMountPathRequired": "Please enter a host path",
+    "localMountCountRequired": "Please add at least one directory",
+    "localMountUnavailable": "Local file access is unavailable right now",
+    "localMountPathDuplicate": "Directory already added: {{path}}"
   },
   "user": {
     "plan": {
@@ -1706,7 +1910,9 @@
     "downloadStart": "Starting workspace archive download",
     "archiveNotAvailable": "Archive file not available yet",
     "archiveUnavailable": "Archive file not available yet",
-    "downloadFailed": "Download failed"
+    "downloadFailed": "Download failed",
+    "workspaceRoot": "Workspace",
+    "localMountsRoot": "Local Mounts"
   },
   "pullToRefresh": {
     "refreshing": "Refreshing...",
@@ -1729,16 +1935,17 @@
     "turnOnAll": "Turn on all",
     "noMcpInstalled": "No MCP installed",
     "noSkillsInstalled": "No skills installed",
-    "noPluginsInstalled": "No presets installed",
+    "noPluginsInstalled": "No plugins installed",
     "fallbackMcp": "MCP #{{id}}",
     "fallbackSkill": "Skill #{{id}}",
+    "fallbackPlugin": "Plugin #{{id}}",
     "fallbackPreset": "Preset #{{id}}",
     "oneClickClose": "Turn off all",
     "notInstalledMcp": "No MCP installed",
     "notInstalledSkill": "No skills installed",
     "mcp": "MCP",
     "skills": "Skills",
-    "plugins": "Presets",
+    "plugins": "Plugins",
     "apps": "Apps",
     "comingSoon": "Coming soon",
     "clickForDetails": "Click for details",
@@ -2044,6 +2251,67 @@
         "title": "Skills page",
         "description": "This is the Skills view inside Capabilities, where you browse and manage skills."
       }
+    }
+  },
+  "filesystem": {
+    "title": "Local files",
+    "description": "Authorize Poco to access directories outside the sandbox workspace.",
+    "status": {
+      "title": "Environment status",
+      "loading": "Checking...",
+      "unknown": "Status unavailable",
+      "available": "Local mount ready",
+      "unavailable": "Local directory mounting is not available"
+    },
+    "mode": {
+      "sandboxTitle": "Sandbox only",
+      "sandboxDescription": "Use only the built-in sandbox environment for this task.",
+      "localMountTitle": "Authorize local directories",
+      "localMountDescription": "Allow the agent to read or edit selected host directories."
+    },
+    "mounts": {
+      "title": "Authorized directories",
+      "itemTitle": "Directory {{index}}"
+    },
+    "actions": {
+      "manage": "Local files",
+      "addMount": "Add directory",
+      "removeMount": "Remove directory",
+      "save": "Save for next run",
+      "apply": "Apply to this task"
+    },
+    "fields": {
+      "name": "Display name",
+      "path": "Host path",
+      "access": "Access"
+    },
+    "placeholders": {
+      "name": "e.g. Documents",
+      "path": "e.g. /Users/alice/Documents"
+    },
+    "accessModes": {
+      "ro": "Read only",
+      "rw": "Read & write"
+    },
+    "messages": {
+      "localDeployment": "Directories will be mounted directly into the execution environment on this machine.",
+      "cloudDeployment": "Directories will be shared with the execution environment through the local helper and cloud bridge.",
+      "supportUnknown": "Couldn't load the helper status. You can keep using sandbox mode safely.",
+      "sandboxOnly": "Only the /workspace sandbox will be available for this task.",
+      "nextRun": "Saved changes apply to the next run. Current containers are not hot-reloaded.",
+      "draft": "These directories will be authorized when this task starts."
+    },
+    "summary": {
+      "localMountCount": "Local files ({{count}})"
+    },
+    "toasts": {
+      "saved": "Configuration saved. It will apply on the next run.",
+      "saveFailed": "Failed to save local file settings"
+    },
+    "picker": {
+      "notSupported": "Native folder picker is not supported in this browser. Please enter the path manually.",
+      "resolveFailed": "Could not auto-detect the path. Please enter the host path manually.",
+      "searchLimitation": "For safety, host path auto-fill only searches by the selected folder name. If multiple folders share that name, resolution can fail and you need to enter the absolute path manually."
     }
   }
 }

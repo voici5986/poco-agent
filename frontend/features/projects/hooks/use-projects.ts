@@ -14,7 +14,7 @@ import {
   hasStartupPreloadValue,
 } from "@/lib/startup-preload";
 import type {
-  ProjectRepoDefaultsInput,
+  ProjectCreateInput,
   ProjectUpdatesInput,
 } from "@/components/shell/app-shell-context";
 
@@ -70,22 +70,18 @@ export function useProjects(options: UseProjectsOptions = {}) {
     fetchProjects();
   }, [enableClientFetch, fetchProjects]);
 
-  const addProject = useCallback(
-    async (name: string, options?: ProjectRepoDefaultsInput) => {
-      try {
-        const newProject = await createProjectAction({
-          name,
-          ...(options ?? {}),
-        });
-        setProjects((prev) => [...prev, newProject]);
-        return newProject;
-      } catch (error) {
-        console.error("Failed to create project", error);
-        return null;
-      }
-    },
-    [],
-  );
+  const addProject = useCallback(async (input: ProjectCreateInput) => {
+    try {
+      const newProject = await createProjectAction({
+        ...input,
+      });
+      setProjects((prev) => [...prev, newProject]);
+      return newProject;
+    } catch (error) {
+      console.error("Failed to create project", error);
+      return null;
+    }
+  }, []);
 
   const updateProject = useCallback(
     async (projectId: string, updates: ProjectUpdatesInput) => {

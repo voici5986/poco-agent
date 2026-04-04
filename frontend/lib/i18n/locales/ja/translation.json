@@ -8,7 +8,10 @@
     "newTaskWithShortcut": "新しいタスク ({{shortcut}})",
     "search": "検索",
     "library": "機能",
+    "presets": "プリセット",
+    "openMain": "メインサイドバーを開く",
     "scheduledTasks": "スケジュールタスク",
+    "memories": "メモリ",
     "projects": "プロジェクト",
     "newProject": "新しいプロジェクト",
     "newProjectPrompt": "プロジェクト名を入力してください：",
@@ -274,6 +277,9 @@
     "planApprovalApprove": "承認して実行",
     "planApprovalReject": "拒否",
     "planApprovalEmpty": "計画が提供されていません",
+    "enterPlanModeTitle": "プランニングモードに入る",
+    "enterPlanModeHint": "Agent はまず実行手順を計画し、あなたの承認を待ってから実行を開始します。",
+    "enterPlanModeConfirm": "プランニングに入る",
     "askUserTimeout": "残り時間 {{seconds}}秒",
     "askUserPrevious": "前へ",
     "askUserNext": "次へ",
@@ -319,7 +325,8 @@
       "skillsConfigured": "スキル（設定済み）",
       "skillsUsed": "スキル",
       "mcpConfigured": "MCPサーバー（設定済み）",
-      "mcp": "MCPサーバー"
+      "mcp": "MCPサーバー",
+      "pluginsConfigured": "プラグイン（設定済み）"
     },
     "typingWords": [
       "Accomplishing",
@@ -632,14 +639,14 @@
       "loadingDoc": "ドキュメントを読み込み中...",
       "parseError": "Excalidraw ファイルの解析に失敗しました",
       "fetchError": "ドキュメントコンテンツの取得に失敗しました",
+      "frontMatter": "フロントマター",
       "retry": "再試行",
       "selectFile": "プレビューするファイルを右から選択してください",
       "supportedFormats": "PDF、Officeドキュメント、一般的な画像形式、MP4 動画、XMind ファイル、.excalidraw ファイル、.drawio ファイルをサポート",
       "processing": "ファイル処理",
       "notSupported": "この形式はプレビューをサポートしていません",
       "openInNewWindow": "新しいウィンドウで開く",
-      "downloadOriginal": "元のファイルをダウンロード",
-      "frontMatter": "フロントマター"
+      "downloadOriginal": "元のファイルをダウンロード"
     },
     "summary": {
       "total": "合計",
@@ -660,8 +667,11 @@
   },
   "library": {
     "title": "機能",
-    "subtitle": "スキル、プリセット、ツールを管理",
+    "subtitle": "スキル、プラグイン、ツールを管理",
     "comingSoon": "近日公開",
+    "mobile": {
+      "back": "機能一覧に戻る"
+    },
     "sidebar": {
       "title": "機能ショートカット",
       "description": "機能を選択して設定にジャンプします。",
@@ -693,6 +703,10 @@
       "feature2": "視覚的な管理",
       "feature3": "リアルタイム監視",
       "action": "サーバーを管理"
+    },
+    "pluginsStore": {
+      "title": "プラグイン",
+      "description": "プラグインを閲覧してインストール"
     },
     "envVars": {
       "title": "環境変数",
@@ -1074,6 +1088,10 @@
         }
       }
     },
+    "pluginsPage": {
+      "searchPlaceholder": "プラグインを検索...",
+      "addCard": "プラグインを追加"
+    },
     "skillsManager": {
       "stats": {
         "available": "利用可能",
@@ -1220,9 +1238,103 @@
         "invalidKeyHint": "設定 > その他 で SkillsMP API キーを更新し、保存後にここへ戻ってもう一度お試しください。"
       }
     },
-    "pluginsPage": {
-      "searchPlaceholder": "プリセットを検索...",
-      "addCard": "プリセットを追加"
+    "pluginsManager": {
+      "stats": {
+        "enabled": "有効"
+      },
+      "scope": {
+        "system": "システム",
+        "user": "ユーザー"
+      },
+      "fields": {
+        "id": "id",
+        "source": "ソース"
+      },
+      "actions": {
+        "install": "インストール",
+        "uninstall": "アンインストール"
+      },
+      "toasts": {
+        "loadError": "プラグインの読み込みに失敗しました",
+        "actionError": "操作に失敗しました。後でもう一度お試しください",
+        "installed": "プラグインをインストールしました",
+        "uninstalled": "プラグインをアンインストールしました",
+        "enabled": "プラグインを有効にしました",
+        "disabled": "プラグインを無効にしました",
+        "actionFailed": "操作に失敗しました。後でもう一度お試しください",
+        "exclusiveEnabled": "（他のプラグインもオフにしました）"
+      },
+      "empty": "プラグインはまだありません",
+      "unknownPlugin": "不明なプラグイン"
+    },
+    "pluginsImport": {
+      "title": "プラグインをインポート",
+      "description": "プラグイン zip をアップロードするか、公開 GitHub リポジトリからインポートします。",
+      "relativePath": "相対パス",
+      "tabs": {
+        "zip": "Zip をアップロード",
+        "github": "GitHub URL"
+      },
+      "fields": {
+        "zip": "Zip ファイル",
+        "githubUrl": "公開 GitHub リポジトリ URL",
+        "nameOverride": "プラグイン名"
+      },
+      "placeholders": {
+        "githubUrl": "https://github.com/owner/repo",
+        "name": "例: my-plugin"
+      },
+      "hints": {
+        "github": "デフォルトは main/master（公開 github.com リポジトリのみ）"
+      },
+      "actions": {
+        "back": "戻る",
+        "discover": "検出",
+        "discovering": "検出中...",
+        "commit": "インポートしてインストール",
+        "committing": "インポート中..."
+      },
+      "preview": {
+        "found": "検出",
+        "items": "件のプラグイン定義",
+        "overwrite": "上書きされます",
+        "overwriteItems": "既存のプラグイン",
+        "willOverwrite": "上書き",
+        "root": "ルート",
+        "path": "パス",
+        "unnamed": "名称未設定",
+        "pagination": {
+          "page": "{{page}} / {{pages}} ページ",
+          "prev": "前へ",
+          "next": "次へ"
+        },
+        "selection": {
+          "selectPage": "このページを選択",
+          "clearPage": "このページの選択を解除",
+          "selectAll": "すべて選択",
+          "clearAll": "すべて解除"
+        }
+      },
+      "result": {
+        "title": "インポート結果",
+        "success": "成功",
+        "failed": "失敗"
+      },
+      "toasts": {
+        "missingZip": "Zip ファイルを選択してください",
+        "missingGithubUrl": "GitHub URL を入力してください",
+        "discovered": "検出しました。インポートする内容を確認してください。",
+        "discoverError": "検出に失敗しました。後でもう一度お試しください",
+        "committed": "インポートに成功しました",
+        "commitError": "インポートに失敗しました。後でもう一度お試しください",
+        "partialFailed": "一部のプラグインのインポートに失敗しました。詳細を確認してください。",
+        "commitTimeout": "インポートがタイムアウトしました。後でもう一度お試しください"
+      },
+      "progress": {
+        "title": "インポート進捗",
+        "value": "進捗",
+        "jobId": "ジョブ ID"
+      }
     },
     "mcpLibrary": {
       "header": {
@@ -1285,11 +1397,6 @@
       "marketplace": "Marketplace",
       "skillsmp": "SkillsMP"
     },
-    "pluginsManager": {
-      "toasts": {
-        "exclusiveEnabled": "（他のプリセットもオフにしました）"
-      }
-    },
     "presets": {
       "title": "プリセット",
       "description": "再利用可能な機能プリセットを管理"
@@ -1297,6 +1404,80 @@
     "presetsPage": {
       "header": {
         "title": "プリセット"
+      },
+      "summary": "再利用可能なプリセット {{count}} 件",
+      "searchPlaceholder": "プリセットを検索...",
+      "addCard": "プリセットを作成",
+      "empty": "まだプリセットがありません",
+      "emptySearch": "検索条件に一致するプリセットはありません",
+      "emptyDescription": "説明はまだありません",
+      "emptyBadgesHint": "プリセットにいくつかスキルを追加して、もっと役立つものにしましょう。",
+      "emptySkills": "利用可能なスキルがありません",
+      "emptyMcp": "利用可能な MCP サーバーがありません",
+      "emptyPlugins": "利用可能なプラグインがありません",
+      "loadingCapabilities": "機能を読み込み中...",
+      "flags": {
+        "browser": "ブラウザ",
+        "memory": "メモリ"
+      },
+      "tabs": {
+        "general": "基本情報",
+        "capabilities": "機能",
+        "subagents": "サブエージェント"
+      },
+      "picker": {
+        "placeholder": "プリセットを選択",
+        "none": "プリセットなし",
+        "change": "プリセットを変更",
+        "selected": "選択中",
+        "dialogTitle": "プリセットを選択",
+        "dialogDescription": "この実行に再利用可能な設定を適用するか、プリセットなしで続行します。",
+        "noneDescription": "この実行を独立したままにし、プリセットを適用しません。"
+      },
+      "selectors": {
+        "skills": "このプリセットに含める再利用可能なスキルを選択します。",
+        "mcp": "このプリセットで有効にする MCP サーバーを選択します。",
+        "plugins": "このプリセットに含めるプラグインを選択します。"
+      },
+      "form": {
+        "name": "名前",
+        "namePlaceholder": "例: フロントエンド納品",
+        "description": "説明",
+        "descriptionPlaceholder": "このプリセットを使う場面を説明してください",
+        "promptTemplate": "プロンプトテンプレート",
+        "promptTemplatePlaceholder": "このプリセットから作成される実行向けの任意の基本指示",
+        "visual": "ビジュアル",
+        "browserEnabled": "ブラウザを有効化",
+        "browserEnabledHint": "このプリセットが適用されるたびにブラウザ機能を追加します。",
+        "memoryEnabled": "メモリを有効化",
+        "memoryEnabledHint": "このプリセットから作成される実行にメモリ機能を引き継ぎます。"
+      },
+      "dialog": {
+        "createTitle": "プリセットを作成",
+        "editTitle": "プリセットを編集"
+      },
+      "subagents": {
+        "title": "インラインサブエージェント",
+        "description": "このプリセットと一緒に注入する追加サブエージェントを定義します。",
+        "add": "サブエージェントを追加",
+        "empty": "サブエージェントは未設定です",
+        "itemTitle": "サブエージェント {{index}}",
+        "fields": {
+          "name": "名前",
+          "model": "モデル",
+          "description": "説明",
+          "tools": "ツール",
+          "toolsPlaceholder": "Read, Edit, Bash",
+          "prompt": "プロンプト"
+        }
+      },
+      "toasts": {
+        "loadError": "プリセットの読み込みに失敗しました",
+        "created": "プリセットを作成しました",
+        "updated": "プリセットを更新しました",
+        "deleted": "プリセットを削除しました",
+        "saveFailed": "プリセットの保存に失敗しました",
+        "deleteFailed": "プリセットの削除に失敗しました"
       }
     },
     "skillSettings": {
@@ -1343,13 +1524,137 @@
     "titleWithCount": "{{name}} ・ {{count}}件のタスク",
     "share": "プロジェクトを共有",
     "settings": "プロジェクト設定",
+    "settingsAction": "プリセットを管理",
+    "edit": "プロジェクトを編集",
     "rename": "プロジェクト名を変更",
-    "renameDescription": "新しいプロジェクト名を入力してください",
     "nameLabel": "プロジェクト名",
+    "descriptionLabel": "プロジェクトの説明",
     "namePlaceholder": "プロジェクト名を入力",
+    "advanced": {
+      "title": "詳細設定",
+      "defaultModelLabel": "既定モデル",
+      "defaultModelPlaceholder": "ワークスペースの既定モデルを使用",
+      "gitTitle": "Git リポジトリ",
+      "gitDescription": "このプロジェクトのデフォルトの Git リポジトリ URL、ブランチ、認証方式を設定します。",
+      "gitRepoUrlLabel": "リポジトリ URL",
+      "gitRepoUrlPlaceholder": "https://github.com/user/repo.git",
+      "gitBranchLabel": "ブランチ",
+      "gitBranchPlaceholder": "main",
+      "gitTokenEnvKeyLabel": "認証環境変数",
+      "gitTokenEnvKeyPlaceholder": "GITHUB_TOKEN",
+      "mountTitle": "プロジェクトのマウント",
+      "mountDescription": "このプロジェクトの新しい実行に1つ以上のローカルディレクトリを追加します。",
+      "chooseFolder": "フォルダーを選択",
+      "mountPathLabel": "マウントパス",
+      "mountPathPlaceholder": "例: /Users/alice/Workspace/my-project"
+    },
     "delete": "プロジェクトを削除",
     "deleteDescription": "このプロジェクトを削除すると、すべてのタスクがメインリストに戻ります。",
-    "deleteConfirm": "削除"
+    "deleteConfirm": "削除",
+    "detail": {
+      "overview": "プロジェクト概要",
+      "renameAction": "プロジェクトを編集",
+      "descriptionPlaceholder": "プロジェクトの説明を追加...",
+      "editDescription": "説明を編集",
+      "emptyDescription": "このプロジェクトにはまだ概要がありません。新しいセッションを始めてコンテキストを作成してください。",
+      "unknownUpdatedAt": "まだアクティビティはありません",
+      "composerTitle": "{{name}} で Poco への指示を続ける",
+      "infoDrawer": {
+        "title": "プロジェクト情報"
+      },
+      "files": {
+        "title": "プロジェクトファイル",
+        "description": "{{name}} に追加したファイルは、このプロジェクトのすべての実行で利用できます。",
+        "uploadTitle": "ファイルをアップロード",
+        "uploadDescription": "ドキュメント、メモ、断片を添付して、プロジェクトの文脈をすぐ使えるようにします。",
+        "uploadButton": "ファイルを追加",
+        "loading": "プロジェクトファイルを読み込み中...",
+        "emptyTitle": "まだプロジェクトファイルはありません",
+        "emptyDescription": "ここにファイルを追加すると、このプロジェクトのすべての実行で文脈として使えます。",
+        "count": "{{count}} 件のファイル",
+        "unknownSize": "サイズ不明",
+        "toasts": {
+          "loadFailed": "プロジェクトファイルの読み込みに失敗しました",
+          "added": "{{name}} をプロジェクトファイルに追加しました",
+          "addFailed": "プロジェクトにファイルを追加できませんでした",
+          "removed": "{{name}} をプロジェクトファイルから削除しました",
+          "removeFailed": "プロジェクトファイルを削除できませんでした"
+        }
+      },
+      "notFoundTitle": "プロジェクトが見つかりません",
+      "notFoundDescription": "このプロジェクトは利用できないか、アクセス権がなくなっています。",
+      "backHome": "ホームに戻る",
+      "stats": {
+        "sessions": "セッション",
+        "presets": "プリセット",
+        "updated": "最終更新"
+      },
+      "sessionList": {
+        "title": "セッション履歴",
+        "subtitle": "このプロジェクトには {{count}} 件のセッションがあります",
+        "emptyTitle": "このプロジェクトにはまだセッションがありません",
+        "emptyDescription": "このプロジェクトで次に実行したセッションはここに表示され、すぐにコンテキストへ戻れます。"
+      },
+      "quickActions": {
+        "title": "クイックアクション",
+        "subtitle": "よく使うプロジェクト操作を 1 つのパネルにまとめます。",
+        "soon": "近日対応",
+        "presets": {
+          "title": "プリセットを管理",
+          "description": "デフォルトのプリセットを設定し、新しいセッションの開始状態を管理します。"
+        },
+        "rename": {
+          "title": "プロジェクトを編集",
+          "description": "詳細ビューを離れずにプロジェクト名を更新します。"
+        },
+        "files": {
+          "title": "プロジェクトファイル",
+          "description": "このプロジェクトの各実行で使えるファイルをアップロードします。"
+        },
+        "docs": {
+          "title": "プロジェクトドキュメント",
+          "description": "ドキュメントと共有コンテキスト資産のための予約済みエントリです。"
+        }
+      }
+    },
+    "settingsPanel": {
+      "dialogTitle": "{{name}} の設定",
+      "dialogDescription": "すべてのプリセットを検索し、このプロジェクトの新しい実行に使うデフォルトを選択します。",
+      "git": {
+        "title": "Git リポジトリ",
+        "repoUrlLabel": "リポジトリ URL",
+        "repoUrlPlaceholder": "https://github.com/user/repo.git",
+        "branchLabel": "ブランチ",
+        "branchPlaceholder": "main",
+        "tokenEnvKeyLabel": "認証環境変数",
+        "tokenEnvKeyPlaceholder": "GITHUB_TOKEN",
+        "toasts": {
+          "updated": "Git 設定を更新しました",
+          "failed": "Git 設定の更新に失敗しました"
+        }
+      },
+      "presets": {
+        "title": "デフォルトプリセット",
+        "description": "このプロジェクトのプリセットを 1 つ選ぶか、デフォルトをクリアして新しい実行をプリセットなしで開始します。",
+        "searchPlaceholder": "プリセットを検索...",
+        "clearDefault": "デフォルトをクリア",
+        "loading": "プリセットを読み込み中...",
+        "empty": "デフォルトプリセットは未選択です",
+        "emptySearch": "検索条件に一致するプリセットがありません",
+        "default": "デフォルト",
+        "emptyDescription": "説明はまだありません",
+        "stats": {
+          "skills": "{{count}} スキル",
+          "mcp": "{{count}} MCP",
+          "plugins": "{{count}} プラグイン"
+        },
+        "toasts": {
+          "loadError": "プリセットの読み込みに失敗しました",
+          "defaultUpdated": "デフォルトプリセットを更新しました",
+          "defaultFailed": "デフォルトプリセットの更新に失敗しました"
+        }
+      }
+    }
   },
   "userMenu": {
     "credits": "クレジット",
@@ -1366,6 +1671,7 @@
   },
   "common": {
     "cancel": "キャンセル",
+    "close": "閉じる",
     "create": "作成",
     "delete": "削除",
     "deleted": "削除済み",
@@ -1569,7 +1875,12 @@
     "missingToolUseId": "ツール使用IDが見つかりません",
     "messageContentRequired": "メッセージ内容を入力してください",
     "sessionNameRequired": "セッション名を入力してください",
-    "sessionNameTooLong": "セッション名が長すぎます"
+    "sessionNameTooLong": "セッション名が長すぎます",
+    "localMountNameRequired": "ディレクトリ名を入力してください",
+    "localMountPathRequired": "ホストパスを入力してください",
+    "localMountCountRequired": "少なくとも 1 つのディレクトリを追加してください",
+    "localMountUnavailable": "現在ローカルファイルアクセスは利用できません",
+    "localMountPathDuplicate": "すでに追加済みのディレクトリです: {{path}}"
   },
   "user": {
     "plan": {
@@ -1599,7 +1910,9 @@
     "downloadStart": "ワークスペースアーカイブのダウンロードを開始しています",
     "archiveNotAvailable": "アーカイブファイルがまだ利用できません",
     "archiveUnavailable": "アーカイブファイルがまだ利用できません",
-    "downloadFailed": "ダウンロードに失敗しました"
+    "downloadFailed": "ダウンロードに失敗しました",
+    "workspaceRoot": "ワークスペース",
+    "localMountsRoot": "ローカルマウント"
   },
   "pullToRefresh": {
     "refreshing": "更新中...",
@@ -1622,10 +1935,17 @@
     "turnOnAll": "すべてをオン",
     "noMcpInstalled": "MCPはインストールされていません",
     "noSkillsInstalled": "スキルはインストールされていません",
-    "noPluginsInstalled": "プリセットはインストールされていません",
+    "noPluginsInstalled": "プラグインはインストールされていません",
+    "fallbackMcp": "MCP #{{id}}",
+    "fallbackSkill": "スキル #{{id}}",
+    "fallbackPlugin": "プラグイン #{{id}}",
+    "fallbackPreset": "プリセット #{{id}}",
     "oneClickClose": "すべてをオフ",
     "notInstalledMcp": "MCPはインストールされていません",
     "notInstalledSkill": "スキルはインストールされていません",
+    "mcp": "MCP",
+    "skills": "スキル",
+    "plugins": "プラグイン",
     "apps": "アプリ",
     "comingSoon": "近日公開",
     "clickForDetails": "詳細をクリック",
@@ -1673,6 +1993,9 @@
   },
   "skillsGrid": {
     "turnOffAll": "すべてをオフ"
+  },
+  "pluginsGrid": {
+    "turnOffAll": "すべてオフ"
   },
   "mcpSettings": {
     "configureServer": "MCPサーバーを設定",
@@ -1815,6 +2138,69 @@
   "filesidebar": {
     "title": "ファイルリスト"
   },
+  "memories": {
+    "title": "メモリ",
+    "subtitle": "ユーザーレベルの長期メモリエントリを管理します。",
+    "stats": {
+      "count": "{{count}} 件"
+    },
+    "actions": {
+      "search": "検索",
+      "showAll": "すべて表示",
+      "refresh": "更新",
+      "edit": "編集",
+      "update": "保存",
+      "delete": "削除",
+      "create": "作成",
+      "creating": "作成中..."
+    },
+    "search": {
+      "queryPlaceholder": "メモリを検索..."
+    },
+    "create": {
+      "title": "メモリを追加",
+      "desc": "Poco に覚えておいてほしい内容を入力してください。",
+      "contentPlaceholder": "Poco に覚えてほしい内容を入力"
+    },
+    "edit": {
+      "title": "メモリを編集",
+      "contentPlaceholder": "メモリ内容を更新"
+    },
+    "fields": {
+      "updatedAt": "更新日時",
+      "createdAt": "作成日時"
+    },
+    "progress": {
+      "title": "作成進捗",
+      "status": "ステータス",
+      "value": "進捗",
+      "jobId": "ジョブ ID",
+      "hints": {
+        "running": "メモリを追加しています...",
+        "success": "メモリを追加しました",
+        "failed": "メモリの追加に失敗しました"
+      },
+      "statuses": {
+        "queued": "待機中",
+        "running": "実行中",
+        "success": "成功",
+        "failed": "失敗",
+        "unknown": "不明"
+      }
+    },
+    "list": {
+      "empty": "メモリが見つかりません。"
+    },
+    "toasts": {
+      "invalidJson": "無効な JSON",
+      "error": "操作に失敗しました",
+      "created": "メモリを作成しました",
+      "updated": "メモリを更新しました",
+      "deleted": "メモリを削除しました",
+      "cleared": "すべてのメモリを消去しました",
+      "timeout": "作成がタイムアウトしました。後でもう一度お試しください。"
+    }
+  },
   "onboarding": {
     "close": "Close tutorial",
     "skip": "Skip",
@@ -1865,6 +2251,67 @@
         "title": "Skills page",
         "description": "This is the Skills view inside Capabilities, where you browse and manage skills."
       }
+    }
+  },
+  "filesystem": {
+    "title": "ローカルファイル",
+    "description": "Poco が sandbox ワークスペース外のディレクトリへアクセスできるようにします。",
+    "status": {
+      "title": "環境ステータス",
+      "loading": "確認中...",
+      "unknown": "ステータス不明",
+      "available": "ローカルマウント準備完了",
+      "unavailable": "ローカルディレクトリのマウントは利用できません"
+    },
+    "mode": {
+      "sandboxTitle": "Sandbox のみ",
+      "sandboxDescription": "このタスクでは内蔵の sandbox 環境のみを使います。",
+      "localMountTitle": "ローカルディレクトリを許可",
+      "localMountDescription": "選択したホストディレクトリの読み取りや編集を agent に許可します。"
+    },
+    "mounts": {
+      "title": "許可済みディレクトリ",
+      "itemTitle": "ディレクトリ {{index}}"
+    },
+    "actions": {
+      "manage": "ローカルファイル",
+      "addMount": "ディレクトリを追加",
+      "removeMount": "ディレクトリを削除",
+      "save": "次回実行向けに保存",
+      "apply": "このタスクに適用"
+    },
+    "fields": {
+      "name": "表示名",
+      "path": "ホストパス",
+      "access": "アクセス権"
+    },
+    "placeholders": {
+      "name": "例: Documents",
+      "path": "例: /Users/alice/Documents"
+    },
+    "accessModes": {
+      "ro": "読み取り専用",
+      "rw": "読み取りと書き込み"
+    },
+    "messages": {
+      "localDeployment": "ディレクトリはこのマシン上の実行環境へ直接マウントされます。",
+      "cloudDeployment": "ディレクトリはローカルヘルパーとクラウドブリッジ経由で実行環境に共有されます。",
+      "supportUnknown": "ヘルパーの状態を取得できませんでした。sandbox モードは引き続き安全に利用できます。",
+      "sandboxOnly": "このタスクでは /workspace sandbox のみが利用されます。",
+      "nextRun": "保存した変更は次回実行時に適用されます。現在のコンテナには即時反映されません。",
+      "draft": "これらのディレクトリはタスク開始時に許可されます。"
+    },
+    "summary": {
+      "localMountCount": "ローカルファイル（{{count}}）"
+    },
+    "toasts": {
+      "saved": "設定を保存しました。次回実行時に適用されます。",
+      "saveFailed": "ローカルファイル設定の保存に失敗しました"
+    },
+    "picker": {
+      "notSupported": "お使いのブラウザはネイティブフォルダ選択に対応していません。パスを手動で入力してください。",
+      "resolveFailed": "パスを自動検出できませんでした。ホストパスを手動で入力してください。",
+      "searchLimitation": "安全上の理由から、ホストパスの自動補完は選択したフォルダ名だけで検索します。同名のフォルダが複数ある場合は解決に失敗することがあり、その際は絶対パスを手動で入力する必要があります。"
     }
   }
 }

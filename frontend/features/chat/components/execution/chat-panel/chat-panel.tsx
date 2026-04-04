@@ -4,6 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import {
   Image as ImageIcon,
+  HardDrive,
   Loader2,
   MessageSquare,
   PanelRightClose,
@@ -41,6 +42,8 @@ import type {
 } from "@/features/chat/types";
 import { useT } from "@/lib/i18n/client";
 import { toast } from "sonner";
+import { useAppShell } from "@/components/shell/app-shell-context";
+import { persistSessionLocalFilesystem } from "@/features/chat/lib/local-filesystem-persistence";
 import { useTaskHistoryContext } from "@/features/projects/contexts/task-history-context";
 import { SkeletonCircle, SkeletonItem } from "@/components/ui/skeleton-shimmer";
 import { cn } from "@/lib/utils";
@@ -62,11 +65,18 @@ import {
 } from "@/components/ui/dialog";
 import { useLanguage } from "@/hooks/use-language";
 import { ModelSelector } from "@/features/chat/components/chat/model-selector";
+import { chatService } from "@/features/chat/api/chat-api";
 import { useModelCatalog } from "@/features/chat/hooks/use-model-catalog";
 import {
   normalizeModelSelection,
   type ModelSelection,
 } from "@/features/chat/lib/model-catalog";
+import { presetsService } from "@/features/capabilities/presets/api/presets-api";
+import type { Preset } from "@/features/capabilities/presets/lib/preset-types";
+import {
+  LocalFilesystemDialog,
+  type LocalFilesystemDraft,
+} from "@/features/task-composer";
 
 interface ChatPanelProps {
   session: ExecutionSession | null;
@@ -191,6 +201,14 @@ export function ChatPanel({
     React.useState<QuoteSelectionState | null>(null);
   const [draftModelSelection, setDraftModelSelection] =
     React.useState<ModelSelection | null>(null);
+  const [persistedPreset, setPersistedPreset] = React.useState<Preset | null>(
+    null,
+  );
+  const [draftPreset, setDraftPreset] = React.useState<
+    Preset | null | undefined
+  >(undefined);
+  const [filesystemDialogOpen, setFilesystemDialogOpen] = React.useState(false);
+  const [isSavingFilesystem, setIsSavingFilesystem] = React.useState(false);
 
   // Message management hook
   const {
@@ -264,11 +282,42 @@ export function ChatPanel({
     setStickyUserInput(null);
     setQuoteSelection(null);
     setDraftModelSelection(null);
+    setDraftPreset(undefined);
+    setPersistedPreset(null);
     if (stickyTimerRef.current) {
       window.clearTimeout(stickyTimerRef.current);
       stickyTimerRef.current = null;
     }
   }, [session?.session_id]);
+
+  React.useEffect(() => {
+    const presetId = session?.config_snapshot?.preset_id ?? null;
+    if (!session?.session_id || presetId === null) {
+      setPersistedPreset(null);
+      return;
+    }
+
+    let isCancelled = false;
+    void (async () => {
+      try {
+        const preset = await presetsService.getPreset(presetId, {
+          revalidate: 0,
+        });
+        if (!isCancelled) {
+          setPersistedPreset(preset);
+        }
+      } catch (error) {
+        console.error("[ChatPanel] Failed to load preset:", error);
+        if (!isCancelled) {
+          setPersistedPreset(null);
+        }
+      }
+    })();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [session?.config_snapshot?.preset_id, session?.session_id]);
 
   const defaultSelection = React.useMemo(() => {
     const defaultOption = modelOptions.find((option) => option.isDefault);
@@ -306,6 +355,8 @@ export function ChatPanel({
       normalizeModelSelection(draftModelSelection ?? persistedModelSelection),
     [draftModelSelection, persistedModelSelection],
   );
+  const currentPreset =
+    draftPreset === undefined ? persistedPreset : draftPreset;
   const selectedModelId = selectedModelSelection.modelId;
   const selectedModelLabel = React.useMemo(() => {
     if (!selectedModelSelection.modelId) {
@@ -938,8 +989,9 @@ export function ChatPanel({
   // Check for config snapshot or runtime data
   const hasConfigSnapshot =
     session?.config_snapshot &&
-    ((session.config_snapshot.mcp_server_ids &&
-      session.config_snapshot.mcp_server_ids.length > 0) ||
+    (session.config_snapshot.preset_id != null ||
+      (session.config_snapshot.mcp_server_ids &&
+        session.config_snapshot.mcp_server_ids.length > 0) ||
       session.config_snapshot.browser_enabled === true ||
       (session.config_snapshot.plugin_ids &&
         session.config_snapshot.plugin_ids.length > 0) ||
@@ -958,6 +1010,7 @@ export function ChatPanel({
   const headerDescription = session?.title?.trim() || t("chat.emptyStateDesc");
   const contentPaddingClass = isRightPanelCollapsed ? "px-[20%]" : "px-4";
   const messagePaddingClass = isRightPanelCollapsed ? "px-[20%]" : "px-6";
+  const { updateProject } = useAppShell();
   const canExportConversationImage =
     !isLoadingHistory &&
     (displayMessages.length > 0 || showTypingIndicator) &&
@@ -1008,6 +1061,57 @@ export function ChatPanel({
     [canExportConversationImage, headerDescription, isExportingImage, t],
   );
 
+  const localFilesystemValue = React.useMemo<LocalFilesystemDraft>(
+    () => ({
+      filesystem_mode: session?.config_snapshot?.filesystem_mode ?? "sandbox",
+      local_mounts: session?.config_snapshot?.local_mounts ?? [],
+    }),
+    [
+      session?.config_snapshot?.filesystem_mode,
+      session?.config_snapshot?.local_mounts,
+    ],
+  );
+
+  const handleSaveLocalFilesystem = React.useCallback(
+    async (nextValue: LocalFilesystemDraft) => {
+      if (!session?.session_id) {
+        return;
+      }
+
+      setIsSavingFilesystem(true);
+      try {
+        const projectResult = await persistSessionLocalFilesystem({
+          sessionId: session.session_id,
+          projectId: session.project_id,
+          draft: nextValue,
+          persistSession: chatService.updateSession,
+          persistProject: updateProject,
+        });
+        if (session.project_id && projectResult === null) {
+          throw new Error("Failed to sync project local mounts");
+        }
+        updateSession({
+          config_snapshot: {
+            ...(session.config_snapshot ?? {}),
+            filesystem_mode: nextValue.filesystem_mode,
+            local_mounts: nextValue.local_mounts,
+          },
+        });
+        toast.success(t("filesystem.toasts.saved"));
+      } finally {
+        setIsSavingFilesystem(false);
+      }
+    },
+    [
+      session?.config_snapshot,
+      session?.project_id,
+      session?.session_id,
+      t,
+      updateProject,
+      updateSession,
+    ],
+  );
+
   return (
     <div
       ref={panelRootRef}
@@ -1034,6 +1138,14 @@ export function ChatPanel({
                     disabled={isLoadingModelCatalog}
                     triggerClassName="h-8 max-w-[220px] px-2"
                   />
+                ) : null}
+                {session?.session_id ? (
+                  <PanelHeaderAction
+                    onClick={() => setFilesystemDialogOpen(true)}
+                    title={t("filesystem.actions.manage")}
+                  >
+                    <HardDrive className="size-4" />
+                  </PanelHeaderAction>
                 ) : null}
                 {session?.session_id ? (
                   <DropdownMenu>
@@ -1227,13 +1339,30 @@ export function ChatPanel({
         </DialogContent>
       </Dialog>
 
+      {session?.session_id ? (
+        <LocalFilesystemDialog
+          open={filesystemDialogOpen}
+          onOpenChange={setFilesystemDialogOpen}
+          value={localFilesystemValue}
+          isSaving={isSavingFilesystem}
+          saveBehavior="next_run"
+          onSave={handleSaveLocalFilesystem}
+        />
+      ) : null}
+
       {/* Status Bar - Skills and MCP */}
-      {(hasConfigSnapshot || hasSkills || hasMcp || hasBrowser) && (
+      {(currentPreset ||
+        hasConfigSnapshot ||
+        hasSkills ||
+        hasMcp ||
+        hasBrowser) && (
         <StatusBar
           configSnapshot={session?.config_snapshot}
           skills={statePatch?.skills_used}
           mcpStatuses={statePatch?.mcp_status}
           browser={statePatch?.browser}
+          preset={currentPreset}
+          onPresetChange={setDraftPreset}
           className={isRightPanelCollapsed ? "px-[20%]" : undefined}
         />
       )}

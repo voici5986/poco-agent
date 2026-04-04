@@ -8,7 +8,10 @@
     "newTaskWithShortcut": "Новая задача ({{shortcut}})",
     "search": "Поиск",
     "library": "Возможности",
+    "presets": "Пресеты",
+    "openMain": "Открыть основную боковую панель",
     "scheduledTasks": "Запланированные задачи",
+    "memories": "Память",
     "projects": "Проекты",
     "newProject": "Новый проект",
     "newProjectPrompt": "Введите название проекта:",
@@ -88,6 +91,19 @@
       "scheduledHelp": "Выполняется по расписанию Cron и при необходимости повторно использует рабочее пространство.",
       "planPlaceholder": "Опишите сложную задачу. Я сначала предложу план, затем выполну после вашего подтверждения…",
       "planPrefix": "Сначала предложите чёткий план выполнения (шаги с контрольными точками). Пока не выполняйте. После подтверждения выполняйте пошагово.\\n\\nЗадача: {{prompt}}"
+    },
+    "modeLabels": {
+      "task": "Режим задачи",
+      "plan": "Режим плана",
+      "scheduled": "Режим расписания"
+    },
+    "skillCreatorCard": {
+      "title": "Создать навык",
+      "description": "Используйте пользовательские навыки, чтобы автоматизировать повторяющиеся рабочие процессы.",
+      "prefillPrompt": "Помоги мне использовать /skill-creator, чтобы создать навык. Сначала спроси меня, что должен делать этот навык."
+    },
+    "bottomCards": {
+      "selectCard": "Выбрать карточку {{index}}"
     },
     "repo": {
       "toggle": "Настройки репозитория",
@@ -195,19 +211,6 @@
       "tooManySkills": "Включено слишком много навыков ({{count}}). Это может замедлить загрузку системы и снизить производительность.",
       "mcpLimitReached": "Включение этого MCP превысит рекомендуемый лимит (3 сервера). Слишком много MCP может замедлить загрузку системы.",
       "skillLimitReached": "Включение этого навыка превысит рекомендуемый лимит (5 навыков). Слишком много навыков может замедлить загрузку системы."
-    },
-    "skillCreatorCard": {
-      "title": "Создать навык",
-      "description": "Используйте пользовательские навыки, чтобы автоматизировать повторяющиеся рабочие процессы.",
-      "prefillPrompt": "Помоги мне использовать /skill-creator, чтобы создать навык. Сначала спроси меня, что должен делать этот навык."
-    },
-    "bottomCards": {
-      "selectCard": "Выбрать карточку {{index}}"
-    },
-    "modeLabels": {
-      "task": "Режим задачи",
-      "plan": "Режим плана",
-      "scheduled": "Режим расписания"
     }
   },
   "prompts": {
@@ -274,6 +277,9 @@
     "planApprovalApprove": "Утвердить и запустить",
     "planApprovalReject": "Отклонить",
     "planApprovalEmpty": "План не предоставлен",
+    "enterPlanModeTitle": "Перейти в режим планирования",
+    "enterPlanModeHint": "Агент сначала составит план выполнения и будет ждать вашего подтверждения перед запуском.",
+    "enterPlanModeConfirm": "Перейти к плану",
     "askUserTimeout": "Осталось {{seconds}}с",
     "askUserPrevious": "Назад",
     "askUserNext": "Далее",
@@ -319,7 +325,8 @@
       "skillsConfigured": "Навыки (настроено)",
       "skillsUsed": "Навыки",
       "mcpConfigured": "MCP серверы (настроено)",
-      "mcp": "MCP серверы"
+      "mcp": "MCP серверы",
+      "pluginsConfigured": "Плагины (настроены)"
     },
     "typingWords": [
       "Accomplishing",
@@ -632,14 +639,14 @@
       "loadingDoc": "Чтение документа...",
       "parseError": "Не удалось разобрать файл Excalidraw",
       "fetchError": "Не удалось получить содержимое документа",
+      "frontMatter": "Front matter",
       "retry": "Повторить",
       "selectFile": "Пожалуйста, выберите файл справа для предварительного просмотра",
       "supportedFormats": "Поддерживает PDF, документы Office, распространённые форматы изображений, видео MP4, файлы XMind, файлы .excalidraw и файлы .drawio",
       "processing": "Обработка файла",
       "notSupported": "Предварительный просмотр не поддерживается для этого формата",
       "openInNewWindow": "Открыть в новом окне",
-      "downloadOriginal": "Скачать исходный файл",
-      "frontMatter": "Front matter"
+      "downloadOriginal": "Скачать исходный файл"
     },
     "summary": {
       "total": "Всего",
@@ -660,8 +667,11 @@
   },
   "library": {
     "title": "Возможности",
-    "subtitle": "Управление навыками, пресетами и инструментами",
+    "subtitle": "Управление навыками, плагинами и инструментами",
     "comingSoon": "Скоро",
+    "mobile": {
+      "back": "Назад к возможностям"
+    },
     "sidebar": {
       "title": "Ярлыки возможностей",
       "description": "Выберите возможность для перехода к её настройке.",
@@ -693,6 +703,10 @@
       "feature2": "Визуальное управление",
       "feature3": "Мониторинг в реальном времени",
       "action": "Управление серверами"
+    },
+    "pluginsStore": {
+      "title": "Пресеты",
+      "description": "Просматривайте и устанавливайте пресеты возможностей"
     },
     "envVars": {
       "title": "Переменные окружения",
@@ -1074,6 +1088,10 @@
         }
       }
     },
+    "pluginsPage": {
+      "searchPlaceholder": "Поиск плагинов...",
+      "addCard": "Добавить плагин"
+    },
     "skillsManager": {
       "stats": {
         "available": "Доступно",
@@ -1220,9 +1238,103 @@
         "invalidKeyHint": "Откройте Настройки > Другое, обновите API-ключ SkillsMP и затем вернитесь сюда, чтобы попробовать снова."
       }
     },
-    "pluginsPage": {
-      "searchPlaceholder": "Поиск пресетов...",
-      "addCard": "Добавить пресет"
+    "pluginsManager": {
+      "stats": {
+        "enabled": "Включено"
+      },
+      "scope": {
+        "system": "Система",
+        "user": "Пользователь"
+      },
+      "fields": {
+        "id": "id",
+        "source": "Источник"
+      },
+      "actions": {
+        "install": "Установить",
+        "uninstall": "Удалить"
+      },
+      "toasts": {
+        "loadError": "Не удалось загрузить плагины",
+        "actionError": "Операция не удалась, попробуйте позже",
+        "installed": "Плагин установлен",
+        "uninstalled": "Плагин удалён",
+        "enabled": "Плагин включён",
+        "disabled": "Плагин выключен",
+        "actionFailed": "Операция не удалась, попробуйте позже",
+        "exclusiveEnabled": "(Другие плагины отключены)"
+      },
+      "empty": "Пока нет плагинов",
+      "unknownPlugin": "Неизвестный плагин"
+    },
+    "pluginsImport": {
+      "title": "Импорт плагинов",
+      "description": "Загрузите zip с плагинами или импортируйте из публичного репозитория GitHub.",
+      "relativePath": "Относительный путь",
+      "tabs": {
+        "zip": "Загрузить zip",
+        "github": "URL GitHub"
+      },
+      "fields": {
+        "zip": "Файл zip",
+        "githubUrl": "URL публичного репозитория GitHub",
+        "nameOverride": "Название плагина"
+      },
+      "placeholders": {
+        "githubUrl": "https://github.com/owner/repo",
+        "name": "например, my-plugin"
+      },
+      "hints": {
+        "github": "По умолчанию main/master (только публичные репозитории github.com)"
+      },
+      "actions": {
+        "back": "Назад",
+        "discover": "Найти",
+        "discovering": "Поиск...",
+        "commit": "Импортировать и установить",
+        "committing": "Импорт..."
+      },
+      "preview": {
+        "found": "Найдено",
+        "items": "описаний плагинов",
+        "overwrite": "перезапишет",
+        "overwriteItems": "существующие плагины",
+        "willOverwrite": "Перезаписать",
+        "root": "Корень",
+        "path": "Путь",
+        "unnamed": "Без названия",
+        "pagination": {
+          "page": "Страница {{page}} / {{pages}}",
+          "prev": "Назад",
+          "next": "Далее"
+        },
+        "selection": {
+          "selectPage": "Выбрать страницу",
+          "clearPage": "Снять выбор страницы",
+          "selectAll": "Выбрать все",
+          "clearAll": "Снять весь выбор"
+        }
+      },
+      "result": {
+        "title": "Результат импорта",
+        "success": "Успешно",
+        "failed": "Ошибка"
+      },
+      "toasts": {
+        "missingZip": "Пожалуйста, выберите файл zip",
+        "missingGithubUrl": "Пожалуйста, введите URL GitHub",
+        "discovered": "Найдено. Пожалуйста, подтвердите, что импортировать.",
+        "discoverError": "Не удалось выполнить поиск, попробуйте позже",
+        "committed": "Импорт выполнен успешно",
+        "commitError": "Не удалось импортировать, попробуйте позже",
+        "partialFailed": "Некоторые плагины не удалось импортировать. Проверьте детали.",
+        "commitTimeout": "Время импорта истекло, попробуйте позже"
+      },
+      "progress": {
+        "title": "Ход импорта",
+        "value": "Прогресс",
+        "jobId": "ID задания"
+      }
     },
     "mcpLibrary": {
       "header": {
@@ -1285,11 +1397,6 @@
       "marketplace": "Marketplace",
       "skillsmp": "SkillsMP"
     },
-    "pluginsManager": {
-      "toasts": {
-        "exclusiveEnabled": "(Другие пресеты отключены)"
-      }
-    },
     "presets": {
       "title": "Пресеты",
       "description": "Управление повторно используемыми пресетами возможностей"
@@ -1297,6 +1404,80 @@
     "presetsPage": {
       "header": {
         "title": "Пресеты"
+      },
+      "summary": "{{count}} повторно используемых пресетов",
+      "searchPlaceholder": "Поиск пресетов...",
+      "addCard": "Создать пресет",
+      "empty": "Пока нет пресетов",
+      "emptySearch": "Нет пресетов, подходящих под поиск",
+      "emptyDescription": "Описание пока отсутствует",
+      "emptyBadgesHint": "Добавьте в пресет несколько навыков, чтобы он стал полезнее.",
+      "emptySkills": "Нет доступных навыков",
+      "emptyMcp": "Нет доступных MCP-серверов",
+      "emptyPlugins": "Нет доступных плагинов",
+      "loadingCapabilities": "Загрузка возможностей...",
+      "flags": {
+        "browser": "Браузер",
+        "memory": "Память"
+      },
+      "tabs": {
+        "general": "Общее",
+        "capabilities": "Возможности",
+        "subagents": "Субагенты"
+      },
+      "picker": {
+        "placeholder": "Выбрать пресет",
+        "none": "Без пресета",
+        "change": "Сменить пресет",
+        "selected": "Выбрано",
+        "dialogTitle": "Выбрать пресет",
+        "dialogDescription": "Примените к этому запуску переиспользуемую конфигурацию или продолжайте без пресета.",
+        "noneDescription": "Оставить этот запуск независимым и не применять пресет."
+      },
+      "selectors": {
+        "skills": "Выберите повторно используемые навыки для этого пресета.",
+        "mcp": "Выберите MCP-серверы, которые должен включать этот пресет.",
+        "plugins": "Выберите плагины, которые должен содержать этот пресет."
+      },
+      "form": {
+        "name": "Название",
+        "namePlaceholder": "Например: Frontend delivery",
+        "description": "Описание",
+        "descriptionPlaceholder": "Опишите, когда использовать этот пресет",
+        "promptTemplate": "Шаблон промпта",
+        "promptTemplatePlaceholder": "Необязательные базовые инструкции для запусков, созданных из этого пресета",
+        "visual": "Визуал",
+        "browserEnabled": "Включить браузер",
+        "browserEnabledHint": "Добавляет браузерную возможность каждый раз при применении этого пресета.",
+        "memoryEnabled": "Включить память",
+        "memoryEnabledHint": "Передаёт возможность памяти в запуски, созданные из этого пресета."
+      },
+      "dialog": {
+        "createTitle": "Создать пресет",
+        "editTitle": "Редактировать пресет"
+      },
+      "subagents": {
+        "title": "Встроенные субагенты",
+        "description": "Определите дополнительные субагенты, которые будут внедряться вместе с этим пресетом.",
+        "add": "Добавить субагента",
+        "empty": "Субагенты не настроены",
+        "itemTitle": "Субагент {{index}}",
+        "fields": {
+          "name": "Название",
+          "model": "Модель",
+          "description": "Описание",
+          "tools": "Инструменты",
+          "toolsPlaceholder": "Read, Edit, Bash",
+          "prompt": "Промпт"
+        }
+      },
+      "toasts": {
+        "loadError": "Не удалось загрузить пресеты",
+        "created": "Пресет создан",
+        "updated": "Пресет обновлён",
+        "deleted": "Пресет удалён",
+        "saveFailed": "Не удалось сохранить пресет",
+        "deleteFailed": "Не удалось удалить пресет"
       }
     },
     "skillSettings": {
@@ -1343,13 +1524,137 @@
     "titleWithCount": "{{name}} · {{count}} задач",
     "share": "Поделиться проектом",
     "settings": "Настройки проекта",
+    "settingsAction": "Управлять пресетами",
+    "edit": "Редактировать проект",
     "rename": "Переименовать проект",
-    "renameDescription": "Введите новое имя проекта",
     "nameLabel": "Имя проекта",
+    "descriptionLabel": "Описание проекта",
     "namePlaceholder": "Введите имя проекта",
+    "advanced": {
+      "title": "Расширенные настройки",
+      "defaultModelLabel": "Модель по умолчанию",
+      "defaultModelPlaceholder": "Использовать модель рабочего пространства по умолчанию",
+      "gitTitle": "Git-репозиторий",
+      "gitDescription": "Настройте URL репозитория Git, ветку и аутентификацию по умолчанию для этого проекта.",
+      "gitRepoUrlLabel": "URL репозитория",
+      "gitRepoUrlPlaceholder": "https://github.com/user/repo.git",
+      "gitBranchLabel": "Ветка",
+      "gitBranchPlaceholder": "main",
+      "gitTokenEnvKeyLabel": "Переменная окружения для авторизации",
+      "gitTokenEnvKeyPlaceholder": "GITHUB_TOKEN",
+      "mountTitle": "Монтирования проекта",
+      "mountDescription": "Добавьте один или несколько локальных каталогов для новых запусков в этом проекте.",
+      "chooseFolder": "Выбрать папку",
+      "mountPathLabel": "Путь монтирования",
+      "mountPathPlaceholder": "например: /Users/alice/Workspace/my-project"
+    },
     "delete": "Удалить проект",
     "deleteDescription": "Удаление этого проекта переместит все его задачи обратно в основной список.",
-    "deleteConfirm": "Удалить"
+    "deleteConfirm": "Удалить",
+    "detail": {
+      "overview": "Обзор проекта",
+      "renameAction": "Изменить проект",
+      "descriptionPlaceholder": "Добавить описание проекта...",
+      "editDescription": "Редактировать описание",
+      "emptyDescription": "У этого проекта пока нет описания. Запустите новую сессию, чтобы собрать контекст.",
+      "unknownUpdatedAt": "Активности пока не было",
+      "composerTitle": "Продолжить работу с Poco в {{name}}",
+      "infoDrawer": {
+        "title": "Информация о проекте"
+      },
+      "files": {
+        "title": "Файлы проекта",
+        "description": "Файлы, добавленные в {{name}}, доступны в каждом запуске этого проекта.",
+        "uploadTitle": "Загрузить файлы",
+        "uploadDescription": "Прикрепляйте документы, заметки или фрагменты, чтобы держать контекст проекта под рукой.",
+        "uploadButton": "Добавить файлы",
+        "loading": "Загрузка файлов проекта...",
+        "emptyTitle": "Файлов проекта пока нет",
+        "emptyDescription": "Добавьте файлы здесь, чтобы каждый запуск этого проекта мог использовать их как контекст.",
+        "count": "{{count}} файлов",
+        "unknownSize": "Неизвестный размер",
+        "toasts": {
+          "loadFailed": "Не удалось загрузить файлы проекта",
+          "added": "{{name}} добавлен в файлы проекта",
+          "addFailed": "Не удалось добавить файл в проект",
+          "removed": "{{name}} удалён из файлов проекта",
+          "removeFailed": "Не удалось удалить файл проекта"
+        }
+      },
+      "notFoundTitle": "Проект не найден",
+      "notFoundDescription": "Этот проект недоступен или у вас больше нет к нему доступа.",
+      "backHome": "На главную",
+      "stats": {
+        "sessions": "Сессии",
+        "presets": "Пресеты",
+        "updated": "Последнее обновление"
+      },
+      "sessionList": {
+        "title": "История сессий",
+        "subtitle": "{{count}} сессий в этом проекте",
+        "emptyTitle": "Сессий проекта пока нет",
+        "emptyDescription": "Следующий запуск в этом проекте появится здесь, чтобы вы могли быстро вернуться в нужный контекст."
+      },
+      "quickActions": {
+        "title": "Быстрые действия",
+        "subtitle": "Держите самые частые действия проекта в одной панели.",
+        "soon": "Скоро",
+        "presets": {
+          "title": "Управлять пресетами",
+          "description": "Задайте пресет по умолчанию и управляйте тем, с чего стартуют новые сессии."
+        },
+        "rename": {
+          "title": "Изменить проект",
+          "description": "Обновите имя проекта, не выходя из детального просмотра."
+        },
+        "files": {
+          "title": "Файлы проекта",
+          "description": "Загружайте файлы, которые сможет использовать каждый запуск этого проекта."
+        },
+        "docs": {
+          "title": "Документация проекта",
+          "description": "Зарезервированная точка входа для документации и общих контекстных материалов."
+        }
+      }
+    },
+    "settingsPanel": {
+      "dialogTitle": "Настройки {{name}}",
+      "dialogDescription": "Ищите среди всех пресетов и выбирайте пресет по умолчанию для новых запусков в этом проекте.",
+      "git": {
+        "title": "Git-репозиторий",
+        "repoUrlLabel": "URL репозитория",
+        "repoUrlPlaceholder": "https://github.com/user/repo.git",
+        "branchLabel": "Ветка",
+        "branchPlaceholder": "main",
+        "tokenEnvKeyLabel": "Переменная окружения для авторизации",
+        "tokenEnvKeyPlaceholder": "GITHUB_TOKEN",
+        "toasts": {
+          "updated": "Конфигурация Git обновлена",
+          "failed": "Не удалось обновить конфигурацию Git"
+        }
+      },
+      "presets": {
+        "title": "Пресет по умолчанию",
+        "description": "Выберите один пресет для этого проекта или очистите значение по умолчанию, чтобы новые запуски стартовали без пресета.",
+        "searchPlaceholder": "Поиск пресетов...",
+        "clearDefault": "Очистить значение по умолчанию",
+        "loading": "Загрузка пресетов...",
+        "empty": "Пресет по умолчанию не выбран",
+        "emptySearch": "По вашему запросу пресеты не найдены",
+        "default": "По умолчанию",
+        "emptyDescription": "Описание пока отсутствует",
+        "stats": {
+          "skills": "{{count}} навыков",
+          "mcp": "{{count}} MCP",
+          "plugins": "{{count}} плагинов"
+        },
+        "toasts": {
+          "loadError": "Не удалось загрузить пресеты",
+          "defaultUpdated": "Пресет по умолчанию обновлён",
+          "defaultFailed": "Не удалось обновить пресет по умолчанию"
+        }
+      }
+    }
   },
   "userMenu": {
     "credits": "Кредиты",
@@ -1366,6 +1671,7 @@
   },
   "common": {
     "cancel": "Отмена",
+    "close": "Закрыть",
     "create": "Создать",
     "delete": "Удалить",
     "deleted": "Удалено",
@@ -1569,7 +1875,12 @@
     "missingToolUseId": "Отсутствует ID использования инструмента",
     "messageContentRequired": "Пожалуйста, введите содержимое сообщения",
     "sessionNameRequired": "Пожалуйста, введите имя сессии",
-    "sessionNameTooLong": "Имя сессии слишком длинное"
+    "sessionNameTooLong": "Имя сессии слишком длинное",
+    "localMountNameRequired": "Введите имя каталога",
+    "localMountPathRequired": "Введите путь хоста",
+    "localMountCountRequired": "Добавьте хотя бы один каталог",
+    "localMountUnavailable": "Доступ к локальным файлам сейчас недоступен",
+    "localMountPathDuplicate": "Каталог уже добавлен: {{path}}"
   },
   "user": {
     "plan": {
@@ -1599,7 +1910,9 @@
     "downloadStart": "Начинается загрузка архива рабочего пространства",
     "archiveNotAvailable": "Файл архива пока недоступен",
     "archiveUnavailable": "Файл архива пока недоступен",
-    "downloadFailed": "Не удалось загрузить"
+    "downloadFailed": "Не удалось загрузить",
+    "workspaceRoot": "Рабочая область",
+    "localMountsRoot": "Локальные монтирования"
   },
   "pullToRefresh": {
     "refreshing": "Обновление...",
@@ -1622,10 +1935,17 @@
     "turnOnAll": "Включить все",
     "noMcpInstalled": "MCP не установлен",
     "noSkillsInstalled": "Навыки не установлены",
-    "noPluginsInstalled": "Пресеты не установлены",
+    "noPluginsInstalled": "Плагины не установлены",
+    "fallbackMcp": "MCP #{{id}}",
+    "fallbackSkill": "Навык #{{id}}",
+    "fallbackPlugin": "Плагин #{{id}}",
+    "fallbackPreset": "Пресет #{{id}}",
     "oneClickClose": "Выключить все",
     "notInstalledMcp": "MCP не установлен",
     "notInstalledSkill": "Навыки не установлены",
+    "mcp": "MCP",
+    "skills": "Навыки",
+    "plugins": "Плагины",
     "apps": "Приложения",
     "comingSoon": "Скоро",
     "clickForDetails": "Нажмите для деталей",
@@ -1672,6 +1992,9 @@
     "settings": "Настройки"
   },
   "skillsGrid": {
+    "turnOffAll": "Выключить все"
+  },
+  "pluginsGrid": {
     "turnOffAll": "Выключить все"
   },
   "mcpSettings": {
@@ -1815,6 +2138,69 @@
   "filesidebar": {
     "title": "Список файлов"
   },
+  "memories": {
+    "title": "Память",
+    "subtitle": "Управляйте пользовательскими записями долговременной памяти.",
+    "stats": {
+      "count": "{{count}} элементов"
+    },
+    "actions": {
+      "search": "Поиск",
+      "showAll": "Показать все",
+      "refresh": "Обновить",
+      "edit": "Редактировать",
+      "update": "Сохранить",
+      "delete": "Удалить",
+      "create": "Создать",
+      "creating": "Создание..."
+    },
+    "search": {
+      "queryPlaceholder": "Поиск по памяти..."
+    },
+    "create": {
+      "title": "Добавить память",
+      "desc": "Введите, что Poco должен запомнить.",
+      "contentPlaceholder": "Введите, что Poco должен запомнить"
+    },
+    "edit": {
+      "title": "Редактировать память",
+      "contentPlaceholder": "Обновите содержимое памяти"
+    },
+    "fields": {
+      "updatedAt": "Обновлено",
+      "createdAt": "Создано"
+    },
+    "progress": {
+      "title": "Ход создания",
+      "status": "Статус",
+      "value": "Прогресс",
+      "jobId": "ID задания",
+      "hints": {
+        "running": "Добавляем память...",
+        "success": "Память добавлена",
+        "failed": "Не удалось добавить память"
+      },
+      "statuses": {
+        "queued": "В очереди",
+        "running": "Выполняется",
+        "success": "Успешно",
+        "failed": "Ошибка",
+        "unknown": "Неизвестно"
+      }
+    },
+    "list": {
+      "empty": "Память не найдена."
+    },
+    "toasts": {
+      "invalidJson": "Некорректный JSON",
+      "error": "Операция не удалась",
+      "created": "Память создана",
+      "updated": "Память обновлена",
+      "deleted": "Память удалена",
+      "cleared": "Вся память очищена",
+      "timeout": "Время создания истекло. Попробуйте позже."
+    }
+  },
   "onboarding": {
     "close": "Close tutorial",
     "skip": "Skip",
@@ -1865,6 +2251,67 @@
         "title": "Skills page",
         "description": "This is the Skills view inside Capabilities, where you browse and manage skills."
       }
+    }
+  },
+  "filesystem": {
+    "title": "Локальные файлы",
+    "description": "Разрешите Poco доступ к каталогам вне sandbox-рабочей области.",
+    "status": {
+      "title": "Состояние окружения",
+      "loading": "Проверка...",
+      "unknown": "Статус недоступен",
+      "available": "Локальное монтирование готово",
+      "unavailable": "Монтирование локальных каталогов недоступно"
+    },
+    "mode": {
+      "sandboxTitle": "Только sandbox",
+      "sandboxDescription": "Для этой задачи будет использоваться только встроенная sandbox-среда.",
+      "localMountTitle": "Разрешить локальные каталоги",
+      "localMountDescription": "Разрешить агенту читать или изменять выбранные каталоги хоста."
+    },
+    "mounts": {
+      "title": "Разрешённые каталоги",
+      "itemTitle": "Каталог {{index}}"
+    },
+    "actions": {
+      "manage": "Локальные файлы",
+      "addMount": "Добавить каталог",
+      "removeMount": "Удалить каталог",
+      "save": "Сохранить для следующего запуска",
+      "apply": "Применить к этой задаче"
+    },
+    "fields": {
+      "name": "Отображаемое имя",
+      "path": "Путь хоста",
+      "access": "Доступ"
+    },
+    "placeholders": {
+      "name": "например, Documents",
+      "path": "например, /Users/alice/Documents"
+    },
+    "accessModes": {
+      "ro": "Только чтение",
+      "rw": "Чтение и запись"
+    },
+    "messages": {
+      "localDeployment": "Каталоги будут напрямую смонтированы в среду выполнения на этой машине.",
+      "cloudDeployment": "Каталоги будут предоставлены среде выполнения через локальный помощник и облачный мост.",
+      "supportUnknown": "Не удалось загрузить статус помощника. Вы можете продолжать безопасно использовать режим sandbox.",
+      "sandboxOnly": "Для этой задачи будет доступен только sandbox /workspace.",
+      "nextRun": "Сохранённые изменения применятся при следующем запуске. Текущие контейнеры не обновляются на лету.",
+      "draft": "Эти каталоги будут разрешены при запуске задачи."
+    },
+    "summary": {
+      "localMountCount": "Локальные файлы ({{count}})"
+    },
+    "toasts": {
+      "saved": "Конфигурация сохранена. Она будет применена при следующем запуске.",
+      "saveFailed": "Не удалось сохранить настройки локальных файлов"
+    },
+    "picker": {
+      "notSupported": "Нативный выбор папок не поддерживается в этом браузере. Пожалуйста, введите путь вручную.",
+      "resolveFailed": "Не удалось автоматически определить путь. Пожалуйста, введите путь к хосту вручную.",
+      "searchLimitation": "Из соображений безопасности автозаполнение пути хоста ищет только по имени выбранной папки. Если папок с таким именем несколько, определение пути может не сработать, и тогда абсолютный путь нужно ввести вручную."
     }
   }
 }

@@ -7,6 +7,7 @@ from app.api.v1 import (
     capability_recommendations,
     claude_md,
     env_vars,
+    filesystem,
     models,
     internal_claude_md,
     internal_env_vars,
@@ -27,7 +28,9 @@ from app.api.v1 import (
     plugin_installs,
     plugins,
     pending_skill_creations,
+    presets,
     projects,
+    project_files,
     runs,
     schedules,
     search,
@@ -59,12 +62,14 @@ api_v1_router.include_router(callback.router)
 api_v1_router.include_router(messages.router)
 api_v1_router.include_router(memories.router)
 api_v1_router.include_router(projects.router)
+api_v1_router.include_router(project_files.router)
 api_v1_router.include_router(tool_executions.router)
 api_v1_router.include_router(usage.router)
 api_v1_router.include_router(attachments.router)
 api_v1_router.include_router(audio.router)
 api_v1_router.include_router(capability_recommendations.router)
 api_v1_router.include_router(env_vars.router)
+api_v1_router.include_router(filesystem.router)
 api_v1_router.include_router(claude_md.router)
 api_v1_router.include_router(models.router)
 api_v1_router.include_router(search.router)
@@ -88,6 +93,7 @@ api_v1_router.include_router(skill_imports.router)
 api_v1_router.include_router(skill_installs.router)
 api_v1_router.include_router(pending_skill_creations.router)
 api_v1_router.include_router(plugins.router)
+api_v1_router.include_router(presets.router)
 api_v1_router.include_router(plugin_imports.router)
 api_v1_router.include_router(plugin_installs.router)
 api_v1_router.include_router(slash_commands.router)

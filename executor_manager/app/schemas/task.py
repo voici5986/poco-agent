@@ -3,6 +3,8 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from app.schemas.filesystem import LocalMountConfig, FilesystemMode
+
 
 class InputFile(BaseModel):
     """User-provided input file or URL attachment."""
@@ -16,21 +18,42 @@ class InputFile(BaseModel):
     path: str | None = None
 
 
+AgentModel = Literal["sonnet", "opus", "haiku", "inherit"]
+
+
+class SubAgentConfig(BaseModel):
+    name: str = Field(min_length=1, max_length=255)
+    description: str | None = Field(default=None, max_length=255)
+    prompt: str | None = None
+    model: AgentModel | None = None
+    tools: list[str] | None = None
+
+
 class TaskConfig(BaseModel):
     """Task configuration."""
 
+    preset_id: int | None = None
     repo_url: str | None = None
     git_branch: str = "main"
+    git_token_env_key: str | None = None
+    model: str | None = None
+    model_provider_id: str | None = None
     # Built-in browser capability toggle (Playwright MCP is injected internally by the executor).
     browser_enabled: bool = False
     # Built-in memory capability toggle (Memory MCP is injected internally by the executor).
     memory_enabled: bool = False
     mcp_config: dict = Field(default_factory=dict)
+    skill_config: dict = Field(default_factory=dict)
+    plugin_config: dict = Field(default_factory=dict)
     mcp_server_ids: list[int] = Field(default_factory=list)
     skill_files: dict = Field(default_factory=dict)
     skill_ids: list[int] = Field(default_factory=list)
     plugin_files: dict = Field(default_factory=dict)
     plugin_ids: list[int] = Field(default_factory=list)
+    subagent_ids: list[int] = Field(default_factory=list)
+    subagent_configs: list[SubAgentConfig] = Field(default_factory=list)
+    filesystem_mode: FilesystemMode = "sandbox"
+    local_mounts: list[LocalMountConfig] = Field(default_factory=list)
     input_files: list[InputFile] = Field(default_factory=list)
     user_id: str = ""
     container_mode: Literal["ephemeral", "persistent"] = "ephemeral"

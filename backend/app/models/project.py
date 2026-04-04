@@ -1,13 +1,16 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, String, Text, text
+from sqlalchemy import Boolean, ForeignKey, Integer, String, Text, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models import Base, TimestampMixin
 
 if TYPE_CHECKING:
     from app.models.agent_session import AgentSession
+    from app.models.preset import Preset
+    from app.models.project_file import ProjectFile
+    from app.models.project_local_mount import ProjectLocalMount
 
 
 class Project(Base, TimestampMixin):
@@ -19,6 +22,14 @@ class Project(Base, TimestampMixin):
     )
     user_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    default_model: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    default_preset_id: Mapped[int | None] = mapped_column(
+        Integer,
+        ForeignKey("presets.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
     # Default git repository context for this project (GitHub-only in v1).
     repo_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     git_branch: Mapped[str | None] = mapped_column(String(255), nullable=True)
@@ -29,3 +40,16 @@ class Project(Base, TimestampMixin):
     )
 
     sessions: Mapped[list["AgentSession"]] = relationship(back_populates="project")
+    project_files: Mapped[list["ProjectFile"]] = relationship(
+        back_populates="project",
+        cascade="all, delete-orphan",
+    )
+    project_local_mounts: Mapped[list["ProjectLocalMount"]] = relationship(
+        back_populates="project",
+        cascade="all, delete-orphan",
+        order_by="ProjectLocalMount.sort_order",
+    )
+    default_preset: Mapped["Preset | None"] = relationship(
+        back_populates="default_projects",
+        foreign_keys=[default_preset_id],
+    )

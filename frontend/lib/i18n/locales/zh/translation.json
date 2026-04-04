@@ -8,6 +8,7 @@
     "newTaskWithShortcut": "新建任务 ({{shortcut}})",
     "search": "搜索",
     "library": "能力",
+    "presets": "预设",
     "openMain": "打开主侧边栏",
     "scheduledTasks": "定时任务",
     "memories": "记忆",
@@ -325,7 +326,7 @@
       "skillsUsed": "技能使用",
       "mcpConfigured": "MCP 服务器配置",
       "mcp": "MCP 服务器",
-      "pluginsConfigured": "预设配置"
+      "pluginsConfigured": "插件配置"
     },
     "typingWords": [
       "Accomplishing",
@@ -666,7 +667,7 @@
   },
   "library": {
     "title": "能力",
-    "subtitle": "管理您的技能、预设和工具",
+    "subtitle": "管理您的技能、插件和工具",
     "comingSoon": "即将推出",
     "mobile": {
       "back": "返回能力列表"
@@ -704,8 +705,8 @@
       "action": "管理服务器"
     },
     "pluginsStore": {
-      "title": "预设",
-      "description": "浏览并安装能力预设"
+      "title": "插件",
+      "description": "浏览并安装插件"
     },
     "envVars": {
       "title": "环境变量",
@@ -1088,7 +1089,7 @@
       }
     },
     "pluginsPage": {
-      "searchPlaceholder": "搜索预设...",
+      "searchPlaceholder": "搜索插件...",
       "addCard": "新增一个 Plugin"
     },
     "skillsManager": {
@@ -1254,21 +1255,21 @@
         "uninstall": "卸载"
       },
       "toasts": {
-        "loadError": "加载预设列表失败",
+        "loadError": "加载插件列表失败",
         "actionError": "操作失败，请稍后再试",
-        "installed": "预设已安装",
-        "uninstalled": "预设已卸载",
-        "enabled": "预设已启用",
-        "disabled": "预设已停用",
+        "installed": "插件已安装",
+        "uninstalled": "插件已卸载",
+        "enabled": "插件已启用",
+        "disabled": "插件已停用",
         "actionFailed": "操作失败，请稍后再试",
-        "exclusiveEnabled": "（同时关闭其他预设）"
+        "exclusiveEnabled": "（同时关闭其他插件）"
       },
-      "empty": "暂无预设",
-      "unknownPlugin": "未知预设"
+      "empty": "暂无插件",
+      "unknownPlugin": "未知插件"
     },
     "pluginsImport": {
-      "title": "导入预设",
-      "description": "上传预设 zip，或从 GitHub 公共仓库导入。",
+      "title": "导入插件",
+      "description": "上传插件 zip，或从 GitHub 公共仓库导入。",
       "relativePath": "相对路径",
       "tabs": {
         "zip": "上传压缩包",
@@ -1277,11 +1278,11 @@
       "fields": {
         "zip": "Zip 文件",
         "githubUrl": "GitHub 公共仓库地址",
-        "nameOverride": "预设名称"
+        "nameOverride": "插件名称"
       },
       "placeholders": {
         "githubUrl": "https://github.com/owner/repo",
-        "name": "例如：my-preset"
+        "name": "例如：my-plugin"
       },
       "hints": {
         "github": "默认为 main/master 分支，仅支持公开 GitHub 仓库"
@@ -1295,9 +1296,9 @@
       },
       "preview": {
         "found": "发现",
-        "items": "个预设定义",
+        "items": "个插件定义",
         "overwrite": "将覆盖",
-        "overwriteItems": "个同名预设",
+        "overwriteItems": "个同名插件",
         "willOverwrite": "将覆盖",
         "root": "根目录",
         "path": "路径",
@@ -1322,11 +1323,11 @@
       "toasts": {
         "missingZip": "请选择一个 zip 文件",
         "missingGithubUrl": "请输入 GitHub 地址",
-        "discovered": "解析成功，请确认要导入的预设",
+        "discovered": "解析成功，请确认要导入的插件",
         "discoverError": "解析失败，请稍后重试",
-        "committed": "预设导入成功",
+        "committed": "插件导入成功",
         "commitError": "导入失败，请稍后重试",
-        "partialFailed": "部分预设导入失败，请查看详情",
+        "partialFailed": "部分插件导入失败，请查看详情",
         "commitTimeout": "导入超时，请稍后重试"
       },
       "progress": {
@@ -1403,6 +1404,80 @@
     "presetsPage": {
       "header": {
         "title": "预设"
+      },
+      "summary": "{{count}} 个可复用预设",
+      "searchPlaceholder": "搜索预设...",
+      "addCard": "创建一个预设",
+      "empty": "还没有预设",
+      "emptySearch": "没有匹配的预设",
+      "emptyDescription": "暂无描述",
+      "emptyBadgesHint": "让您的预设学习一些技能吧",
+      "emptySkills": "暂无 Skill",
+      "emptyMcp": "暂无 MCP 服务",
+      "emptyPlugins": "暂无插件",
+      "loadingCapabilities": "正在加载能力列表...",
+      "flags": {
+        "browser": "浏览器",
+        "memory": "记忆"
+      },
+      "tabs": {
+        "general": "基础信息",
+        "capabilities": "能力组合",
+        "subagents": "子代理"
+      },
+      "picker": {
+        "placeholder": "选择预设",
+        "none": "不使用预设",
+        "change": "切换预设",
+        "selected": "当前使用",
+        "dialogTitle": "选择预设",
+        "dialogDescription": "为本次会话套用一组可复用配置，或者继续不使用预设。",
+        "noneDescription": "保持当前会话独立运行，不额外套用任何预设。"
+      },
+      "selectors": {
+        "skills": "选择这个预设默认启用的 Skills。",
+        "mcp": "选择这个预设默认启用的 MCP 服务。",
+        "plugins": "选择这个预设携带的插件。"
+      },
+      "form": {
+        "name": "名称",
+        "namePlaceholder": "例如：前端交付",
+        "description": "描述",
+        "descriptionPlaceholder": "说明这个预设适合什么场景",
+        "promptTemplate": "提示词模板",
+        "promptTemplatePlaceholder": "可选，为使用该预设创建的任务提供默认指令基线",
+        "visual": "形象",
+        "browserEnabled": "启用浏览器",
+        "browserEnabledHint": "应用该预设时自动附带浏览器能力。",
+        "memoryEnabled": "启用记忆",
+        "memoryEnabledHint": "应用该预设时自动附带记忆能力。"
+      },
+      "dialog": {
+        "createTitle": "创建预设",
+        "editTitle": "编辑预设"
+      },
+      "subagents": {
+        "title": "内联子代理",
+        "description": "定义会随预设一起注入的额外子代理。",
+        "add": "添加子代理",
+        "empty": "暂未配置子代理",
+        "itemTitle": "子代理 {{index}}",
+        "fields": {
+          "name": "名称",
+          "model": "模型",
+          "description": "描述",
+          "tools": "工具",
+          "toolsPlaceholder": "Read, Edit, Bash",
+          "prompt": "提示词"
+        }
+      },
+      "toasts": {
+        "loadError": "加载预设失败",
+        "created": "预设已创建",
+        "updated": "预设已更新",
+        "deleted": "预设已删除",
+        "saveFailed": "保存预设失败",
+        "deleteFailed": "删除预设失败"
       }
     },
     "skillSettings": {
@@ -1449,13 +1524,137 @@
     "titleWithCount": "{{name}} · {{count}} 个任务",
     "share": "分享项目",
     "settings": "项目设置",
+    "settingsAction": "管理预设",
+    "edit": "编辑项目",
     "rename": "重命名项目",
-    "renameDescription": "请输入新的项目名称",
     "nameLabel": "项目名称",
+    "descriptionLabel": "项目描述",
     "namePlaceholder": "请输入项目名称",
+    "advanced": {
+      "title": "高级配置",
+      "defaultModelLabel": "默认模型",
+      "defaultModelPlaceholder": "使用工作区默认模型",
+      "gitTitle": "Git 仓库",
+      "gitDescription": "为这个项目配置默认的 Git 仓库地址、分支和认证方式。",
+      "gitRepoUrlLabel": "仓库地址",
+      "gitRepoUrlPlaceholder": "https://github.com/user/repo.git",
+      "gitBranchLabel": "分支",
+      "gitBranchPlaceholder": "main",
+      "gitTokenEnvKeyLabel": "认证环境变量",
+      "gitTokenEnvKeyPlaceholder": "GITHUB_TOKEN",
+      "mountTitle": "项目挂载",
+      "mountDescription": "为这个项目的新运行附加一个或多个本地目录。",
+      "chooseFolder": "选择文件夹",
+      "mountPathLabel": "挂载路径",
+      "mountPathPlaceholder": "例如：/Users/alice/Workspace/my-project"
+    },
     "delete": "删除项目",
     "deleteDescription": "删除项目后，项目中的所有任务将回到任务清单。",
-    "deleteConfirm": "删除"
+    "deleteConfirm": "删除",
+    "detail": {
+      "overview": "项目概览",
+      "renameAction": "编辑项目",
+      "descriptionPlaceholder": "添加项目描述...",
+      "editDescription": "编辑描述",
+      "emptyDescription": "这个项目还没有补充说明，可以先从一次新对话开始。",
+      "unknownUpdatedAt": "暂无记录",
+      "composerTitle": "在 {{name}} 中继续指挥 Poco",
+      "infoDrawer": {
+        "title": "项目信息"
+      },
+      "files": {
+        "title": "项目文件",
+        "description": "附加到 {{name}} 的文件会在这个项目的每次运行中可用。",
+        "uploadTitle": "上传文件",
+        "uploadDescription": "附加文档、笔记或片段，让项目上下文始终可用。",
+        "uploadButton": "添加文件",
+        "loading": "正在加载项目文件...",
+        "emptyTitle": "还没有项目文件",
+        "emptyDescription": "在这里添加文件，让这个项目的每次运行都能直接使用它们。",
+        "count": "{{count}} 个文件",
+        "unknownSize": "未知大小",
+        "toasts": {
+          "loadFailed": "加载项目文件失败",
+          "added": "已将 {{name}} 添加到项目文件",
+          "addFailed": "向项目添加文件失败",
+          "removed": "已从项目文件中移除 {{name}}",
+          "removeFailed": "移除项目文件失败"
+        }
+      },
+      "notFoundTitle": "项目不存在",
+      "notFoundDescription": "这个项目不可用，或者你已经没有访问权限。",
+      "backHome": "返回首页",
+      "stats": {
+        "sessions": "会话",
+        "presets": "预设",
+        "updated": "最近更新"
+      },
+      "sessionList": {
+        "title": "会话历史",
+        "subtitle": "这个项目中共有 {{count}} 个会话",
+        "emptyTitle": "项目里还没有会话",
+        "emptyDescription": "你在这个项目中的下一次运行会出现在这里，方便快速回到上下文。"
+      },
+      "quickActions": {
+        "title": "快捷操作",
+        "subtitle": "把常用入口放在项目上下文里，减少来回切换。",
+        "soon": "即将支持",
+        "presets": {
+          "title": "管理预设",
+          "description": "配置项目默认预设，控制新对话的起点。"
+        },
+        "rename": {
+          "title": "编辑项目",
+          "description": "快速调整项目名称，保持侧边栏和详情一致。"
+        },
+        "files": {
+          "title": "项目文件",
+          "description": "上传这个项目每次运行都能使用的文件。"
+        },
+        "docs": {
+          "title": "项目文档",
+          "description": "预留给文档与上下文资产的统一入口。"
+        }
+      }
+    },
+    "settingsPanel": {
+      "dialogTitle": "{{name}} 设置",
+      "dialogDescription": "在全部预设中搜索，并为这个项目的新任务选择默认预设。",
+      "git": {
+        "title": "Git 仓库",
+        "repoUrlLabel": "仓库地址",
+        "repoUrlPlaceholder": "https://github.com/user/repo.git",
+        "branchLabel": "分支",
+        "branchPlaceholder": "main",
+        "tokenEnvKeyLabel": "认证环境变量",
+        "tokenEnvKeyPlaceholder": "GITHUB_TOKEN",
+        "toasts": {
+          "updated": "Git 配置已更新",
+          "failed": "更新 Git 配置失败"
+        }
+      },
+      "presets": {
+        "title": "默认预设",
+        "description": "为项目选择一个默认预设，或者清空默认值，让新任务不带预设启动。",
+        "searchPlaceholder": "搜索预设...",
+        "clearDefault": "清空默认值",
+        "loading": "正在加载预设...",
+        "empty": "当前还没有默认预设",
+        "emptySearch": "没有符合搜索条件的预设",
+        "default": "默认",
+        "emptyDescription": "暂无描述",
+        "stats": {
+          "skills": "{{count}} 个技能",
+          "mcp": "{{count}} 个 MCP",
+          "plugins": "{{count}} 个插件"
+        },
+        "toasts": {
+          "loadError": "加载预设失败",
+          "defaultUpdated": "默认预设已更新",
+          "defaultFailed": "更新默认预设失败"
+        }
+      }
+    }
   },
   "userMenu": {
     "credits": "积分",
@@ -1676,7 +1875,12 @@
     "missingToolUseId": "缺少工具调用 ID",
     "messageContentRequired": "请输入消息内容",
     "sessionNameRequired": "请输入会话名称",
-    "sessionNameTooLong": "会话名称过长"
+    "sessionNameTooLong": "会话名称过长",
+    "localMountNameRequired": "请输入目录名称",
+    "localMountPathRequired": "请输入主机路径",
+    "localMountCountRequired": "请至少添加一个目录",
+    "localMountUnavailable": "当前不可用本地文件访问",
+    "localMountPathDuplicate": "目录已添加：{{path}}"
   },
   "user": {
     "plan": {
@@ -1706,7 +1910,9 @@
     "downloadStart": "开始下载工作区归档",
     "archiveNotAvailable": "归档文件暂不可用",
     "archiveUnavailable": "归档文件暂不可用",
-    "downloadFailed": "下载失败"
+    "downloadFailed": "下载失败",
+    "workspaceRoot": "工作区",
+    "localMountsRoot": "本地目录"
   },
   "pullToRefresh": {
     "refreshing": "正在刷新...",
@@ -1729,13 +1935,14 @@
     "turnOnAll": "一键开启",
     "notInstalledMcp": "未安装 MCP",
     "notInstalledSkill": "未安装技能",
-    "noPluginsInstalled": "未安装预设",
+    "noPluginsInstalled": "未安装插件",
     "fallbackMcp": "MCP #{{id}}",
     "fallbackSkill": "技能 #{{id}}",
+    "fallbackPlugin": "插件 #{{id}}",
     "fallbackPreset": "预设 #{{id}}",
     "mcp": "MCP",
     "skills": "技能",
-    "plugins": "预设",
+    "plugins": "插件",
     "apps": "应用",
     "comingSoon": "即将推出",
     "clickForDetails": "点击查看详情",
@@ -2044,6 +2251,67 @@
         "title": "技能页面（Skills）",
         "description": "这里是能力中心的 Skills 页面，用来浏览、启用和管理技能。"
       }
+    }
+  },
+  "filesystem": {
+    "title": "本地文件",
+    "description": "授权 Poco 访问 sandbox workspace 之外的目录。",
+    "status": {
+      "title": "环境状态",
+      "loading": "检查中...",
+      "unknown": "状态暂不可用",
+      "available": "本地挂载已就绪",
+      "unavailable": "云端部署不支持本地目录挂载"
+    },
+    "mode": {
+      "sandboxTitle": "仅使用 Sandbox",
+      "sandboxDescription": "本次任务仅使用内置的沙盒环境",
+      "localMountTitle": "授权本地目录",
+      "localMountDescription": "允许 agent 读取或修改你选定的主机目录。"
+    },
+    "mounts": {
+      "title": "已授权目录",
+      "itemTitle": "目录 {{index}}"
+    },
+    "actions": {
+      "manage": "本地文件",
+      "addMount": "添加目录",
+      "removeMount": "移除目录",
+      "save": "保存并下次执行生效",
+      "apply": "应用到本次任务"
+    },
+    "fields": {
+      "name": "显示名称",
+      "path": "主机路径",
+      "access": "权限"
+    },
+    "placeholders": {
+      "name": "例如：Documents",
+      "path": "例如：/Users/alice/Documents"
+    },
+    "accessModes": {
+      "ro": "只读",
+      "rw": "可读写"
+    },
+    "messages": {
+      "localDeployment": "目录将直接挂载到当前机器上的执行环境。",
+      "cloudDeployment": "目录将通过本地助手和云端 bridge 安全暴露给执行环境。",
+      "supportUnknown": "暂时无法获取助手状态，你仍可安全使用 sandbox 模式。",
+      "sandboxOnly": "本次任务只会使用 /workspace sandbox。",
+      "nextRun": "已保存，下一次执行时生效；当前容器不会热更新挂载。",
+      "draft": "这些目录会在任务开始时获得授权。"
+    },
+    "summary": {
+      "localMountCount": "本地文件（{{count}}）"
+    },
+    "toasts": {
+      "saved": "配置已保存，将在下一次执行时生效。",
+      "saveFailed": "保存本地文件配置失败"
+    },
+    "picker": {
+      "notSupported": "当前浏览器不支持原生文件夹选择，请手动输入路径。",
+      "resolveFailed": "无法自动识别路径，请手动填写主机路径。",
+      "searchLimitation": "出于安全原因，主机路径自动补全只会按所选目录名称搜索；如果存在重名目录，自动识别就可能失败，需要你手动填写绝对路径。"
     }
   }
 }

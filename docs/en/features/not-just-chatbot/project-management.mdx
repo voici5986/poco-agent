@@ -1,12 +1,29 @@
 ---
 title: Project Management
-description: Organize tasks and switch between contexts more effectively.
+description: Organize tasks, define project-level defaults, and switch between contexts seamlessly.
 ---
 
 Poco helps you organize work across different tasks, sessions, and contexts.
 
-## Benefits
+## Project organization
 
-- Better separation between projects
-- Easier context switching across ongoing work
-- More structured task ownership and tracking
+- Full isolation between projects — tasks, sessions, and configs stay separate
+- Per-project session history for easy retrospection and tracking
+- Editable project name and description to keep your workspace up to date
+
+## Project-level defaults
+
+Set defaults at the project level to eliminate repetitive setup for every new session:
+
+- **Default model** — specify a go-to model for the project, auto-filled on session creation
+- **Default Preset** — bind a Preset as the project runtime config for consistent capabilities and tools
+- **Git repository** — configure the default repo URL, branch, and authentication
+- **Local mounts** — define host-directory mounts that are available on every run
+
+## Project files
+
+Attach reference files to a project (e.g., design docs, specs, code snippets). These files are automatically injected into every session run within the project — no need to re-upload.
+
+## Preset integration
+
+A project can bind a default Preset. New sessions inherit the Preset's full configuration automatically, while users can still override settings per-session in the task composer — balancing standardization with flexibility.

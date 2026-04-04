@@ -4,12 +4,33 @@
 
 import type { ApiStatePatch } from "./callback";
 
+export type FilesystemMode = "sandbox" | "local_mount";
+export type LocalMountAccessMode = "ro" | "rw";
+
+export interface LocalMountConfig {
+  id: string;
+  name: string;
+  host_path: string;
+  access_mode?: LocalMountAccessMode;
+}
+
+export type TaskSubAgentModel = "sonnet" | "opus" | "haiku" | "inherit";
+
+export interface TaskSubAgentConfig {
+  name: string;
+  description?: string | null;
+  prompt?: string | null;
+  model?: TaskSubAgentModel | null;
+  tools?: string[] | null;
+}
+
 export interface SessionCreateRequest {
   config?: TaskConfig | null;
 }
 
 export interface SessionUpdateRequest {
   status?: string | null;
+  config?: TaskConfig | null;
   sdk_session_id?: string | null;
   title?: string | null;
   is_pinned?: boolean | null;
@@ -160,6 +181,8 @@ export interface TaskConfig {
   git_branch?: string; // defaults to "main"
   /** Env var key holding a GitHub token (e.g. "GITHUB_TOKEN"). */
   git_token_env_key?: string | null;
+  /** Optional preset baseline applied before manual config overrides. */
+  preset_id?: number | null;
   /** Optional explicit model override for this session/run. */
   model?: string | null;
   /** Optional explicit provider binding for the selected model. */
@@ -182,5 +205,9 @@ export interface TaskConfig {
   plugin_config?: Record<string, boolean>;
   /** Optional explicit subagent selection (by id). */
   subagent_ids?: number[];
+  /** Optional inline subagent definitions merged into runtime agents. */
+  subagent_configs?: TaskSubAgentConfig[];
+  filesystem_mode?: FilesystemMode;
+  local_mounts?: LocalMountConfig[];
   input_files?: InputFile[];
 }

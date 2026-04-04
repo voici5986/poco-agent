@@ -3,9 +3,9 @@
 import * as React from "react";
 import type { LucideIcon } from "lucide-react";
 import {
-  Sparkles,
   Store,
   Puzzle,
+  Plug,
   Server,
   KeySquare,
   FileText,
@@ -15,9 +15,9 @@ import {
 
 import { useT } from "@/lib/i18n/client";
 import { SkillsMarketplacePageClient } from "@/features/capabilities/marketplace/components/skills-marketplace-page-client";
-import { PresetsPageClient } from "@/features/capabilities/presets/components/presets-page-client";
 import { SkillsPageClient } from "@/features/capabilities/skills/components/skills-page-client";
 import { McpPageClient } from "@/features/capabilities/mcp/components/mcp-page-client";
+import { PluginsPageClient } from "@/features/capabilities/plugins/components/plugins-page-client";
 import { EnvVarsPageClient } from "@/features/capabilities/env-vars/components/env-vars-page-client";
 import { PersonalizationPageClient } from "@/features/capabilities/personalization/components/personalization-page-client";
 import { SlashCommandsPageClient } from "@/features/capabilities/slash-commands/components/slash-commands-page-client";
@@ -49,14 +49,6 @@ export function useCapabilityViews(): CapabilityView[] {
         component: SkillsMarketplacePageClient,
       },
       {
-        id: "presets",
-        label: t("library.presets.title"),
-        description: t("library.presets.description"),
-        group: "featured",
-        icon: Sparkles,
-        component: PresetsPageClient,
-      },
-      {
         id: "skills",
         label: t("library.skillsStore.title"),
         description: t("library.skillsStore.description"),
@@ -71,6 +63,14 @@ export function useCapabilityViews(): CapabilityView[] {
         group: "primary",
         icon: Server,
         component: McpPageClient,
+      },
+      {
+        id: "plugins",
+        label: t("library.pluginsStore.title"),
+        description: t("library.pluginsStore.description"),
+        group: "primary",
+        icon: Plug,
+        component: PluginsPageClient,
       },
       {
         id: "slash-commands",

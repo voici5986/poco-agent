@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import type { LocalMountConfig } from "@/features/chat/types/api/session";
 import type {
   AddTaskOptions,
   ProjectItem,
@@ -15,8 +16,20 @@ export type ProjectRepoDefaultsInput = {
   git_token_env_key?: string | null;
 };
 
+export type ProjectCreateInput = {
+  name: string;
+  description?: string | null;
+  default_model?: string | null;
+  default_preset_id?: number | null;
+  local_mounts?: LocalMountConfig[] | null;
+} & ProjectRepoDefaultsInput;
+
 export type ProjectUpdatesInput = {
   name?: string;
+  description?: string | null;
+  default_model?: string | null;
+  default_preset_id?: number | null;
+  local_mounts?: LocalMountConfig[] | null;
 } & ProjectRepoDefaultsInput;
 
 export interface AppShellContextValue {
@@ -24,10 +37,7 @@ export interface AppShellContextValue {
   openSettings: (tab?: SettingsTabId) => void;
 
   projects: ProjectItem[];
-  addProject: (
-    name: string,
-    options?: ProjectRepoDefaultsInput,
-  ) => Promise<ProjectItem | null>;
+  addProject: (input: ProjectCreateInput) => Promise<ProjectItem | null>;
   updateProject: (
     projectId: string,
     updates: ProjectUpdatesInput,

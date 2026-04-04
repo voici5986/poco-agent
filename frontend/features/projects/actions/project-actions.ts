@@ -12,8 +12,19 @@ const VALIDATION_ERRORS = {
   missingTaskId: "validation.missingTaskId",
 } as const;
 
+const localMountSchema = z.object({
+  id: z.string().trim().min(1),
+  name: z.string().trim().min(1),
+  host_path: z.string().trim().min(1),
+  access_mode: z.enum(["ro", "rw"]).optional(),
+});
+
 const createProjectSchema = z.object({
   name: z.string().trim().min(1, VALIDATION_ERRORS.projectNameRequired),
+  description: z.string().trim().max(2000).optional().nullable(),
+  default_model: z.string().trim().max(255).optional().nullable(),
+  default_preset_id: z.number().int().positive().optional().nullable(),
+  local_mounts: z.array(localMountSchema).optional().nullable(),
   repo_url: z.string().trim().optional().nullable(),
   git_branch: z.string().trim().optional().nullable(),
   git_token_env_key: z.string().trim().optional().nullable(),
@@ -34,6 +45,10 @@ const updateProjectSchema = z.object({
     .trim()
     .min(1, VALIDATION_ERRORS.projectNameRequired)
     .optional(),
+  description: z.string().trim().max(2000).optional().nullable(),
+  default_model: z.string().trim().max(255).optional().nullable(),
+  default_preset_id: z.number().int().positive().optional().nullable(),
+  local_mounts: z.array(localMountSchema).optional().nullable(),
   repo_url: z.string().trim().optional().nullable(),
   git_branch: z.string().trim().optional().nullable(),
   git_token_env_key: z.string().trim().optional().nullable(),
@@ -56,13 +71,25 @@ export type DeleteProjectInput = z.infer<typeof deleteProjectSchema>;
 export type MoveTaskToProjectInput = z.infer<typeof moveTaskToProjectSchema>;
 
 export async function createProjectAction(input: CreateProjectInput) {
-  const { name, repo_url, git_branch, git_token_env_key } =
-    createProjectSchema.parse(input);
+  const {
+    name,
+    description,
+    default_model,
+    default_preset_id,
+    local_mounts,
+    repo_url,
+    git_branch,
+    git_token_env_key,
+  } = createProjectSchema.parse(input);
   return projectsService.createProject({
     name,
-    repo_url: repo_url ?? undefined,
-    git_branch: git_branch ?? undefined,
-    git_token_env_key: git_token_env_key ?? undefined,
+    description,
+    default_model,
+    default_preset_id,
+    local_mounts,
+    repo_url,
+    git_branch,
+    git_token_env_key,
   });
 }
 
@@ -77,10 +104,23 @@ export async function listTaskHistoryAction(input?: ListTasksInput) {
 }
 
 export async function updateProjectAction(input: UpdateProjectInput) {
-  const { projectId, name, repo_url, git_branch, git_token_env_key } =
-    updateProjectSchema.parse(input);
+  const {
+    projectId,
+    name,
+    description,
+    default_model,
+    default_preset_id,
+    local_mounts,
+    repo_url,
+    git_branch,
+    git_token_env_key,
+  } = updateProjectSchema.parse(input);
   return projectsService.updateProject(projectId, {
     name,
+    description,
+    default_model,
+    default_preset_id,
+    local_mounts,
     repo_url,
     git_branch,
     git_token_env_key,

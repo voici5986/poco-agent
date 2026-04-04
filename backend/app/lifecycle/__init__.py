@@ -1,5 +1,6 @@
 from app.lifecycle.bootstrap import LifecycleBootstrapService
 from app.lifecycle.builtin_mcp import McpServerBootstrapService
+from app.lifecycle.builtin_preset_visuals import BuiltinPresetVisualBootstrapService
 from app.lifecycle.builtin_skills import (
     BUILTIN_SKILLS,
     SYSTEM_SKILL_OWNER_USER_ID,
@@ -9,6 +10,7 @@ from app.lifecycle.lifespan import lifespan
 
 __all__ = [
     "BUILTIN_SKILLS",
+    "BuiltinPresetVisualBootstrapService",
     "SYSTEM_SKILL_OWNER_USER_ID",
     "LifecycleBootstrapService",
     "McpServerBootstrapService",

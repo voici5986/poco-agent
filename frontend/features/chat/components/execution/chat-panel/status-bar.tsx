@@ -25,15 +25,19 @@ import {
 import { mcpService } from "@/features/capabilities/mcp/api/mcp-api";
 import { skillsService } from "@/features/capabilities/skills/api/skills-api";
 import { pluginsService } from "@/features/capabilities/plugins/api/plugins-api";
+import { presetsService } from "@/features/capabilities/presets/api/presets-api";
+import { PresetGlyph } from "@/features/capabilities/presets/components/preset-glyph";
 import type { McpServer } from "@/features/capabilities/mcp/types";
 import type { Skill } from "@/features/capabilities/skills/types";
 import type { Plugin } from "@/features/capabilities/plugins/types";
+import type { Preset } from "@/features/capabilities/presets/lib/preset-types";
 import type {
   SkillUse,
   McpStatusItem,
   ConfigSnapshot,
   BrowserState,
 } from "@/features/chat/types";
+import { PresetPickerDialog } from "@/features/task-composer/components/preset-picker-dialog";
 import { useT } from "@/lib/i18n/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -45,6 +49,8 @@ interface StatusBarProps {
   browser?: BrowserState | null;
   // Configuration snapshot from session creation
   configSnapshot?: ConfigSnapshot | null;
+  preset?: Preset | null;
+  onPresetChange?: (preset: Preset | null) => void;
   className?: string;
 }
 
@@ -53,12 +59,16 @@ export function StatusBar({
   mcpStatuses = [],
   browser = null,
   configSnapshot,
+  preset = null,
+  onPresetChange,
   className,
 }: StatusBarProps) {
   const { t } = useT("translation");
   const [mcpServers, setMcpServers] = React.useState<McpServer[]>([]);
   const [allSkills, setAllSkills] = React.useState<Skill[]>([]);
-  const [allPresets, setAllPresets] = React.useState<Plugin[]>([]);
+  const [allPlugins, setAllPlugins] = React.useState<Plugin[]>([]);
+  const [availablePresets, setAvailablePresets] = React.useState<Preset[]>([]);
+  const [presetDialogOpen, setPresetDialogOpen] = React.useState(false);
   const isMobile = useIsMobile();
 
   const renderInteractiveCard = React.useCallback(
@@ -99,14 +109,17 @@ export function StatusBar({
   React.useEffect(() => {
     const loadData = async () => {
       try {
-        const [serversData, skillsData, pluginsData] = await Promise.all([
-          mcpService.listServers(),
-          skillsService.listSkills(),
-          pluginsService.listPlugins(),
-        ]);
+        const [serversData, skillsData, pluginsData, presetsData] =
+          await Promise.all([
+            mcpService.listServers(),
+            skillsService.listSkills(),
+            pluginsService.listPlugins(),
+            presetsService.listPresets({ revalidate: 0 }),
+          ]);
         setMcpServers(serversData);
         setAllSkills(skillsData);
-        setAllPresets(pluginsData);
+        setAllPlugins(pluginsData);
+        setAvailablePresets(presetsData);
       } catch (error) {
         console.error("[StatusBar] Failed to load config data:", error);
       }
@@ -135,9 +148,9 @@ export function StatusBar({
   const configuredPresets = React.useMemo(() => {
     const pluginIds = configSnapshot?.plugin_ids ?? [];
     return pluginIds
-      .map((id) => allPresets.find((plugin) => plugin.id === id))
+      .map((id) => allPlugins.find((plugin) => plugin.id === id))
       .filter((plugin): plugin is Plugin => plugin !== undefined);
-  }, [configSnapshot?.plugin_ids, allPresets]);
+  }, [configSnapshot?.plugin_ids, allPlugins]);
 
   const visibleMcpStatuses = React.useMemo(() => {
     // Hide built-in/internal MCP servers (e.g. executor-injected Playwright MCP).
@@ -152,13 +165,10 @@ export function StatusBar({
   const hasMcp =
     configuredMcpServers.length > 0 || visibleMcpStatuses.length > 0;
   const hasPresets = configuredPresets.length > 0;
+  const hasCurrentPreset = Boolean(preset);
   const hasBrowser = Boolean(
     configSnapshot?.browser_enabled || browser?.enabled,
   );
-
-  if (!hasSkills && !hasMcp && !hasPresets && !hasBrowser) {
-    return null;
-  }
 
   // Display skills from config snapshot (preferred) or runtime data
   const displaySkills =
@@ -184,6 +194,31 @@ export function StatusBar({
     name: plugin.name,
     status: "configured" as const,
   }));
+
+  const handlePresetSelection = React.useCallback(
+    (presetId: number | null) => {
+      if (!onPresetChange) {
+        return;
+      }
+      const nextPreset =
+        presetId === null
+          ? null
+          : (availablePresets.find((item) => item.preset_id === presetId) ??
+            null);
+      onPresetChange(nextPreset);
+    },
+    [availablePresets, onPresetChange],
+  );
+
+  if (
+    !hasCurrentPreset &&
+    !hasSkills &&
+    !hasMcp &&
+    !hasPresets &&
+    !hasBrowser
+  ) {
+    return null;
+  }
 
   const getSkillStatusIcon = (status: string) => {
     if (status === "configured") {
@@ -221,9 +256,32 @@ export function StatusBar({
       )}
     >
       <TooltipProvider delayDuration={200}>
+        {preset ? (
+          <>
+            <button
+              type="button"
+              onClick={() => setPresetDialogOpen(true)}
+              className="group flex h-9 min-w-0 shrink-0 max-w-[220px] items-center gap-2 rounded-xl border border-primary/20 bg-primary/10 px-3 text-foreground transition-colors hover:bg-primary/15 cursor-pointer"
+            >
+              <PresetGlyph preset={preset} variant="status" />
+              <span className="min-w-0 truncate text-xs font-medium text-foreground">
+                {preset.name}
+              </span>
+            </button>
+
+            <PresetPickerDialog
+              open={presetDialogOpen}
+              onOpenChange={setPresetDialogOpen}
+              presets={availablePresets}
+              value={preset.preset_id}
+              onChange={handlePresetSelection}
+            />
+          </>
+        ) : null}
+
         {/* Browser Card */}
         {hasBrowser && (
-          <div className="group flex shrink-0 min-w-0 max-w-full items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 transition-all hover:border-border hover:shadow-sm cursor-pointer">
+          <div className="group flex shrink-0 min-w-0 max-w-full items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 transition-colors hover:border-border cursor-pointer">
             <AppWindow className="size-3.5 text-foreground group-hover:text-foreground/80 transition-colors" />
             <span className="min-w-0 truncate text-xs font-medium text-foreground">
               {t("chat.statusBar.browser")}
@@ -240,7 +298,7 @@ export function StatusBar({
         {/* Skills Card */}
         {hasSkills &&
           renderInteractiveCard(
-            <div className="group flex shrink-0 min-w-0 max-w-full items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 transition-all hover:border-border hover:shadow-sm cursor-pointer">
+            <div className="group flex shrink-0 min-w-0 max-w-full items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 transition-colors hover:border-border cursor-pointer">
               <Zap className="size-3.5 text-foreground group-hover:text-foreground/80 transition-colors" />
               <span className="min-w-0 truncate text-xs font-medium text-foreground">
                 {configuredSkills.length > 0
@@ -267,11 +325,11 @@ export function StatusBar({
             </div>,
           )}
 
-        {/* Presets Card */}
+        {/* Plugins Card */}
         {hasPresets && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="group flex shrink-0 min-w-0 max-w-full items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 transition-all hover:border-border hover:shadow-sm cursor-pointer">
+              <div className="group flex shrink-0 min-w-0 max-w-full items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 transition-colors hover:border-border cursor-pointer">
                 <Plug className="size-3.5 text-foreground group-hover:text-foreground/80 transition-colors" />
                 <span className="min-w-0 truncate text-xs font-medium text-foreground">
                   {t("chat.statusBar.pluginsConfigured")}
@@ -307,7 +365,7 @@ export function StatusBar({
         {/* MCP Card */}
         {hasMcp &&
           renderInteractiveCard(
-            <div className="group flex shrink-0 min-w-0 max-w-full items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 transition-all hover:border-border hover:shadow-sm cursor-pointer">
+            <div className="group flex shrink-0 min-w-0 max-w-full items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 transition-colors hover:border-border cursor-pointer">
               <Server className="size-3.5 text-foreground group-hover:text-foreground/80 transition-colors" />
               <span className="min-w-0 truncate text-xs font-medium text-foreground">
                 {configuredMcpServers.length > 0

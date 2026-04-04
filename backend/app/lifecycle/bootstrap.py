@@ -2,6 +2,7 @@ import logging
 
 from app.core.database import SessionLocal
 from app.lifecycle.builtin_mcp import McpServerBootstrapService
+from app.lifecycle.builtin_preset_visuals import BuiltinPresetVisualBootstrapService
 from app.lifecycle.builtin_skills import SkillBootstrapService
 
 logger = logging.getLogger(__name__)
@@ -17,6 +18,7 @@ class LifecycleBootstrapService:
         try:
             SkillBootstrapService.bootstrap_builtin_skills(db)
             McpServerBootstrapService.bootstrap_builtin_servers(db)
+            BuiltinPresetVisualBootstrapService.bootstrap_builtin_preset_visuals(db)
             db.commit()
         except Exception:
             db.rollback()

@@ -51,6 +51,13 @@ export const API_ENDPOINTS = {
   usageAnalytics: "/usage/analytics",
   sessionWorkspaceFiles: (sessionId: string) =>
     `/sessions/${sessionId}/workspace/files`,
+  sessionLocalMountFiles: (sessionId: string) =>
+    `/sessions/${sessionId}/local-mounts/files`,
+  sessionLocalMountFile: (sessionId: string) =>
+    `/sessions/${sessionId}/local-mounts/file`,
+  sessionLocalMountFolderArchive: (sessionId: string) =>
+    `/sessions/${sessionId}/local-mounts/folder-archive`,
+  filesystemSupport: "/filesystem/support",
   sessionWorkspaceArchive: (sessionId: string) =>
     `/sessions/${sessionId}/workspace/archive`,
   sessionWorkspaceFolderArchive: (sessionId: string) =>
@@ -147,6 +154,11 @@ export const API_ENDPOINTS = {
   slashCommandSuggestions: "/slash-commands/suggestions",
   slashCommand: (commandId: number) => `/slash-commands/${commandId}`,
 
+  // Presets
+  presets: "/presets",
+  presetVisuals: "/presets/visuals",
+  preset: (presetId: number) => `/presets/${presetId}`,
+
   // Sub Agents
   subAgents: "/subagents",
   subAgent: (subAgentId: number) => `/subagents/${subAgentId}`,
@@ -171,6 +183,9 @@ export const API_ENDPOINTS = {
   // Projects
   projects: "/projects",
   project: (projectId: string) => `/projects/${projectId}`,
+  projectFiles: (projectId: string) => `/projects/${projectId}/files`,
+  projectFile: (projectId: string, fileId: number) =>
+    `/projects/${projectId}/files/${fileId}`,
 
   // Health
   health: "/health",

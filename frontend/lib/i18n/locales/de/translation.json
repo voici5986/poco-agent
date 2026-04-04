@@ -8,8 +8,10 @@
     "newTaskWithShortcut": "Neue Aufgabe ({{shortcut}})",
     "search": "Suche",
     "library": "Funktionen",
+    "presets": "Voreinstellungen",
     "openMain": "Hauptseitenleiste öffnen",
     "scheduledTasks": "Geplante Aufgaben",
+    "memories": "Erinnerungen",
     "projects": "Projekte",
     "newProject": "Neues Projekt",
     "newProjectPrompt": "Projektname eingeben:",
@@ -275,6 +277,9 @@
     "planApprovalApprove": "Genehmigen & ausführen",
     "planApprovalReject": "Ablehnen",
     "planApprovalEmpty": "Kein Plan bereitgestellt",
+    "enterPlanModeTitle": "Planungsmodus starten",
+    "enterPlanModeHint": "Der Agent plant zuerst die Ausführungsschritte und wartet auf deine Freigabe, bevor er beginnt.",
+    "enterPlanModeConfirm": "Planung starten",
     "askUserTimeout": "Verbleibende Zeit: {{seconds}}s",
     "askUserPrevious": "Zurück",
     "askUserNext": "Weiter",
@@ -320,7 +325,8 @@
       "skillsConfigured": "Skills (konfiguriert)",
       "skillsUsed": "Skills",
       "mcpConfigured": "MCP-Server (konfiguriert)",
-      "mcp": "MCP-Server"
+      "mcp": "MCP-Server",
+      "pluginsConfigured": "Plugins (konfiguriert)"
     },
     "typingWords": [
       "Accomplishing",
@@ -633,14 +639,14 @@
       "loadingDoc": "Dokument wird gelesen...",
       "parseError": "Excalidraw-Datei konnte nicht geparst werden",
       "fetchError": "Dokumentinhalt konnte nicht abgerufen werden",
+      "frontMatter": "Frontmatter",
       "retry": "Wiederholen",
       "selectFile": "Bitte wähle eine Datei rechts zur Vorschau",
       "supportedFormats": "Unterstützt PDF, Office-Dokumente, gängige Bildformate, MP4-Videos, XMind-Dateien, .excalidraw-Dateien und .drawio-Dateien",
       "processing": "Dateiverarbeitung",
       "notSupported": "Vorschau für dieses Format nicht unterstützt",
       "openInNewWindow": "In neuem Fenster öffnen",
-      "downloadOriginal": "Originaldatei herunterladen",
-      "frontMatter": "Frontmatter"
+      "downloadOriginal": "Originaldatei herunterladen"
     },
     "summary": {
       "total": "Gesamt",
@@ -661,7 +667,7 @@
   },
   "library": {
     "title": "Funktionen",
-    "subtitle": "Verwalte deine Skills, Vorlagen und Tools",
+    "subtitle": "Verwalte deine Skills, Plugins und Tools",
     "comingSoon": "Demnächst",
     "mobile": {
       "back": "Zurück zu den Funktionen"
@@ -697,6 +703,10 @@
       "feature2": "Visuelle Verwaltung",
       "feature3": "Echtzeit-Überwachung",
       "action": "Server verwalten"
+    },
+    "pluginsStore": {
+      "title": "Plugins",
+      "description": "Plugins durchsuchen und installieren"
     },
     "envVars": {
       "title": "Umgebungsvariablen",
@@ -1078,6 +1088,10 @@
         }
       }
     },
+    "pluginsPage": {
+      "searchPlaceholder": "Plugins durchsuchen...",
+      "addCard": "Plugin hinzufügen"
+    },
     "skillsManager": {
       "stats": {
         "available": "Verfügbar",
@@ -1224,9 +1238,103 @@
         "invalidKeyHint": "Oeffne Einstellungen > Sonstiges, aktualisiere den SkillsMP API-Schluessel und versuche es danach hier erneut."
       }
     },
-    "pluginsPage": {
-      "searchPlaceholder": "Vorlagen durchsuchen...",
-      "addCard": "Vorlage hinzufügen"
+    "pluginsManager": {
+      "stats": {
+        "enabled": "Aktiviert"
+      },
+      "scope": {
+        "system": "System",
+        "user": "Benutzer"
+      },
+      "fields": {
+        "id": "id",
+        "source": "Quelle"
+      },
+      "actions": {
+        "install": "Installieren",
+        "uninstall": "Deinstallieren"
+      },
+      "toasts": {
+        "loadError": "Plugins konnten nicht geladen werden",
+        "actionError": "Aktion fehlgeschlagen, bitte versuche es später erneut",
+        "installed": "Plugin installiert",
+        "uninstalled": "Plugin deinstalliert",
+        "enabled": "Plugin aktiviert",
+        "disabled": "Plugin deaktiviert",
+        "actionFailed": "Aktion fehlgeschlagen, bitte versuche es später erneut",
+        "exclusiveEnabled": "(Andere Plugins wurden deaktiviert)"
+      },
+      "empty": "Noch keine Plugins",
+      "unknownPlugin": "Unbekanntes Plugin"
+    },
+    "pluginsImport": {
+      "title": "Plugins importieren",
+      "description": "Lade eine Plugin-ZIP hoch oder importiere aus einem öffentlichen GitHub-Repository.",
+      "relativePath": "Relativer Pfad",
+      "tabs": {
+        "zip": "ZIP hochladen",
+        "github": "GitHub-URL"
+      },
+      "fields": {
+        "zip": "ZIP-Datei",
+        "githubUrl": "Öffentliche GitHub-Repo-URL",
+        "nameOverride": "Plugin-Name"
+      },
+      "placeholders": {
+        "githubUrl": "https://github.com/owner/repo",
+        "name": "z. B. mein-plugin"
+      },
+      "hints": {
+        "github": "Standardmäßig main/master (nur öffentliche github.com-Repos)"
+      },
+      "actions": {
+        "back": "Zurück",
+        "discover": "Erkennen",
+        "discovering": "Analysiere...",
+        "commit": "Importieren & installieren",
+        "committing": "Importiere..."
+      },
+      "preview": {
+        "found": "Gefunden",
+        "items": "Plugin-Definitionen",
+        "overwrite": "werden überschrieben",
+        "overwriteItems": "vorhandene Plugins",
+        "willOverwrite": "Überschreiben",
+        "root": "Wurzel",
+        "path": "Pfad",
+        "unnamed": "Unbenannt",
+        "pagination": {
+          "page": "Seite {{page}} / {{pages}}",
+          "prev": "Zurück",
+          "next": "Weiter"
+        },
+        "selection": {
+          "selectPage": "Seite auswählen",
+          "clearPage": "Seitenauswahl aufheben",
+          "selectAll": "Alle auswählen",
+          "clearAll": "Alle Auswahlen aufheben"
+        }
+      },
+      "result": {
+        "title": "Importergebnis",
+        "success": "Erfolgreich",
+        "failed": "Fehlgeschlagen"
+      },
+      "toasts": {
+        "missingZip": "Bitte wähle eine ZIP-Datei",
+        "missingGithubUrl": "Bitte gib eine GitHub-URL ein",
+        "discovered": "Erkannt. Bitte bestätige, was importiert werden soll.",
+        "discoverError": "Erkennung fehlgeschlagen, bitte versuche es später erneut",
+        "committed": "Import erfolgreich",
+        "commitError": "Import fehlgeschlagen, bitte versuche es später erneut",
+        "partialFailed": "Einige Plugins konnten nicht importiert werden. Bitte prüfe die Details.",
+        "commitTimeout": "Import-Zeitüberschreitung, bitte versuche es später erneut"
+      },
+      "progress": {
+        "title": "Importfortschritt",
+        "value": "Fortschritt",
+        "jobId": "Job-ID"
+      }
     },
     "mcpLibrary": {
       "header": {
@@ -1289,11 +1397,6 @@
       "marketplace": "Marketplace",
       "skillsmp": "SkillsMP"
     },
-    "pluginsManager": {
-      "toasts": {
-        "exclusiveEnabled": "(Andere Vorlagen wurden deaktiviert)"
-      }
-    },
     "presets": {
       "title": "Vorlagen",
       "description": "Wiederverwendbare Funktionsvorlagen verwalten"
@@ -1301,6 +1404,80 @@
     "presetsPage": {
       "header": {
         "title": "Vorlagen"
+      },
+      "summary": "{{count}} wiederverwendbare Vorlagen",
+      "searchPlaceholder": "Vorlagen durchsuchen...",
+      "addCard": "Vorlage erstellen",
+      "empty": "Noch keine Vorlagen",
+      "emptySearch": "Keine Vorlagen entsprechen deiner Suche",
+      "emptyDescription": "Noch keine Beschreibung",
+      "emptyBadgesHint": "Bringe deiner Vorlage ein paar Skills bei, damit sie mehr kann.",
+      "emptySkills": "Keine Skills verfügbar",
+      "emptyMcp": "Keine MCP-Server verfügbar",
+      "emptyPlugins": "Keine Plugins verfuegbar",
+      "loadingCapabilities": "Fähigkeiten werden geladen...",
+      "flags": {
+        "browser": "Browser",
+        "memory": "Speicher"
+      },
+      "tabs": {
+        "general": "Allgemein",
+        "capabilities": "Fähigkeiten",
+        "subagents": "Subagents"
+      },
+      "picker": {
+        "placeholder": "Vorlage auswählen",
+        "none": "Keine Vorlage",
+        "change": "Vorlage wechseln",
+        "selected": "Ausgewählt",
+        "dialogTitle": "Vorlage auswählen",
+        "dialogDescription": "Wende für diesen Lauf eine wiederverwendbare Konfiguration an oder fahre ohne Vorlage fort.",
+        "noneDescription": "Diesen Lauf unabhängig halten und keine Vorlage anwenden."
+      },
+      "selectors": {
+        "skills": "Wähle die wiederverwendbaren Skills für diese Vorlage aus.",
+        "mcp": "Wähle die MCP-Server aus, die diese Vorlage aktivieren soll.",
+        "plugins": "Waehle die Plugins aus, die diese Vorlage enthalten soll."
+      },
+      "form": {
+        "name": "Name",
+        "namePlaceholder": "Zum Beispiel: Frontend-Auslieferung",
+        "description": "Beschreibung",
+        "descriptionPlaceholder": "Beschreibe, wann diese Vorlage verwendet werden soll",
+        "promptTemplate": "Prompt-Vorlage",
+        "promptTemplatePlaceholder": "Optionale Basisanweisungen für Läufe, die aus dieser Vorlage erstellt werden",
+        "visual": "Visual",
+        "browserEnabled": "Browser aktivieren",
+        "browserEnabledHint": "Fügt Browser-Fähigkeit hinzu, wenn diese Vorlage angewendet wird.",
+        "memoryEnabled": "Speicher aktivieren",
+        "memoryEnabledHint": "Übernimmt die Speicher-Fähigkeit in Läufe, die mit dieser Vorlage erstellt werden."
+      },
+      "dialog": {
+        "createTitle": "Vorlage erstellen",
+        "editTitle": "Vorlage bearbeiten"
+      },
+      "subagents": {
+        "title": "Inline-Subagents",
+        "description": "Definiere zusätzliche Subagents, die mit dieser Vorlage injiziert werden.",
+        "add": "Subagent hinzufügen",
+        "empty": "Keine Subagents konfiguriert",
+        "itemTitle": "Subagent {{index}}",
+        "fields": {
+          "name": "Name",
+          "model": "Modell",
+          "description": "Beschreibung",
+          "tools": "Werkzeuge",
+          "toolsPlaceholder": "Read, Edit, Bash",
+          "prompt": "Prompt"
+        }
+      },
+      "toasts": {
+        "loadError": "Vorlagen konnten nicht geladen werden",
+        "created": "Vorlage erstellt",
+        "updated": "Vorlage aktualisiert",
+        "deleted": "Vorlage gelöscht",
+        "saveFailed": "Vorlage konnte nicht gespeichert werden",
+        "deleteFailed": "Vorlage konnte nicht gelöscht werden"
       }
     },
     "skillSettings": {
@@ -1347,13 +1524,137 @@
     "titleWithCount": "{{name}} · {{count}} Aufgaben",
     "share": "Projekt teilen",
     "settings": "Projekteinstellungen",
+    "settingsAction": "Vorlagen verwalten",
+    "edit": "Projekt bearbeiten",
     "rename": "Projekt umbenennen",
-    "renameDescription": "Gib einen neuen Projektnamen ein",
     "nameLabel": "Projektname",
+    "descriptionLabel": "Projektbeschreibung",
     "namePlaceholder": "Projektnamen eingeben",
+    "advanced": {
+      "title": "Erweiterte Konfiguration",
+      "defaultModelLabel": "Standardmodell",
+      "defaultModelPlaceholder": "Standardmodell des Arbeitsbereichs verwenden",
+      "gitTitle": "Git-Repository",
+      "gitDescription": "Konfiguriere die Standard-Git-Repository-URL, den Branch und die Authentifizierung für dieses Projekt.",
+      "gitRepoUrlLabel": "Repository-URL",
+      "gitRepoUrlPlaceholder": "https://github.com/user/repo.git",
+      "gitBranchLabel": "Branch",
+      "gitBranchPlaceholder": "main",
+      "gitTokenEnvKeyLabel": "Auth-Umgebungsvariable",
+      "gitTokenEnvKeyPlaceholder": "GITHUB_TOKEN",
+      "mountTitle": "Projekt-Mounts",
+      "mountDescription": "Hänge für neue Ausführungen in diesem Projekt ein oder mehrere lokale Verzeichnisse an.",
+      "chooseFolder": "Ordner auswählen",
+      "mountPathLabel": "Mount-Pfad",
+      "mountPathPlaceholder": "z. B. /Users/alice/Workspace/my-project"
+    },
     "delete": "Projekt löschen",
     "deleteDescription": "Das Löschen dieses Projekts verschiebt alle seine Aufgaben zurück in die Hauptliste.",
-    "deleteConfirm": "Löschen"
+    "deleteConfirm": "Löschen",
+    "detail": {
+      "overview": "Projektübersicht",
+      "renameAction": "Projekt bearbeiten",
+      "descriptionPlaceholder": "Projektbeschreibung hinzufügen...",
+      "editDescription": "Beschreibung bearbeiten",
+      "emptyDescription": "Dieses Projekt hat noch keine Zusammenfassung. Starte eine neue Sitzung, um Kontext aufzubauen.",
+      "unknownUpdatedAt": "Noch keine Aktivität",
+      "composerTitle": "Poco in {{name}} weiter steuern",
+      "infoDrawer": {
+        "title": "Projektinfos"
+      },
+      "files": {
+        "title": "Projektdateien",
+        "description": "Dateien, die {{name}} hinzugefügt werden, stehen in jedem Lauf dieses Projekts zur Verfügung.",
+        "uploadTitle": "Dateien hochladen",
+        "uploadDescription": "Hänge Dokumente, Notizen oder Ausschnitte an, damit der Projektkontext jederzeit griffbereit ist.",
+        "uploadButton": "Dateien hinzufügen",
+        "loading": "Projektdateien werden geladen...",
+        "emptyTitle": "Noch keine Projektdateien",
+        "emptyDescription": "Füge hier Dateien hinzu, damit jeder Lauf dieses Projekts sie als Kontext nutzen kann.",
+        "count": "{{count}} Dateien",
+        "unknownSize": "Unbekannte Größe",
+        "toasts": {
+          "loadFailed": "Projektdateien konnten nicht geladen werden",
+          "added": "{{name}} zu den Projektdateien hinzugefügt",
+          "addFailed": "Datei konnte dem Projekt nicht hinzugefügt werden",
+          "removed": "{{name}} aus den Projektdateien entfernt",
+          "removeFailed": "Projektdatei konnte nicht entfernt werden"
+        }
+      },
+      "notFoundTitle": "Projekt nicht gefunden",
+      "notFoundDescription": "Dieses Projekt ist nicht verfügbar oder du hast keinen Zugriff mehr darauf.",
+      "backHome": "Zur Startseite",
+      "stats": {
+        "sessions": "Sitzungen",
+        "presets": "Vorlagen",
+        "updated": "Zuletzt aktualisiert"
+      },
+      "sessionList": {
+        "title": "Sitzungsverlauf",
+        "subtitle": "{{count}} Sitzungen in diesem Projekt",
+        "emptyTitle": "Noch keine Projektsitzungen",
+        "emptyDescription": "Der nächste Lauf in diesem Projekt erscheint hier, damit du schnell wieder in den Kontext springen kannst."
+      },
+      "quickActions": {
+        "title": "Schnellaktionen",
+        "subtitle": "Die wichtigsten Projektaktionen an einem Ort im Detailbereich halten.",
+        "soon": "Bald",
+        "presets": {
+          "title": "Vorlagen verwalten",
+          "description": "Lege die Standardvorlage fest und steuere, womit neue Sitzungen starten."
+        },
+        "rename": {
+          "title": "Projekt bearbeiten",
+          "description": "Aktualisiere den Projektnamen, ohne die Detailansicht zu verlassen."
+        },
+        "files": {
+          "title": "Projektdateien",
+          "description": "Lade Dateien hoch, die jeder Lauf in diesem Projekt nutzen kann."
+        },
+        "docs": {
+          "title": "Projektdokumente",
+          "description": "Reservierter Einstiegspunkt für Dokumentation und gemeinsame Kontextressourcen."
+        }
+      }
+    },
+    "settingsPanel": {
+      "dialogTitle": "{{name}} Einstellungen",
+      "dialogDescription": "Durchsuche alle Vorlagen und wähle die Standardvorlage für neue Läufe in diesem Projekt.",
+      "git": {
+        "title": "Git-Repository",
+        "repoUrlLabel": "Repository-URL",
+        "repoUrlPlaceholder": "https://github.com/user/repo.git",
+        "branchLabel": "Branch",
+        "branchPlaceholder": "main",
+        "tokenEnvKeyLabel": "Auth-Umgebungsvariable",
+        "tokenEnvKeyPlaceholder": "GITHUB_TOKEN",
+        "toasts": {
+          "updated": "Git-Konfiguration aktualisiert",
+          "failed": "Git-Konfiguration konnte nicht aktualisiert werden"
+        }
+      },
+      "presets": {
+        "title": "Standardvorlage",
+        "description": "Wähle eine Vorlage für dieses Projekt oder entferne den Standardwert, damit neue Läufe ohne Vorlage starten.",
+        "searchPlaceholder": "Vorlagen suchen...",
+        "clearDefault": "Standard löschen",
+        "loading": "Vorlagen werden geladen...",
+        "empty": "Keine Standardvorlage ausgewählt",
+        "emptySearch": "Keine Vorlage entspricht deiner Suche",
+        "default": "Standard",
+        "emptyDescription": "Noch keine Beschreibung",
+        "stats": {
+          "skills": "{{count}} Skills",
+          "mcp": "{{count}} MCP",
+          "plugins": "{{count}} Plugins"
+        },
+        "toasts": {
+          "loadError": "Vorlagen konnten nicht geladen werden",
+          "defaultUpdated": "Standardvorlage aktualisiert",
+          "defaultFailed": "Standardvorlage konnte nicht aktualisiert werden"
+        }
+      }
+    }
   },
   "userMenu": {
     "credits": "Guthaben",
@@ -1370,6 +1671,7 @@
   },
   "common": {
     "cancel": "Abbrechen",
+    "close": "Schließen",
     "create": "Erstellen",
     "delete": "Löschen",
     "deleted": "Gelöscht",
@@ -1573,7 +1875,12 @@
     "missingToolUseId": "Tool-Aufruf-ID fehlt",
     "messageContentRequired": "Bitte Nachrichteninhalt eingeben",
     "sessionNameRequired": "Bitte Sitzungsname eingeben",
-    "sessionNameTooLong": "Sitzungsname zu lang"
+    "sessionNameTooLong": "Sitzungsname zu lang",
+    "localMountNameRequired": "Bitte gib einen Verzeichnisnamen ein",
+    "localMountPathRequired": "Bitte gib einen Host-Pfad ein",
+    "localMountCountRequired": "Bitte füge mindestens ein Verzeichnis hinzu",
+    "localMountUnavailable": "Lokaler Dateizugriff ist derzeit nicht verfügbar",
+    "localMountPathDuplicate": "Verzeichnis bereits hinzugefügt: {{path}}"
   },
   "user": {
     "plan": {
@@ -1603,7 +1910,9 @@
     "downloadStart": "Herunterladen des Arbeitsbereichs-Archivs gestartet",
     "archiveNotAvailable": "Archivdatei noch nicht verfügbar",
     "archiveUnavailable": "Archivdatei noch nicht verfügbar",
-    "downloadFailed": "Download fehlgeschlagen"
+    "downloadFailed": "Download fehlgeschlagen",
+    "workspaceRoot": "Arbeitsbereich",
+    "localMountsRoot": "Lokale Einbindungen"
   },
   "pullToRefresh": {
     "refreshing": "Aktualisiere...",
@@ -1626,10 +1935,17 @@
     "turnOnAll": "Alle einschalten",
     "noMcpInstalled": "Kein MCP installiert",
     "noSkillsInstalled": "Keine Skills installiert",
-    "noPluginsInstalled": "Keine Presets installiert",
+    "noPluginsInstalled": "Keine Plugins installiert",
+    "fallbackMcp": "MCP #{{id}}",
+    "fallbackSkill": "Skill #{{id}}",
+    "fallbackPlugin": "Plugin #{{id}}",
+    "fallbackPreset": "Voreinstellung #{{id}}",
     "oneClickClose": "Alle ausschalten",
     "notInstalledMcp": "Kein MCP installiert",
     "notInstalledSkill": "Keine Skills installiert",
+    "mcp": "MCP",
+    "skills": "Skills",
+    "plugins": "Plugins",
     "apps": "Apps",
     "comingSoon": "Demnächst",
     "clickForDetails": "Für Details klicken",
@@ -1676,6 +1992,9 @@
     "settings": "Einstellungen"
   },
   "skillsGrid": {
+    "turnOffAll": "Alle ausschalten"
+  },
+  "pluginsGrid": {
     "turnOffAll": "Alle ausschalten"
   },
   "mcpSettings": {
@@ -1819,6 +2138,69 @@
   "filesidebar": {
     "title": "Dateiliste"
   },
+  "memories": {
+    "title": "Erinnerungen",
+    "subtitle": "Benutzerbezogene Langzeitspeicher-Einträge verwalten.",
+    "stats": {
+      "count": "{{count}} Einträge"
+    },
+    "actions": {
+      "search": "Suchen",
+      "showAll": "Alle anzeigen",
+      "refresh": "Aktualisieren",
+      "edit": "Bearbeiten",
+      "update": "Speichern",
+      "delete": "Löschen",
+      "create": "Erstellen",
+      "creating": "Wird erstellt..."
+    },
+    "search": {
+      "queryPlaceholder": "Erinnerungen durchsuchen..."
+    },
+    "create": {
+      "title": "Erinnerung hinzufügen",
+      "desc": "Gib ein, was Poco sich merken soll.",
+      "contentPlaceholder": "Gib ein, was Poco sich merken soll"
+    },
+    "edit": {
+      "title": "Erinnerung bearbeiten",
+      "contentPlaceholder": "Erinnerungsinhalt aktualisieren"
+    },
+    "fields": {
+      "updatedAt": "Aktualisiert",
+      "createdAt": "Erstellt"
+    },
+    "progress": {
+      "title": "Erstellungsfortschritt",
+      "status": "Status",
+      "value": "Fortschritt",
+      "jobId": "Job-ID",
+      "hints": {
+        "running": "Erinnerung wird hinzugefügt...",
+        "success": "Erinnerung hinzugefügt",
+        "failed": "Erinnerung konnte nicht hinzugefügt werden"
+      },
+      "statuses": {
+        "queued": "In Warteschlange",
+        "running": "Läuft",
+        "success": "Erfolgreich",
+        "failed": "Fehlgeschlagen",
+        "unknown": "Unbekannt"
+      }
+    },
+    "list": {
+      "empty": "Keine Erinnerungen gefunden."
+    },
+    "toasts": {
+      "invalidJson": "Ungültiges JSON",
+      "error": "Aktion fehlgeschlagen",
+      "created": "Erinnerung erstellt",
+      "updated": "Erinnerung aktualisiert",
+      "deleted": "Erinnerung gelöscht",
+      "cleared": "Alle Erinnerungen gelöscht",
+      "timeout": "Erstellung überschritten. Bitte versuche es später erneut."
+    }
+  },
   "onboarding": {
     "close": "Close tutorial",
     "skip": "Skip",
@@ -1869,6 +2251,67 @@
         "title": "Skills page",
         "description": "This is the Skills view inside Capabilities, where you browse and manage skills."
       }
+    }
+  },
+  "filesystem": {
+    "title": "Lokale Dateien",
+    "description": "Erlaube Poco den Zugriff auf Verzeichnisse außerhalb des Sandbox-Arbeitsbereichs.",
+    "status": {
+      "title": "Umgebungsstatus",
+      "loading": "Wird geprüft...",
+      "unknown": "Status nicht verfügbar",
+      "available": "Lokale Einbindung bereit",
+      "unavailable": "Lokale Verzeichniseinbindung nicht verfügbar"
+    },
+    "mode": {
+      "sandboxTitle": "Nur Sandbox",
+      "sandboxDescription": "Für diese Aufgabe wird nur die integrierte Sandbox-Umgebung verwendet.",
+      "localMountTitle": "Lokale Verzeichnisse freigeben",
+      "localMountDescription": "Erlaube dem Agenten, ausgewählte Host-Verzeichnisse zu lesen oder zu bearbeiten."
+    },
+    "mounts": {
+      "title": "Freigegebene Verzeichnisse",
+      "itemTitle": "Verzeichnis {{index}}"
+    },
+    "actions": {
+      "manage": "Lokale Dateien",
+      "addMount": "Verzeichnis hinzufügen",
+      "removeMount": "Verzeichnis entfernen",
+      "save": "Für nächsten Lauf speichern",
+      "apply": "Für diese Aufgabe übernehmen"
+    },
+    "fields": {
+      "name": "Anzeigename",
+      "path": "Host-Pfad",
+      "access": "Zugriff"
+    },
+    "placeholders": {
+      "name": "z. B. Documents",
+      "path": "z. B. /Users/alice/Documents"
+    },
+    "accessModes": {
+      "ro": "Schreibgeschützt",
+      "rw": "Lesen & schreiben"
+    },
+    "messages": {
+      "localDeployment": "Die Verzeichnisse werden auf diesem Rechner direkt in die Ausführungsumgebung eingehängt.",
+      "cloudDeployment": "Die Verzeichnisse werden über den lokalen Helper und die Cloud-Bridge für die Ausführungsumgebung freigegeben.",
+      "supportUnknown": "Der Helper-Status konnte nicht geladen werden. Du kannst den Sandbox-Modus weiterhin sicher verwenden.",
+      "sandboxOnly": "Für diese Aufgabe steht nur die /workspace-Sandbox zur Verfügung.",
+      "nextRun": "Gespeicherte Änderungen gelten ab dem nächsten Lauf. Aktuelle Container werden nicht live aktualisiert.",
+      "draft": "Diese Verzeichnisse werden autorisiert, wenn die Aufgabe startet."
+    },
+    "summary": {
+      "localMountCount": "Lokale Dateien ({{count}})"
+    },
+    "toasts": {
+      "saved": "Konfiguration gespeichert. Sie gilt ab dem nächsten Lauf.",
+      "saveFailed": "Lokale Dateieinstellungen konnten nicht gespeichert werden"
+    },
+    "picker": {
+      "notSupported": "Der native Ordnerwähler wird in diesem Browser nicht unterstützt. Bitte gib den Pfad manuell ein.",
+      "resolveFailed": "Der Pfad konnte nicht automatisch erkannt werden. Bitte gib den Hostpfad manuell ein.",
+      "searchLimitation": "Aus Sicherheitsgründen sucht das automatische Ausfüllen des Hostpfads nur nach dem ausgewählten Ordnernamen. Wenn mehrere Ordner denselben Namen haben, kann die Auflösung fehlschlagen und du musst den absoluten Pfad manuell eingeben."
     }
   }
 }

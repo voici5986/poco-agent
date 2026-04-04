@@ -3,6 +3,7 @@
  */
 
 import type { ApiStatePatch } from "../api/callback";
+import type { FilesystemMode, LocalMountConfig } from "../api/session";
 
 export type ExecutionStatus =
   | "pending"
@@ -52,6 +53,7 @@ export interface NewMessage {
  * Contains the IDs of MCP servers, skills, and presets used in this session
  */
 export interface ConfigSnapshot {
+  preset_id?: number | null;
   mcp_server_ids?: number[];
   skill_ids?: number[];
   plugin_ids?: number[];
@@ -62,6 +64,8 @@ export interface ConfigSnapshot {
   repo_url?: string;
   git_branch?: string;
   git_token_env_key?: string | null;
+  filesystem_mode?: FilesystemMode;
+  local_mounts?: LocalMountConfig[];
 }
 
 /**

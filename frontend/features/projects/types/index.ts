@@ -1,7 +1,12 @@
+import type { LocalMountConfig } from "@/features/chat/types/api/session";
+
 export interface ProjectItem {
   id: string;
   name: string;
   icon?: string;
+  defaultModel?: string | null;
+  defaultPresetId?: number | null;
+  localMounts?: LocalMountConfig[];
   /** Default git repository context (GitHub-only in v1). */
   repoUrl?: string | null;
   gitBranch?: string | null;
@@ -13,6 +18,18 @@ export interface ProjectItem {
   description?: string | null;
   /** Owning user identifier */
   userId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ProjectFile {
+  id: number;
+  projectId: string;
+  fileName: string;
+  fileSource: string;
+  fileSize?: number | null;
+  fileContentType?: string | null;
+  sortOrder: number;
   createdAt?: string;
   updatedAt?: string;
 }

@@ -22,9 +22,12 @@ A safer, more beautiful, and easier-to-use OpenClaw alternative
 
 - **Secure Sandbox**
   All tasks run in an isolated container. Feel free to install dependencies, modify files, and execute commands — without affecting the host environment.
+  - **Local Directory Mounting** — mount host directories into the sandbox so the agent can work with your real project files directly (self-hosted only)
 - **More Than a Chatbot**
   - Supports Plan Mode, conversation queueing, conversation termination ...
-  - **Project management**: organize and switch between tasks and contexts more effectively
+  - **Project management**: organize work across tasks and contexts, and set
+    project-level defaults for model, preset, Git repo, local mounts, and
+    project files
   - **File uploads**: accept and work with multiple file formats
 - **Polished, Productive UI**
   - **Artifacts view**: render and preview many formats (HTML, PDF, Markdown, images, videos, Xmind, Excalidraw, Drawio, and more)
@@ -32,6 +35,8 @@ A safer, more beautiful, and easier-to-use OpenClaw alternative
   - **Light/Dark mode** support
 - **Agentic Experience**
   - **native Claude Code experience** - Slash Commands, Plan Mode, AskQuestion ...
+  - **Preset runtime config** - reuse model, capability, tool, and
+    sub-agent settings across projects and sessions
   - **MCP & Skills** - easy to import and infinitely extensible
   - **Browser** - Built-in browser for autonomous web research
   - **GitHub repo integration** for code search and editing
@@ -46,7 +51,16 @@ A safer, more beautiful, and easier-to-use OpenClaw alternative
   Powered by **mem0**: the agent remembers your preferences, project context, and past interactions to deliver increasingly personalized help.
 - Many more powerful features waiting for you to discover!
 
+## Screenshots
+
+|                                                    Project Settings                                                    |                                          Preset Editor                                           |
+| :--------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------: |
+|                                    ![Edit Project](assets/images/edit-project.png)                                     |                          ![Edit Preset](assets/images/edit-preset.png)                           |
+| Set default configurations for your project — presets, local directory mounts, GitHub repos, knowledge base, and more. | DIY your cloud coworker — skills, MCP, sub-agents, and… system prompts & custom visual identity! |
+
 ## Quick Start
+
+![Chat in Project](assets/images/chat-in-project.png)
 
 Run the interactive setup script to automatically generate configuration and start services:
 
