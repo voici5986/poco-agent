@@ -86,7 +86,7 @@ export function CapabilitySelector({
                 type="button"
                 onClick={() => toggle(item.id)}
                 className={cn(
-                  "flex w-full items-start gap-3 rounded-xl border px-3 py-3 text-left transition-colors",
+                  "flex min-w-0 w-full items-start gap-3 overflow-hidden rounded-xl border px-3 py-3 text-left transition-colors",
                   isSelected
                     ? "border-foreground/20 bg-accent/60"
                     : "border-border/50 bg-card hover:bg-accent/40",
@@ -102,23 +102,23 @@ export function CapabilitySelector({
                 >
                   <Check className="size-3.5" />
                 </span>
-                <span className="min-w-0 flex-1">
-                  <span className="flex items-center gap-2">
-                    <span className="truncate text-sm font-medium text-foreground">
+                <div className="min-w-0 flex-1 overflow-hidden">
+                  <div className="flex min-w-0 items-center gap-2 overflow-hidden">
+                    <div className="min-w-0 truncate text-sm font-medium text-foreground">
                       {item.name}
-                    </span>
+                    </div>
                     {item.scope ? (
-                      <Badge variant="outline" className="text-[10px]">
+                      <Badge variant="outline" className="shrink-0 text-[10px]">
                         {item.scope}
                       </Badge>
                     ) : null}
-                  </span>
+                  </div>
                   {item.description ? (
-                    <span className="mt-1 line-clamp-2 block overflow-hidden text-xs text-muted-foreground">
+                    <div className="mt-1 max-w-full overflow-hidden text-xs text-muted-foreground line-clamp-3 break-all">
                       {item.description}
-                    </span>
+                    </div>
                   ) : null}
-                </span>
+                </div>
               </button>
             );
           })

@@ -132,9 +132,7 @@ class PresetService:
                 request.description
             )
         if "visual_key" in update_data and request.visual_key is not None:
-            update_data["visual_key"] = self._require_visual(
-                db, request.visual_key
-            ).key
+            update_data["visual_key"] = self._require_visual(db, request.visual_key).key
 
         skill_ids = update_data.get("skill_ids", preset.skill_ids)
         mcp_server_ids = update_data.get("mcp_server_ids", preset.mcp_server_ids)

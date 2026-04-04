@@ -11,7 +11,9 @@ class BuiltinSkillsTests(unittest.TestCase):
             path.parent.name for path in assets_root.glob("*/SKILL.md")
         )
 
-        declared_names = sorted(definition.asset_dir_name for definition in BUILTIN_SKILLS)
+        declared_names = sorted(
+            definition.asset_dir_name for definition in BUILTIN_SKILLS
+        )
 
         self.assertEqual(declared_names, expected_names)
 

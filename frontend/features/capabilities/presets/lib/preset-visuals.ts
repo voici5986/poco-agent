@@ -32,7 +32,8 @@ export function getPresetGlyphFrameClassName(
 export function getPresetGlyphImageClassName(
   variant: PresetGlyphVariant,
 ): string {
-  return ["shrink-0 object-contain object-center", GLYPH_IMAGE_CLASS_NAMES[variant]].join(
-    " ",
-  );
+  return [
+    "shrink-0 object-contain object-center",
+    GLYPH_IMAGE_CLASS_NAMES[variant],
+  ].join(" ");
 }

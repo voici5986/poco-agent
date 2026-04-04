@@ -11,7 +11,9 @@ class BuiltinPresetVisualsTests(unittest.TestCase):
     def test_discover_assets_returns_all_repo_svg_files_with_stable_storage_keys(
         self,
     ) -> None:
-        assets_root = Path(__file__).resolve().parents[2] / "assets" / "icons" / "presets"
+        assets_root = (
+            Path(__file__).resolve().parents[2] / "assets" / "icons" / "presets"
+        )
         expected_keys = sorted(path.stem for path in assets_root.glob("*.svg"))
 
         discovered = BuiltinPresetVisualBootstrapService._discover_assets()
@@ -23,7 +25,9 @@ class BuiltinPresetVisualsTests(unittest.TestCase):
                 for item in discovered
             )
         )
-        self.assertTrue(all(item.source.startswith("icons/presets/") for item in discovered))
+        self.assertTrue(
+            all(item.source.startswith("icons/presets/") for item in discovered)
+        )
 
     @patch("app.lifecycle.builtin_preset_visuals.PresetVisualRepository")
     def test_bootstrap_uploads_new_assets_and_creates_catalog_records(
@@ -98,8 +102,12 @@ class BuiltinPresetVisualsTests(unittest.TestCase):
         db.flush.assert_called()
 
     @patch("app.lifecycle.bootstrap.SessionLocal")
-    @patch("app.lifecycle.bootstrap.BuiltinPresetVisualBootstrapService.bootstrap_builtin_preset_visuals")
-    @patch("app.lifecycle.bootstrap.McpServerBootstrapService.bootstrap_builtin_servers")
+    @patch(
+        "app.lifecycle.bootstrap.BuiltinPresetVisualBootstrapService.bootstrap_builtin_preset_visuals"
+    )
+    @patch(
+        "app.lifecycle.bootstrap.McpServerBootstrapService.bootstrap_builtin_servers"
+    )
     @patch("app.lifecycle.bootstrap.SkillBootstrapService.bootstrap_builtin_skills")
     def test_lifecycle_bootstrap_invokes_preset_visual_bootstrap(
         self,

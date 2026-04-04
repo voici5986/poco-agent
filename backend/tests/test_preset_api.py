@@ -13,7 +13,7 @@ from app.schemas.project import ProjectResponse
 def build_preset_response(preset_id: int = 1, name: str = "Frontend") -> PresetResponse:
     now = datetime.now(UTC)
     return PresetResponse(
-        preset_id=preset_id,
+        id=preset_id,
         user_id="user-1",
         name=name,
         description="Reusable preset",

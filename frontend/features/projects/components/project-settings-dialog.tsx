@@ -44,9 +44,9 @@ export function ProjectSettingsDialog({
   const [activeDefaultPresetId, setActiveDefaultPresetId] = React.useState<
     number | null
   >(projectDefaultPresetId);
-  const [skillNamesById, setSkillNamesById] = React.useState<Map<number, string>>(
-    () => new Map(),
-  );
+  const [skillNamesById, setSkillNamesById] = React.useState<
+    Map<number, string>
+  >(() => new Map());
   const [mcpNamesById, setMcpNamesById] = React.useState<Map<number, string>>(
     () => new Map(),
   );

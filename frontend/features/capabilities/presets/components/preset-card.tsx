@@ -10,11 +10,7 @@ interface PresetCardProps {
   onEdit: (preset: Preset) => void;
 }
 
-export function PresetCard({
-  preset,
-  badgeLabels,
-  onEdit,
-}: PresetCardProps) {
+export function PresetCard({ preset, badgeLabels, onEdit }: PresetCardProps) {
   const handleOpenEdit = React.useCallback(() => {
     onEdit(preset);
   }, [onEdit, preset]);

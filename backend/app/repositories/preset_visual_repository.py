@@ -11,11 +11,7 @@ class PresetVisualRepository:
 
     @staticmethod
     def get_by_key(session_db: Session, key: str) -> PresetVisual | None:
-        return (
-            session_db.query(PresetVisual)
-            .filter(PresetVisual.key == key)
-            .first()
-        )
+        return session_db.query(PresetVisual).filter(PresetVisual.key == key).first()
 
     @staticmethod
     def list_active(session_db: Session) -> list[PresetVisual]:

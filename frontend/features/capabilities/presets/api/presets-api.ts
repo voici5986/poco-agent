@@ -13,9 +13,9 @@ export const presetsService = {
     });
   },
 
-  listPresetVisuals: async (
-    options?: { revalidate?: number },
-  ): Promise<PresetVisualOption[]> => {
+  listPresetVisuals: async (options?: {
+    revalidate?: number;
+  }): Promise<PresetVisualOption[]> => {
     return apiClient.get<PresetVisualOption[]>(API_ENDPOINTS.presetVisuals, {
       next: { revalidate: options?.revalidate },
     });

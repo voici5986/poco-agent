@@ -8,7 +8,10 @@ import {
 } from "./preset-form.ts";
 
 test("getPresetFormInitialVisualKey falls back to the default built-in visual", () => {
-  assert.equal(getPresetFormInitialVisualKey(undefined), DEFAULT_PRESET_VISUAL_KEY);
+  assert.equal(
+    getPresetFormInitialVisualKey(undefined),
+    DEFAULT_PRESET_VISUAL_KEY,
+  );
   assert.equal(getPresetFormInitialVisualKey("   "), DEFAULT_PRESET_VISUAL_KEY);
 });
 
@@ -21,7 +24,10 @@ test("getPresetFormInitialVisualKey preserves an existing visual key", () => {
 
 test("isPresetFormValid requires both a preset name and visual key", () => {
   assert.equal(
-    isPresetFormValid({ name: "Frontend delivery", visualKey: "preset-visual-01" }),
+    isPresetFormValid({
+      name: "Frontend delivery",
+      visualKey: "preset-visual-01",
+    }),
     true,
   );
   assert.equal(
