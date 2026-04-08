@@ -17,7 +17,6 @@ from app.models.im import (
 )
 from app.models.mcp_server import McpServer
 from app.models.memory_create_job import MemoryCreateJob
-from app.models.model_provider_setting import UserModelProviderSetting
 from app.models.pending_skill_creation import PendingSkillCreation
 from app.models.plugin import Plugin
 from app.models.plugin_import_job import PluginImportJob
@@ -58,7 +57,6 @@ __all__ = [
     "ImEventOutbox",
     "McpServer",
     "MemoryCreateJob",
-    "UserModelProviderSetting",
     "PendingSkillCreation",
     "Plugin",
     "PluginImportJob",
