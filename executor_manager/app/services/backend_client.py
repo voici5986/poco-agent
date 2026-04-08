@@ -87,6 +87,20 @@ class BackendClient:
             retry_connect_errors=2,
         )
 
+    async def get_session(self, session_id: str) -> dict:
+        """Fetch session details from Backend internal API."""
+        response = await self._request(
+            "GET",
+            f"/api/v1/internal/sessions/{session_id}",
+            headers={
+                "X-Internal-Token": self.settings.internal_api_token,
+                **self._trace_headers(),
+            },
+            retry_connect_errors=2,
+        )
+        data = response.json()
+        return data.get("data", {}) or {}
+
     async def forward_callback(self, callback_data: dict) -> dict[str, Any]:
         """Forward Executor callback to Backend and return the callback response."""
         response = await self._request(
@@ -142,6 +156,52 @@ class BackendClient:
             f"/api/v1/runs/{run_id}/fail",
             json={"worker_id": worker_id, "error_message": error_message},
             headers=self._trace_headers(),
+            retry_connect_errors=2,
+        )
+        data = response.json()
+        return data["data"]
+
+    async def claim_session_cancellation(
+        self,
+        *,
+        worker_id: str,
+        lease_seconds: int = 30,
+    ) -> dict | None:
+        """Claim the next pending session cancellation for this worker."""
+        response = await self._request(
+            "POST",
+            "/api/v1/internal/sessions/cancellations/claim",
+            json={"worker_id": worker_id, "lease_seconds": lease_seconds},
+            headers={
+                "X-Internal-Token": self.settings.internal_api_token,
+                **self._trace_headers(),
+            },
+            retry_connect_errors=2,
+        )
+        data = response.json()
+        return data.get("data")
+
+    async def complete_session_cancellation(
+        self,
+        *,
+        session_id: str,
+        worker_id: str,
+        stop_status: str,
+        message: str | None = None,
+    ) -> dict:
+        """Acknowledge session cancellation handling back to Backend."""
+        response = await self._request(
+            "POST",
+            f"/api/v1/internal/sessions/{session_id}/cancellation-complete",
+            json={
+                "worker_id": worker_id,
+                "stop_status": stop_status,
+                "message": message,
+            },
+            headers={
+                "X-Internal-Token": self.settings.internal_api_token,
+                **self._trace_headers(),
+            },
             retry_connect_errors=2,
         )
         data = response.json()
