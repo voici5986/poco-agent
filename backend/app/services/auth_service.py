@@ -247,6 +247,7 @@ class AuthService:
             profile.provider_user_id,
         )
         normalized_email = self.normalize_email(profile.email)
+        verified_email = normalized_email if profile.email_verified else None
 
         if identity is not None:
             user = identity.user
@@ -255,13 +256,13 @@ class AuthService:
             identity.profile_json = profile.profile_json
         else:
             user = None
-            if normalized_email and profile.email_verified:
-                user = UserRepository.get_by_email(db, normalized_email)
+            if verified_email:
+                user = UserRepository.get_by_email(db, verified_email)
             if user is None:
                 user = UserRepository.create(
                     db,
                     user_id=User.generate_id(),
-                    primary_email=normalized_email,
+                    primary_email=verified_email,
                     display_name=profile.display_name,
                     avatar_url=profile.avatar_url,
                 )
@@ -276,12 +277,8 @@ class AuthService:
                 profile_json=profile.profile_json,
             )
 
-        if (
-            normalized_email
-            and profile.email_verified
-            and user.primary_email != normalized_email
-        ):
-            user.primary_email = normalized_email
+        if verified_email and user.primary_email != verified_email:
+            user.primary_email = verified_email
         if profile.display_name:
             user.display_name = profile.display_name
         if profile.avatar_url:
