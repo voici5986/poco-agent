@@ -63,9 +63,13 @@ class BackendClient:
         """Create a session, returns session info dict with session_id and sdk_session_id."""
         response = await self._request(
             "POST",
-            "/api/v1/sessions",
-            json={"user_id": user_id, "config": config},
-            headers=self._trace_headers(),
+            "/api/v1/internal/sessions",
+            json={"config": config},
+            headers={
+                "X-Internal-Token": self.settings.internal_api_token,
+                "X-User-Id": user_id,
+                **self._trace_headers(),
+            },
         )
         data = response.json()
         return data["data"]
@@ -74,9 +78,12 @@ class BackendClient:
         """Update session status."""
         await self._request(
             "PATCH",
-            f"/api/v1/sessions/{session_id}",
+            f"/api/v1/internal/sessions/{session_id}/status",
             json={"status": status},
-            headers=self._trace_headers(),
+            headers={
+                "X-Internal-Token": self.settings.internal_api_token,
+                **self._trace_headers(),
+            },
             retry_connect_errors=2,
         )
 
@@ -254,6 +261,7 @@ class BackendClient:
                 "GET",
                 f"/api/v1/presets/{preset_id}",
                 headers={
+                    "X-Internal-Token": self.settings.internal_api_token,
                     "X-User-Id": user_id,
                     **self._trace_headers(),
                 },
