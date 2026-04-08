@@ -1,11 +1,11 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import {
-  AUTH_SESSION_COOKIE_NAME,
   LoginPageClient,
+  buildSessionRecoveryPath,
   normalizeNextPath,
 } from "@/features/auth";
+import { getServerAuthState } from "@/features/auth/lib/server-session";
 
 export default async function LoginPage({
   params,
@@ -16,11 +16,14 @@ export default async function LoginPage({
 }) {
   const { lng } = await params;
   const { next, error } = await searchParams;
-  const cookieStore = await cookies();
   const nextPath = normalizeNextPath(next, lng);
+  const authState = await getServerAuthState();
 
-  if (cookieStore.get(AUTH_SESSION_COOKIE_NAME)?.value) {
+  if (authState.status === "authenticated") {
     redirect(nextPath);
+  }
+  if (authState.status === "stale") {
+    redirect(buildSessionRecoveryPath(lng, nextPath));
   }
 
   return <LoginPageClient lng={lng} nextPath={nextPath} errorCode={error} />;

@@ -1,11 +1,11 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import {
-  AUTH_SESSION_COOKIE_NAME,
   buildHomePath,
   buildLoginPath,
+  buildSessionRecoveryPath,
 } from "@/features/auth";
+import { getServerAuthState } from "@/features/auth/lib/server-session";
 
 export default async function Page({
   params,
@@ -13,10 +13,13 @@ export default async function Page({
   params: Promise<{ lng: string }>;
 }) {
   const { lng } = await params;
-  const cookieStore = await cookies();
+  const authState = await getServerAuthState();
 
-  if (cookieStore.get(AUTH_SESSION_COOKIE_NAME)?.value) {
+  if (authState.status === "authenticated") {
     redirect(buildHomePath(lng));
+  }
+  if (authState.status === "stale") {
+    redirect(buildSessionRecoveryPath(lng, buildHomePath(lng)));
   }
 
   redirect(buildLoginPath(lng, buildHomePath(lng)));

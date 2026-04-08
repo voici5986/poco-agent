@@ -4,7 +4,7 @@ import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { ApiError } from "@/lib/errors";
-import { buildHomePath, buildLoginPath } from "@/features/auth";
+import { buildHomePath, buildSessionRecoveryPath } from "@/features/auth";
 import { userService } from "@/features/user/api/user-api";
 import type { UserCredits, UserProfile } from "@/features/user/types";
 
@@ -35,6 +35,15 @@ export function UserAccountProvider({
   const [credits, setCredits] = React.useState<UserCredits | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
 
+  const redirectToSessionRecovery = React.useCallback(
+    (nextPath: string) => {
+      setProfile(null);
+      setCredits(null);
+      router.replace(buildSessionRecoveryPath(lng, nextPath));
+    },
+    [lng, router],
+  );
+
   const refresh = React.useCallback(async () => {
     setIsLoading(true);
     try {
@@ -43,40 +52,29 @@ export function UserAccountProvider({
         userService.getCredits(),
       ]);
       if (nextProfile === null) {
-        router.replace(buildLoginPath(lng, pathname || buildHomePath(lng)));
-        setProfile(null);
-        setCredits(null);
+        redirectToSessionRecovery(pathname || buildHomePath(lng));
         return;
       }
       setProfile(nextProfile);
       setCredits(nextCredits);
     } catch (error) {
       if (error instanceof ApiError && error.statusCode === 401) {
-        router.replace(buildLoginPath(lng, pathname || buildHomePath(lng)));
-        setProfile(null);
-        setCredits(null);
+        redirectToSessionRecovery(pathname || buildHomePath(lng));
       } else {
         console.error("Failed to load current user", error);
       }
     } finally {
       setIsLoading(false);
     }
-  }, [lng, pathname, router]);
+  }, [pathname, redirectToSessionRecovery, lng]);
 
   React.useEffect(() => {
     void refresh();
   }, [refresh]);
 
   const logout = React.useCallback(async () => {
-    try {
-      await userService.logout();
-    } finally {
-      setProfile(null);
-      setCredits(null);
-      router.replace(buildLoginPath(lng, buildHomePath(lng)));
-      router.refresh();
-    }
-  }, [lng, router]);
+    redirectToSessionRecovery(buildHomePath(lng));
+  }, [lng, redirectToSessionRecovery]);
 
   const value = React.useMemo(
     () => ({ profile, credits, isLoading, refresh, logout }),

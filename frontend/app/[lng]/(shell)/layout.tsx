@@ -1,12 +1,12 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { AppShell } from "@/components/shell/app-shell";
 import {
-  AUTH_SESSION_COOKIE_NAME,
   buildHomePath,
   buildLoginPath,
+  buildSessionRecoveryPath,
 } from "@/features/auth";
+import { getServerAuthState } from "@/features/auth/lib/server-session";
 
 export default async function ShellLayout({
   children,
@@ -16,10 +16,13 @@ export default async function ShellLayout({
   params: Promise<{ lng: string }>;
 }) {
   const { lng } = await params;
-  const cookieStore = await cookies();
+  const authState = await getServerAuthState();
 
-  if (!cookieStore.get(AUTH_SESSION_COOKIE_NAME)?.value) {
+  if (authState.status === "anonymous") {
     redirect(buildLoginPath(lng, buildHomePath(lng)));
+  }
+  if (authState.status === "stale") {
+    redirect(buildSessionRecoveryPath(lng, buildHomePath(lng)));
   }
 
   return <AppShell lng={lng}>{children}</AppShell>;
