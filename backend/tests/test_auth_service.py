@@ -64,9 +64,11 @@ class AuthServiceTests(unittest.TestCase):
                 primary_email,
                 display_name,
                 avatar_url,
-                status="active": self._build_user(
-                    user_id=user_id,
-                    primary_email=primary_email,
+                status="active": (
+                    self._build_user(
+                        user_id=user_id,
+                        primary_email=primary_email,
+                    )
                 )
             )
 
@@ -153,9 +155,11 @@ class AuthServiceTests(unittest.TestCase):
                 primary_email,
                 display_name,
                 avatar_url,
-                status="active": self._build_user(
-                    user_id=user_id,
-                    primary_email=primary_email,
+                status="active": (
+                    self._build_user(
+                        user_id=user_id,
+                        primary_email=primary_email,
+                    )
                 )
             )
 
